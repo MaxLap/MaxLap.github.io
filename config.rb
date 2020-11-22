@@ -31,8 +31,11 @@ activate :blog do |blog|
 end
 
 activate :livereload
+activate :syntax
 
 set :build_dir, 'docs'
+set :markdown_engine, :redcarpet
+set :markdown, :fenced_code_blocks => true
 
 # Layouts
 # https://middlemanapp.com/basics/layouts/
