@@ -1,5 +1,10 @@
 @import 'normalize';
 
+.page-wrapper {
+  max-width: 900px;
+  margin: 0 auto
+}
+
 body {
   background-color: #f7fff4;
   color: #022700;
@@ -7,5 +12,4 @@ body {
     "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans",
     "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu",
     "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
-  padding: 18vh 1rem;
 }

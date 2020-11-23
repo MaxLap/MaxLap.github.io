@@ -1,19 +1,9 @@
-!!!
-%html
-  %head
-    %meta{content: "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}
-    %meta{charset: "utf-8"}
-    %meta{content: "ie=edge", "http-equiv" => "X-UA-Compatible"}
-    %meta{content: "width=device-width, initial-scale=1, shrink-to-fit=no", name: "viewport"}
-    %title
-      = current_article&.title || "Blog"
-      | maxlap.dev
-    = feed_tag :atom, "#{blog.options.prefix.to_s}/feed.xml", title: "Atom Feed"
-    = stylesheet_link_tag "highlighting"
-    = stylesheet_link_tag "site"
-    = javascript_include_tag "site"
-  %body
-    #main{role: "main"}
+- content_for :head do
+  = feed_tag :atom, "#{blog.options.prefix.to_s}/feed.xml", title: "Atom Feed"
+
+= wrap_layout :layout do
+  .page-wrapper
+    %main{role: "main"}
       = yield
     %aside
       %h2 Recent Articles
