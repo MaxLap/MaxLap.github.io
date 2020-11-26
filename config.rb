@@ -5,13 +5,26 @@ activate :autoprefixer do |prefix|
   prefix.browsers = "last 2 versions"
 end
 
+# Allow a file to self ignore using frontmatter. Just put ignore: true
+# Must be before activating the blog extension, or it will have already
+# processed the files
+class FrontMatterIgnorer < Middleman::Extension
+  def manipulate_resource_list(resources)
+    resources.reject do |resource|
+      resource.data[:ignore] == true
+    end
+  end
+end
+::Middleman::Extensions.register(:front_matter_ignorer, FrontMatterIgnorer)
+activate :front_matter_ignorer
+
 activate :blog do |blog|
   # This will add a prefix to all links, template references and source paths
   blog.prefix = "blog"
 
   # blog.permalink = "{year}/{month}/{day}/{title}.html"
   # Matcher for blog source files
-  # blog.sources = "{year}-{month}-{day}-{title}.html"
+  blog.sources = ":blogdir/{year}-{month}-{day}-{title}.html"
   # blog.taglink = "tags/{tag}.html"
   blog.layout = "blog_post"
   # blog.summary_separator = /(READMORE)/
@@ -45,6 +58,15 @@ page '/*.xml', layout: false
 page '/*.json', layout: false
 page '/*.txt', layout: false
 
+configure :build do
+  # The source/blog/wip is where work in progress posts are placed, this should be a symbolic link
+  # pointing to another git repository, so that the only time you modify the blog is when you want to add
+  # a completed article by copying it from wip to done.
+  Dir['source/blog/wip/*'].each do |path|
+    ignore path.gsub(/\.md$/, '').gsub(%r{^source/}, '')
+  end
+end
+
 # With alternative layout
 # page '/path/to/file.html', layout: 'other_layout'
 
@@ -76,3 +98,19 @@ page '/*.txt', layout: false
 #   activate :minify_css
 #   activate :minify_javascript
 # end
+
+
+# Adds a [WIP] to title of articles from the wip blogdir
+# Must be after the blog engine ran
+class WIPMarker < Middleman::Extension
+  def manipulate_resource_list(resources)
+    resources.each do |resource|
+      if resource.data[:blogdir] == 'wip'
+        resource.data[:title] += ' [WIP]'
+        resource.destination_path = resource.destination_path.gsub(/\.html$/, '-wip.html')
+      end
+    end
+  end
+end
+::Middleman::Extensions.register(:wip_marker, WIPMarker)
+activate :wip_marker
