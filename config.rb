@@ -57,6 +57,9 @@ set :markdown, :fenced_code_blocks => true
 page '/*.xml', layout: false
 page '/*.json', layout: false
 page '/*.txt', layout: false
+page '/blog/done/*.html', layout: 'blog_post'
+page '/blog/wip/*.html', layout: 'blog_post'
+page '/blog/*.html', layout: 'blog'
 
 configure :build do
   # The source/blog/wip is where work in progress posts are placed, this should be a symbolic link
