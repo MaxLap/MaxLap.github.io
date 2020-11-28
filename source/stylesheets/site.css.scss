@@ -1,7 +1,8 @@
 @import 'normalize';
+@import 'reset';
 
 .page-wrapper {
-  max-width: 900px;
+  max-width: 800px;
   margin: 0 auto
 }
 
@@ -12,4 +13,14 @@ body {
     "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans",
     "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu",
     "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
+  font-size: 16px;
+  line-height: 1.35em;
+}
+
+.table-for-code {
+  width: 100%;
+
+  > tbody > tr > td {
+    vertical-align: top;
+  }
 }

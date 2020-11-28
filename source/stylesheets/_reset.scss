@@ -1,0 +1,14 @@
+// Just resetting some style do defaults that make more sense
+// Manually chosen based on need.
+
+table {
+    border-collapse: collapse;
+}
+
+pre {
+    margin: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
