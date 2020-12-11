@@ -141,6 +141,18 @@ helpers do
       end
     end
   end
+
+  def spoiler_toggler(text)
+    content_tag 'span', class: 'spoiler-toggler btn btn-default btn-flat btn-xs' do
+      text
+    end
+  end
+
+  def spoiler_target(tag, text)
+    content_tag tag, class: 'spoiler-target' do
+      text
+    end
+  end
 end
 
 
