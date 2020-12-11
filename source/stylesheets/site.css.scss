@@ -19,8 +19,38 @@ body {
 
 .table-for-code {
   width: 100%;
+  background: rgba(0, 100, 0, 0.07);
+  border: 0px;
 
-  > tbody > tr > td {
-    vertical-align: top;
+  > tbody > tr {
+    > td {
+      vertical-align: top;
+      padding: 0.7em 1em;
+
+      &:first-child {
+        min-width: 400px;
+      }
+    }
   }
+}
+
+.markdown-body {
+  code {
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    background-color: rgba(27, 31, 35, 0.05);
+    border-radius: 6px;
+  }
+}
+
+p {
+  margin: 0;
+  + * {
+    margin-top: 1em;
+  }
+}
+
+.markdown-body + *{
+  margin-top: 1em;
 }

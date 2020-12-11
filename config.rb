@@ -142,3 +142,7 @@ helpers do
     end
   end
 end
+
+
+require_relative 'customizing/content_filter'
+require_relative 'customizing/code_table_filter'
