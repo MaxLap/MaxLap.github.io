@@ -1,4 +1,4 @@
-module CodeTable
+module CodeBook
   include Haml::Filters::Base
   def render(content)
     parts = []

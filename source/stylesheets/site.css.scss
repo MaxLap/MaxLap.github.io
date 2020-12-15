@@ -56,7 +56,7 @@ p {
   }
 }
 
-.markdown-body + * {
+.markdown-body + *, * + .markdown-body {
   margin-top: 1em;
 }
 

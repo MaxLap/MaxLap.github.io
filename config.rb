@@ -157,4 +157,5 @@ end
 
 
 require_relative 'customizing/content_filter'
-require_relative 'customizing/code_table_filter'
+require_relative 'customizing/code_book_filter'
+require_relative 'customizing/code_in_table_filter'
