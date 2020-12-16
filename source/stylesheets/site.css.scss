@@ -77,3 +77,22 @@ p {
   padding-right: 0 !important;
   visibility: hidden;
 }
+
+@mixin selecting-column-mixin($col_index) {
+  .selecting-column-#{$col_index} {
+    > tbody, > thead {
+      > tr {
+        > td, > th {
+          &:not(:nth-child(#{$col_index})) {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+          }
+        }
+      }
+    }
+  }
+}
+@include selecting-column-mixin(1);
+@include selecting-column-mixin(2);

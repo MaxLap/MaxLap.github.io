@@ -14,6 +14,25 @@ document.addEventListener("DOMContentLoaded", function() {
       target.classList.toggle('spoiler-target--displayed');
     });
   });
+
+  document.querySelectorAll('.table-for-code').forEach(function(table) {
+    table.addEventListener("mousedown", function(e) {
+      var current = e.target;
+      var column_number = 0;
+      while(current !== table) {
+        if (current.tagName.toUpperCase() == 'TD') {
+          column_number = Array.prototype.indexOf.call(current.parentElement.children, current) + 1;
+        }
+        current = current.parentElement;
+      }
+
+      if (column_number > 0) {
+        table.classList.remove('selecting-column-1');
+        table.classList.remove('selecting-column-2');
+        table.classList.add('selecting-column-' + column_number);
+      }
+    });
+  });
 });
 
 function bubblingNextElementSibling(elem) {
