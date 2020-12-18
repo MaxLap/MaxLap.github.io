@@ -4,7 +4,7 @@
 #   it being anywhere we use highlighter...
 # * We want it to default to ruby's highlighting
 
-module Code
+module Customizing::Filters::Code
   include Haml::Filters::Base
   def render(code)
     code = code.rstrip.sub(/\A( *\n)*/, '').encode(Encoding::UTF_8)

@@ -1,4 +1,4 @@
-module CodeBook
+module ::Customizing::Filters::CodeBook
   include Haml::Filters::Base
   def render(content)
     parts = []
@@ -19,7 +19,7 @@ module CodeBook
         language = 'ruby'
       end
 
-      html_text = Content.render(text)
+      html_text = ::Customizing::Filters::Content.render(text)
       highlighted_code = Middleman::Syntax::Highlighter.highlight(code, language)
 
       parts << %(<div class="code-book__left">#{html_text}</div>)

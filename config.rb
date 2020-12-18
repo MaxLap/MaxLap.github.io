@@ -57,15 +57,15 @@ set :markdown, :fenced_code_blocks => true
 page '/*.xml', layout: false
 page '/*.json', layout: false
 page '/*.txt', layout: false
-page '/blog/done/*.html', layout: 'blog_post'
-page '/blog/wip/*.html', layout: 'blog_post'
+page '/blog/released/*.html', layout: 'blog_post'
+page '/blog/repo/*.html', layout: 'blog_post'
 page '/blog/*.html', layout: 'blog'
 
 configure :build do
-  # The source/blog/wip is where work in progress posts are placed, this should be a symbolic link
-  # pointing to another git repository, so that the only time you modify the blog is when you want to add
-  # a completed article by copying it from wip to done.
-  Dir['source/blog/wip/*'].each do |path|
+  # The source/blog/repo is where work in progress posts are placed.
+  # It is either a 2nd git repository, or a symbolic link to a 2nd repository.
+  # Details are in the readme's workflow section.
+  Dir['source/blog/repo/*'].each do |path|
     ignore path.gsub(/\.md$/, '').gsub(%r{^source/}, '')
   end
 end
@@ -103,20 +103,20 @@ end
 # end
 
 
-# Adds a [WIP] to title of articles from the wip blogdir
+# Adds a [REPO] to title of articles from the repo blog dir
 # Must be after the blog engine ran
-class WIPMarker < Middleman::Extension
+class REPOMarker < Middleman::Extension
   def manipulate_resource_list(resources)
     resources.each do |resource|
-      if resource.data[:blogdir] == 'wip'
-        resource.data[:title] += ' [WIP]'
-        resource.destination_path = resource.destination_path.gsub(/\.html$/, '-wip.html')
+      if resource.data[:blogdir] == 'repo'
+        resource.data[:title] += ' [REPO]'
+        resource.destination_path = resource.destination_path.gsub(/\.html$/, '-repo.html')
       end
     end
   end
 end
-::Middleman::Extensions.register(:wip_marker, WIPMarker)
-activate :wip_marker
+::Middleman::Extensions.register(:repo_marker, REPOMarker)
+activate :repo_marker
 
 
 helpers do
@@ -134,6 +134,4 @@ helpers do
 end
 
 
-require_relative 'customizing/content_filter'
-require_relative 'customizing/code_book_filter'
-require_relative 'customizing/code_filter'
+require_relative 'customizing/filters/__init__'

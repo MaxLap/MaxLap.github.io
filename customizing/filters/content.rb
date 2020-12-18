@@ -1,4 +1,4 @@
-module Content
+module Customizing::Filters::Content
   include Haml::Filters::Base
   def render(text)
     text = text.rstrip.sub(/\A( *\n)*/, '').encode(Encoding::UTF_8)
