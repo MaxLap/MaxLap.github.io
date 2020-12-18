@@ -24,7 +24,7 @@
 }
 
 .blog-post-content {
-  > *:not(.code-book) {
+  > * {
     max-width: 800px;
   }
 }
@@ -40,29 +40,51 @@ body {
   line-height: 1.35em;
 }
 
-.table-for-code {
-  width: 100%;
-  background: rgba(0, 100, 0, 0.07);
-  border: 0px;
-
+.lone-highlighted-code {
+  padding: 0.7em;
   border-radius: 5px;
-  overflow: hidden; // Needed for TD's background to be hidden from the corners past the radius
+}
 
-  > tbody > tr {
-    > td {
-      vertical-align: top;
-      padding: 0.7em 1em;
+.code-book {
+  display: grid;
+  grid-template-columns: 350px 1fr;
 
-      &:first-child:not(:last-child) {
-        min-width: 400px;
-        max-width: 400px;
-        border-right: #f7fff4 3px solid;
-      }
-    }
+  > :first-child {
+    border-top-left-radius: 5px;
   }
 
-  @include default-margin-top(0.6em);
+  > :nth-child(2) {
+    border-top-right-radius: 5px;
+  }
 
+  > :nth-last-child(2) {
+    border-bottom-left-radius: 5px;
+  }
+
+  > :last-child {
+    border-bottom-right-radius: 5px;
+  }
+}
+
+.code-book__left {
+  background: rgba(0, 100, 0, 0.07);
+  // This is basically a pale border right now, but it doesn't affect padding and is easier to tweak
+  background: linear-gradient(-90deg, rgba(0, 0, 0, 0.0),
+                                      rgba(0, 0, 0, 0.0) 2px,
+                                      rgba(0, 100, 0, 0.07) 2px);
+
+  padding: 0.7em 0.3em 0.7em 0.8em;
+
+  @include default-margin-top(0.6em);
+}
+
+.code-book__right {
+  padding: 0.7em 0.3em 0.7em 0.8em;
+}
+
+.code-book__right-wrapper {
+  overflow: auto;
+  max-width: 650px;
 }
 
 @include default-margin-top(1em);
@@ -97,19 +119,11 @@ body {
 }
 
 @mixin selecting-column-mixin($col_index) {
-  .selecting-column-#{$col_index} {
-    > tbody, > thead {
-      > tr {
-        > td, > th {
-          &:not(:nth-child(#{$col_index})) {
-            -moz-user-select: none;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-          }
-        }
-      }
-    }
+  .selecting-column-#{$col_index}> :not(:nth-child(2n+#{$col_index})) {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 }
 @include selecting-column-mixin(1);

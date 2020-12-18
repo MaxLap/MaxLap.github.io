@@ -2,9 +2,9 @@ module CodeBook
   include Haml::Filters::Base
   def render(content)
     parts = []
-    parts << %(<table class="table-for-code">)
+    parts << %(<div class="code-book">)
 
-    rows = content.split('%TR')
+    rows = content.split('%ROW')
 
     rows.each do |row_content|
       text, _, code = row_content.partition('%RUBY')
@@ -22,10 +22,11 @@ module CodeBook
       html_text = Content.render(text)
       highlighted_code = Middleman::Syntax::Highlighter.highlight(code, language)
 
-      parts << %(<tr><td>#{html_text}</td><td class="highlight">#{highlighted_code}</td></tr>)
+      parts << %(<div class="code-book__left">#{html_text}</div>)
+      parts << %(<div class="highlight code-book__right"><div class="code-book__right-wrapper">#{highlighted_code}</div></div>)
     end
 
-    parts << %(</table>)
+    parts << %(</div>)
     parts.join
   end
 end

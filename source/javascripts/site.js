@@ -15,21 +15,22 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  document.querySelectorAll('.table-for-code').forEach(function(table) {
-    table.addEventListener("mousedown", function(e) {
+  document.querySelectorAll('.code-book').forEach(function(code_book) {
+    code_book.addEventListener("mousedown", function(e) {
       var current = e.target;
-      var column_number = 0;
-      while(current !== table) {
-        if (current.tagName.toUpperCase() == 'TD') {
-          column_number = Array.prototype.indexOf.call(current.parentElement.children, current) + 1;
-        }
+      var prev;
+
+      while(current && current !== code_book) {
+        prev = current;
         current = current.parentElement;
       }
 
+      var column_number = Array.prototype.indexOf.call(code_book.children, prev) % 2 + 1;
+
       if (column_number > 0) {
-        table.classList.remove('selecting-column-1');
-        table.classList.remove('selecting-column-2');
-        table.classList.add('selecting-column-' + column_number);
+        code_book.classList.remove('selecting-column-1');
+        code_book.classList.remove('selecting-column-2');
+        code_book.classList.add('selecting-column-' + column_number);
       }
     });
   });

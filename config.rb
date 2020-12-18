@@ -120,28 +120,6 @@ activate :wip_marker
 
 
 helpers do
-  def table_for_code
-    content_tag 'table', class: 'table-for-code' do
-      capture_haml {
-        yield
-      }
-    end
-  end
-
-  # Chrome has a weird bug with table, where with `width: 100%`, they don't match a div's width.
-  # So to make all code block end correctly, we need to wrap all the code blocks in tables
-  # https://stackoverflow.com/questions/65052051/table-100-is-less-wide-than-siblbing-div
-  # https://bugs.webkit.org/show_bug.cgi?id=140371 (Maybe that's the right bug report...)
-  def code_in_table
-    table_for_code do
-      content_tag 'td' do
-        capture_haml {
-          yield
-        }
-      end
-    end
-  end
-
   def spoiler_toggler(text)
     content_tag 'span', class: 'spoiler-toggler btn btn-default btn-flat btn-xs' do
       text
@@ -158,4 +136,4 @@ end
 
 require_relative 'customizing/content_filter'
 require_relative 'customizing/code_book_filter'
-require_relative 'customizing/code_in_table_filter'
+require_relative 'customizing/code_filter'
