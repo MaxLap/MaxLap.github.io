@@ -1,4 +1,4 @@
 = wrap_layout :blog do
-  %main{role: "main"}
+  %main.blog-post-content{role: "main"}
     %h1= current_article.title
     = yield

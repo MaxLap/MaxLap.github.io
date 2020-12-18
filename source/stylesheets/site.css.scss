@@ -19,8 +19,14 @@
 }
 
 .page-wrapper {
-  max-width: 800px;
-  margin: 0 auto
+  margin: 0 auto;
+  max-width: 1000px;
+}
+
+.blog-post-content {
+  > *:not(.code-book) {
+    max-width: 800px;
+  }
 }
 
 body {
