@@ -2,6 +2,22 @@
 @import 'reset';
 @import 'buttons';
 
+@mixin default-margin-top($size) {
+  p, .markdown-body {
+    &:not(:first-child) {
+      margin: $size 0 0 0;
+    }
+
+    + * {
+      margin: $size 0 0 0;
+    }
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}
+
 .page-wrapper {
   max-width: 800px;
   margin: 0 auto
@@ -23,17 +39,27 @@ body {
   background: rgba(0, 100, 0, 0.07);
   border: 0px;
 
+  border-radius: 5px;
+  overflow: hidden; // Needed for TD's background to be hidden from the corners past the radius
+
   > tbody > tr {
     > td {
       vertical-align: top;
       padding: 0.7em 1em;
 
-      &:first-child {
+      &:first-child:not(:last-child) {
         min-width: 400px;
+        max-width: 400px;
+        border-right: #f7fff4 3px solid;
       }
     }
   }
+
+  @include default-margin-top(0.6em);
+
 }
+
+@include default-margin-top(1em);
 
 .markdown-body {
   code {
@@ -45,22 +71,8 @@ body {
   }
 }
 
-p {
-  margin: 0;
-  + * {
-    margin-top: 1em;
-
-    &.spoiler-target {
-      margin-top: 0;
-    }
-  }
-}
-
-.markdown-body + *, * + .markdown-body {
-  margin-top: 1em;
-}
-
 .spoiler-target {
+  margin: 0;
   background: white;
   padding: 0.3em;
   cursor: pointer;

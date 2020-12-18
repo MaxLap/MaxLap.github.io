@@ -1,3 +1,7 @@
+# Chrome has a weird bug with table, where with `width: 100%`, they don't match a div's width.
+# So to make all code block end correctly, we need to wrap all the code blocks in tables
+# https://stackoverflow.com/questions/65052051/table-100-is-less-wide-than-siblbing-div
+# https://bugs.webkit.org/show_bug.cgi?id=140371 (Maybe that's the right bug report...)
 module CodeInTable
   include Haml::Filters::Base
   def render(code)

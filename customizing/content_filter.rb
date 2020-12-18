@@ -5,7 +5,7 @@ module Content
 
     parts = []
     parts << %(<div class="markdown-body">)
-    parts << Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(render_options = {})).render(text)
+    parts << Redcarpet::Markdown.new(Redcarpet::Render::HTML, fenced_code_blocks: true).render(text)
     parts << %(</div>)
     parts.join
   end
