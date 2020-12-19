@@ -100,11 +100,12 @@ body {
 }
 
 .spoiler-target {
-  margin: 0;
+  margin: 0 !important;
   background: white;
   padding: 0.3em;
   cursor: pointer;
   border-radius: 3px;
+  border: 1px grey solid;
 }
 
 .spoiler-target:not(.spoiler-target--displayed) {
