@@ -1,0 +1,82 @@
+---
+title: Demo post
+date: 2020-11-28
+
+# This is just a demo, we don't want to actually include this in builds
+published: false
+---
+
+:content
+  Text goes in :content filters.
+
+  It uses it as markdown, and wraps it in a div with a `markdown-body` class. This is useful to style it using css.
+  We style `code` with single ticks to look nice using this.
+
+  But code with triple ticks isn't great:
+
+  ```ruby
+  def hello
+    puts 'world'
+  end
+  ```
+
+  It's better to use the `:code` filter:
+
+:code
+  #lang: ruby
+  def hello
+    puts 'hi'
+  end
+
+:content
+  The `#lang: name` as first line (which isn't displayed) is special, it tells the highlighter which language to pick. If not is given,
+  it defaults to `ruby`.
+
+:content
+  Another cute way of displaying code is as a `:codebook`. Text one the left, code on the right:
+
+:codebook
+  Some text here
+  %RUBY
+  def hello
+    puts 'This is some code'
+  end
+
+  %ROW
+  This is another line of text, it will line up with the code that follows it in the filter.
+
+  %RUBY
+
+  hello()
+
+:content
+  Basically, you use `%ROW` to separate the rows.^
+  Right after `%ROW`, and at the begining of `:codebook`'s content, you are in a `:content` filter (displayed on the left).
+
+  Then you use `%RUBY` or `%CODE` to switch to the right side and write code from inside a `:code`.
+  Using `%RUBY` will default the highlighting to ruby, otherwise specify the language with `# lang: css` as first line.
+
+:codebook
+  Here is plain code
+  %CODE
+  echo "hello"
+
+  %ROW
+  Now for some CSS!
+  %CODE
+  #lang: css
+  p { margin: 0 }
+
+:content
+  Because this file isn't a markdown file, many editors tend to remove trailing whitespace. You can disable it, but
+  `:content` turns trailing carets `^` into two space, so that breaking lines is possible by ending it with a single carret.^
+  Never been a fan of this trailing spaces idea...
+
+  But wanna know something i'm quite a fan of? #{spoiler_toggler('Answer')}
+  #{spoiler_target('span', 'Being able to hide content until the user clicks on it. (You can also re-hide this by clicking on this)')}
+
+  Using Ruby's interpolation, you insert `\#{spoiler_toggler("Name in button")}`.
+  Right after it (it must be the next html element), you do the same with `\#{spoiler_target(tag_name, content)}`.
+
+  If you use a `div` as target, #{spoiler_toggler('then...')}
+  #{spoiler_target('div', 'The content appears under as a div!')}
