@@ -7,7 +7,10 @@
 module Customizing::Filters::Code
   include Haml::Filters::Base
   def render(code)
-    code = code.rstrip.sub(/\A( *\n)*/, '').encode(Encoding::UTF_8)
+    code = code.rstrip.encode(Encoding::UTF_8)
+
+    # Remove starting blank lines? Not sure if I want the possibility of starting with empty lines.
+    # code = code.sub(/\A( *\n)*/, '')
 
     # Allow language to be specified via a special comment like:
     #  # lang: ruby
