@@ -3,17 +3,13 @@
 @import 'buttons';
 
 @mixin default-margin-top($size) {
-  p, .markdown-body {
+  p, .markdown-body, .code-book {
     &:not(:first-child) {
       margin: $size 0 0 0;
     }
 
     + * {
       margin: $size 0 0 0;
-    }
-
-    &:first-child {
-      margin-top: 0;
     }
   }
 }
@@ -24,9 +20,7 @@
 }
 
 .blog-post-content {
-  > * {
-    max-width: 800px;
-  }
+  max-width: 800px;
 }
 
 body {
@@ -80,11 +74,11 @@ body {
 
 .code-book__right {
   padding: 0.7em 0.3em 0.7em 0.8em;
+  max-width: 650px;
 }
 
 .code-book__right-wrapper {
   overflow: auto;
-  max-width: 650px;
 }
 
 @include default-margin-top(1em);
