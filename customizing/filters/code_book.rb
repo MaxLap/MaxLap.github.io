@@ -7,6 +7,8 @@ module ::Customizing::Filters::CodeBook
     rows = content.split(/^\s*%ROW\s*\n?/)
 
     rows.each do |row_content|
+      next if row_content.blank?
+
       text, sep, code = row_content.partition(/^\s*(%RUBY|%CODE)\s*\n?/)
       code = code.rstrip.encode(Encoding::UTF_8)
 
