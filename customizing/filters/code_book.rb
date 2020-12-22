@@ -1,8 +1,9 @@
-module ::Customizing::Filters::CodeBook
+module Customizing::Filters::CodeBook
   include Haml::Filters::Base
-  def render(content)
+  def render(content, top_classes: nil)
+    top_classes = Array(top_classes)
     parts = []
-    parts << %(<div class="code-book">)
+    parts << %(<div class="code-book #{top_classes.join(' ')}">)
 
     rows = content.split(/^\s*%ROW\s*\n?/)
 
@@ -24,7 +25,7 @@ module ::Customizing::Filters::CodeBook
         code = code.lines.to_a[1..-1].join # Strip first line
       end
 
-      html_text = ::Customizing::Filters::Content.render(text)
+      html_text = Customizing::Filters::Content.render(text)
       highlighted_code = Middleman::Syntax::Highlighter.highlight(code, language)
 
       parts << %(<div class="code-book__left">#{html_text}</div>)
@@ -33,5 +34,30 @@ module ::Customizing::Filters::CodeBook
 
     parts << %(</div>)
     parts.join
+  end
+end
+
+module Customizing::Filters::CodeBook1L
+  include Haml::Filters::Base
+
+  def render(content)
+    Customizing::Filters::CodeBook.render(content, top_classes: 'code-book--1l')
+  end
+end
+
+
+module Customizing::Filters::CodeBook2L
+  include Haml::Filters::Base
+
+  def render(content)
+    Customizing::Filters::CodeBook.render(content, top_classes: 'code-book--2l')
+  end
+end
+
+module Customizing::Filters::CodeBook3L
+  include Haml::Filters::Base
+
+  def render(content)
+    Customizing::Filters::CodeBook.render(content, top_classes: 'code-book--3l')
   end
 end

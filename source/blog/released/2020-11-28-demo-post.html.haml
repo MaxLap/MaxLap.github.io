@@ -7,9 +7,8 @@ published: false
 ---
 
 :content
-  Text goes in :content filters.
+  Text goes in `:content` filters. It's markdown, and wraps it in a div with a `markdown-body` class. This is useful to style it using css.
 
-  It uses it as markdown, and wraps it in a div with a `markdown-body` class. This is useful to style it using css.
   We style `code` with single ticks to look nice using this.
 
   But code with triple ticks isn't great:
@@ -74,8 +73,29 @@ published: false
   puts "This is a longer line of code. Look how much larger the right side is!"
 
 :content
-  Because this file isn't a markdown file, many editors tend to remove trailing whitespace. You can disable it, but
-  `:content` turns trailing carets `^` into two space, so that breaking lines is possible by ending it with a single carret.^
+  This stretching can cause a need to scroll for screens between 800px and the size whole thing. So prefer
+  to avoid it when possible.
+
+  If you need a larger code side, you can use `:codebook1l` to `:codebook3l` filters, which will add 100px to 300px to the code side.^
+  These react better to reduced screen size by moving to a single column style earlier.
+
+:codebook1l
+  `:codebook1l`
+  %RUBY
+  # once larger
+
+:codebook2l
+  `:codebook2l`
+  %RUBY
+  # twice larger
+
+:codebook3l
+  `:codebook3l`
+  %RUBY
+  # thrice larger
+
+:content
+  Because this file isn't a markdown file, many editors tend to remove trailing whitespace. `:content` turns trailing carets `^` into two space, so that breaking lines is possible by ending it with a single carret.^
   Never been a fan of this trailing spaces idea...
 
   But wanna know something i'm quite a fan of? #{spoiler_toggler('Answer')}

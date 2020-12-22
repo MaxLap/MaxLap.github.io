@@ -16,10 +16,12 @@
 
 .page-wrapper {
   margin: 0 auto;
-  max-width: 1000px;
+  width: 1000px;
+  width: min-content;
+  min-width: 800px;
 }
 
-.blog-post-content {
+.blog-post-content > :not(.code-book) {
   max-width: 800px;
 }
 
@@ -42,6 +44,7 @@ body {
 .code-book {
   display: grid;
   grid-template-columns: 350px 1fr;
+  width: 800px;
 
   > :first-child {
     border-top-left-radius: 5px;
@@ -60,6 +63,18 @@ body {
   }
 }
 
+.code-book--1l {
+  width: 900px;
+}
+
+.code-book--2l {
+  width: 1000px;
+}
+
+.code-book--3l {
+  width: 1100px;
+}
+
 .code-book__left {
   background: rgba(0, 100, 0, 0.07);
   // This is basically a pale border right now, but it doesn't affect padding and is easier to tweak
@@ -74,11 +89,6 @@ body {
 
 .code-book__right {
   padding: 0.7em 0.3em 0.7em 0.8em;
-  max-width: 650px;
-}
-
-.code-book__right-wrapper {
-  overflow: auto;
 }
 
 @include default-margin-top(1em);
