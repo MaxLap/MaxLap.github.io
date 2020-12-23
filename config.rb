@@ -47,8 +47,19 @@ activate :livereload
 activate :syntax
 
 set :build_dir, 'docs'
+
+redcarpet_config = {
+    fenced_code_blocks: true,
+    no_intra_emphasis: true,
+    autolink: true,
+    strikethrough: true,
+    lax_spacing: true,
+    footnotes: true,
+}
+Object.const_set(:REDCARPET_CONFIG, redcarpet_config)
+
 set :markdown_engine, :redcarpet
-set :markdown, :fenced_code_blocks => true
+set :markdown, redcarpet_config
 
 # Layouts
 # https://middlemanapp.com/basics/layouts/
