@@ -1,0 +1,104 @@
+
+.code-book {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  width: 800px;
+
+  > :first-child {
+    border-top-left-radius: 5px;
+  }
+
+  > :nth-child(2) {
+    border-top-right-radius: 5px;
+  }
+
+  > :nth-last-child(2) {
+    border-bottom-left-radius: 5px;
+  }
+
+  > :last-child {
+    border-bottom-right-radius: 5px;
+  }
+}
+
+.code-book--1l {
+  width: 900px;
+}
+
+.code-book--2l {
+  width: 1000px;
+}
+
+.code-book--3l {
+  width: 1100px;
+}
+
+.code-book__left {
+  background: rgba(0, 100, 0, 0.07);
+  // This is basically a pale border right now, but it doesn't affect padding and is easier to tweak
+  background: linear-gradient(-90deg, rgba(0, 0, 0, 0.0),
+          rgba(0, 0, 0, 0.0) 2px,
+          rgba(0, 100, 0, 0.07) 2px);
+
+  padding: 0.7em 0.3em 0.7em 0.8em;
+}
+
+.code-book__right {
+  padding: 0.7em 0.3em 0.7em 0.8em;
+}
+
+@mixin disabled-code-book {
+  display: block;
+  max-width: 800px;
+  width: initial;
+
+  .code-book__left {
+    background: rgba(0, 100, 0, 0.07);
+  }
+  .code-book__right {
+    overflow-x: auto;
+  }
+
+  > :first-child {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+  }
+
+  > :nth-child(2) {
+    border-top-right-radius: 0;
+  }
+
+  > :nth-last-child(2) {
+    border-bottom-left-radius: 0;
+  }
+
+  > :last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+}
+
+
+@media only screen and (max-width: 1120px) {
+  .code-book--3l {
+    @include disabled-code-book;
+  }
+}
+
+@media only screen and (max-width: 1020px) {
+  .code-book--2l {
+    @include disabled-code-book;
+  }
+}
+
+@media only screen and (max-width: 920px) {
+  .code-book--1l {
+    @include disabled-code-book;
+  }
+}
+
+@media only screen and (max-width: 820px) {
+  .code-book {
+    @include disabled-code-book;
+  }
+}
