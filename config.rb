@@ -132,7 +132,7 @@ activate :repo_marker
 
 helpers do
   def spoiler_toggler(text)
-    content_tag 'span', class: 'spoiler-toggler btn btn-default btn-flat btn-xs' do
+    content_tag 'span', class: 'spoiler-toggler btn btn-default btn-flat btn-xs btn-inline' do
       text
     end
   end

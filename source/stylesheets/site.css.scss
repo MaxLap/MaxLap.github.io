@@ -81,11 +81,9 @@ body {
   display: none;
 }
 
+// Making it so that it being hidden doesn't move text around by changing
 .spoiler-toggler--hidden {
-  width: 0 !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  visibility: hidden;
+  display: none !important;
 }
 
 @mixin selecting-column-mixin($col_index) {

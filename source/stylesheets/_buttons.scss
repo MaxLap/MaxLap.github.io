@@ -58,6 +58,11 @@
     padding: 8px 16px;
     font-size: 1.6rem;
   }
+
+  &.btn-inline {
+    font-size: 1em;
+    display: inline;
+  }
 }
 
 @mixin btn-variant($border, $from, $to, $gloss, $color, $hover-from, $active-border) {
