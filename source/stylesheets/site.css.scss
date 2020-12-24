@@ -6,11 +6,11 @@
 @mixin default-margin-top($size) {
   p, .markdown-body, .code-book {
     &:not(:first-child) {
-      margin: $size 0 0 0;
+      margin-top: $size;
     }
 
     + * {
-      margin: $size 0 0 0;
+      margin-top: $size;
     }
   }
 }
@@ -49,6 +49,10 @@ body {
 .lone-highlighted-code {
   padding: 0.7em;
   border-radius: 5px;
+  overflow-x: auto;
+}
+.code-book {
+  margin: 0 -0.3em 0 -0.3em;
 }
 
 .code-book__left {

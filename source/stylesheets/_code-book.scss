@@ -41,6 +41,7 @@
           rgba(0, 100, 0, 0.07) 2px);
 
   padding: 0.7em 0.3em 0.7em 0.8em;
+  max-width: 550px; // Used when code-book is disabled (page not wide enough)
 }
 
 .code-book__right {
@@ -52,16 +53,8 @@
   max-width: 800px;
   width: initial;
 
-  .code-book__left {
-    background: rgba(0, 100, 0, 0.07);
-  }
-  .code-book__right {
-    overflow-x: auto;
-  }
-
   > :first-child {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    border-top-left-radius: 0;
   }
 
   > :nth-child(2) {
@@ -73,8 +66,17 @@
   }
 
   > :last-child {
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+    border-bottom-right-radius: 0;
+  }
+
+  .code-book__left {
+    background: rgba(0, 100, 0, 0.07);
+    border-radius: 10px 10px 0 5px;
+  }
+  .code-book__right {
+    overflow-x: auto;
+    margin-bottom: 0.2em;
+    border-radius: 0 5px 5px 10px;
   }
 }
 
@@ -100,5 +102,20 @@
 @media only screen and (max-width: 820px) {
   .code-book {
     @include disabled-code-book;
+  }
+}
+
+@media only screen and (max-width: 550px) {
+  .code-book {
+    .code-book__left {
+      background: rgba(0, 100, 0, 0.07);
+      border-bottom-right-radius: 0;
+    }
+    .code-book__right {
+      overflow-x: auto;
+      //margin-left: 3em;
+      margin-bottom: 0.2em;
+      border-top-right-radius: 0;
+    }
   }
 }
