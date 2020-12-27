@@ -67,17 +67,20 @@ published: false
   p { margin: 0 }
 
 
+:content
+  When the screen width gets too small, `:codebook` switches to a single column view.
+
 :codebook
-  If the code is too long, that side gets longer (Up to a point)
+  If the code is too long, that side will stretch
   %RUBY
   puts "This is a longer line of code. It is longer"
 
 :content
-  This stretching can cause a need to scroll for screens between 800px and the size whole thing. So prefer
-  to avoid it when possible.
+  The stretching is not ideal as it can require scrolling if the screen size is between the point where the
+  code-book switches to single column and the width of the codebook, so prefer to avoid it when possible.
 
   If you need a larger code side, it's better to can use `:codebook1l` to `:codebook3l` filters, which will add 100px to 300px to the code side.^
-  These react better to reduced screen size by moving to a single column style earlier.
+  These react better to reduced screen size by moving to single column style earlier.
 
 :codebook1l
   `:codebook1l`
@@ -106,3 +109,20 @@ published: false
 
   If you use a `div` as target, #{spoiler_toggler('then...')}
   #{spoiler_target('div', 'The content appears under as a div!')}
+
+  If you want a spoiler in a `:codebook`, an possible option is to use `%AFTER` after the `%CODE` or `%RUBY` part.
+  The look is a little different, but mostly, when the code-book switched to single column style, the `%AFTER` part
+  will be after the code.
+
+:codebook
+  Guess the number this will return
+  %RUBY
+  Random.rand(10)
+  %AFTER
+  #{spoiler_toggler('Answer')}
+  #{spoiler_target('div', '7')}
+
+  %ROW
+  And if you try reducing the width of the window
+  %RUBY
+  # You can see the single column style

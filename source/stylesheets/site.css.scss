@@ -2,6 +2,7 @@
 @import 'reset';
 @import 'buttons';
 @import 'code-book';
+@import 'colors';
 
 @mixin default-margin-top($size) {
   p, .markdown-body, .code-book {
@@ -36,8 +37,8 @@
 }
 
 body {
-  background-color: #f7fff4;
-  color: #022700;
+  background-color: $background-color;
+  color: $text-color;
   font-family: -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir",
     "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans",
     "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu",
@@ -74,11 +75,12 @@ body {
 
 .spoiler-target {
   margin: 0 !important;
-  background: white;
-  padding: 0.3em;
+  background-color: $spoiler-background-color;
+  color: $spoiler-text-color;
+  padding: 3px 0.3em;
   cursor: pointer;
   border-radius: 3px;
-  border: 1px lightgrey solid;
+  border: 1px $spoiler-border-color solid;
 }
 
 .spoiler-target:not(.spoiler-target--displayed) {
