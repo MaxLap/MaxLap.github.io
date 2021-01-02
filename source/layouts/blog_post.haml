@@ -2,3 +2,18 @@
   %main.blog-post-content{role: "main"}
     %h1= current_article.title
     = yield
+
+    - if @custom_footnotes_data[:name_to_number].present?
+      .footnotes{role: "doc-endnotes"}
+        %ol.footnotes-list
+          - @custom_footnotes_data[:name_to_number].each do |footnote_name, footnote_number|
+            - text = @custom_footnotes_data[:name_to_content][footnote_name]
+            %li.footnote-item{id: "fn-#{footnote_name}", role: "doc-endnote"}
+              %a.footnote-backref{href: "#fn-ref-#{footnote_name}"}
+                ↩
+              .footnote-content
+                = text
+    - if @custom_footnotes_data
+      - unreferenced_footnotes = @custom_footnotes_data[:name_to_content].keys - @custom_footnotes_data[:name_to_number].keys
+      - if unreferenced_footnotes.present?
+        - raise "Some footnotes are not referenced right now: #{unreferenced_footnotes.join(', ')}"

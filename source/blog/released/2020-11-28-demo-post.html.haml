@@ -7,7 +7,7 @@ published: false
 ---
 
 :content
-  Text goes in `:content` filters. It's markdown, and wraps it in a div with a `markdown-body` class. This is useful to style it using css.
+  Text goes in `:content` filters. It's markdown, and wraps it in a div with a `markdown-body` class. This is useful to apply css styles to it.
 
   We style `code` with single ticks to look nice using this.
 
@@ -126,3 +126,11 @@ published: false
   And if you try reducing the width of the window
   %RUBY
   # You can see the single column style
+
+:content
+  You can also use footnotes. Using `\[^name]`, like so[^footnote_example].
+
+  [^footnote_example]: You get this footnote at the bottom of the post, which can also have **formatting**.
+
+  The name can also just be a number. In any case, the footnotes will be numbers in order from the top of the document.
+

@@ -54,7 +54,6 @@ redcarpet_config = {
     autolink: true,
     strikethrough: true,
     lax_spacing: true,
-    footnotes: true,
 }
 Object.send(:remove_const, :REDCARPET_CONFIG) rescue nil
 Object.const_set(:REDCARPET_CONFIG, redcarpet_config)

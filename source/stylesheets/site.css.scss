@@ -102,3 +102,12 @@ body {
 }
 @include selecting-column-mixin(1);
 @include selecting-column-mixin(2);
+
+.footnotes {
+  border-top: 1px solid grey;
+}
+
+.footnote-backref {
+  float: left;
+  padding-right: 10px;
+}
