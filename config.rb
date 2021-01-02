@@ -56,6 +56,7 @@ redcarpet_config = {
     lax_spacing: true,
     footnotes: true,
 }
+Object.send(:remove_const, :REDCARPET_CONFIG) rescue nil
 Object.const_set(:REDCARPET_CONFIG, redcarpet_config)
 
 set :markdown_engine, :redcarpet
