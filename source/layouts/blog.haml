@@ -3,8 +3,20 @@
 
 = wrap_layout :layout do
   .page-wrapper
-    = yield
-    %aside
+    %header
+      %nav
+        .header__site-name.site-name
+          = link_to '/blog' do
+            MaxLap
+            %span.header__site-name-extension<>
+              \.dev
+
+        .header__navbar
+          = link_to 'Blog', '/blog', class: 'navbar-item'
+          = link_to 'About', '/about.html', class: 'navbar-item'
+    %div
+      = yield
+    -#%aside
       %h2 Recent Articles
       %ol
         - blog.articles[0...10].each do |article|
@@ -19,3 +31,8 @@
       %ol
         - blog.articles.group_by {|a| a.date.year }.each do |year, articles|
           %li= link_to "#{year} (#{articles.size})", blog_year_path(year)
+
+    %footer
+      = link_with_icon 'MaxLap', 'https://github.com/MaxLap', partial('reuseables/github_svg')
+      %br
+      = link_to 'maxhlap@gmail.com', 'mailto:maxhlap@gmail.com'

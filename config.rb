@@ -184,6 +184,14 @@ helpers do
       text
     end
   end
+
+  def link_with_icon(text, url, icon)
+    link_to url do
+      content_tag('span', class: 'icon-of-link') do
+        icon
+      end + text
+    end
+  end
 end
 
 

@@ -21,9 +21,96 @@
   width: 1000px;
   width: min-content;
   min-width: 800px;
-  padding: 0.3em;
+
+  main {
+    grid-area: main;
+  }
 }
 
+.header__site-name {
+  font-size: 1.3em;
+  font-weight: 700;
+  line-height: 55px;
+  color: $site-name-color;
+  display: inline-block;
+
+  .header__site-name-extension {
+    color: $site-name-extension-color;
+  }
+
+  a, a:visited, a:hover {
+    color: $site-name-color;
+    text-decoration: none;
+  }
+}
+
+.header__navbar {
+  float: right;
+  line-height: 55px;
+  font-size: 1.1em;
+}
+
+
+.navbar-item {
+  color: $nav-color;
+
+  &:visited {
+    color: $nav-color;
+  }
+
+  + .navbar-item {
+    margin-left: 1em;
+    padding: 5px;
+  }
+}
+
+
+a {
+  color: $url-unvisited-color;
+  &:visited {
+    color: $url-visited-color;
+  }
+}
+
+.no-decoration {
+  text-decoration: none !important;
+}
+
+.blog-post-header {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.blog-post-title {
+  color: $blog-post-title-color;
+  font-size: 2em;
+  line-height: 1.15;
+
+  .blog-post-title__date {
+    margin-left: 1em;
+  }
+}
+
+.blog-post-date {
+  color: $blog-post-date-color;
+  font-size: 0.8rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.blog-post-link {
+  font-size: 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  color: $blog-post-link-color;
+  a {
+    color: $blog-post-link-color;
+
+    &:visited {
+      color: $blog-post-link-visited-color;
+    }
+  }
+}
 
 @media only screen and (max-width: 820px) {
   .page-wrapper {
@@ -40,15 +127,17 @@ body {
   background-color: $background-color;
   color: $text-color;
   font-family: -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir",
-    "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans",
-    "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu",
-    "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
+  "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans",
+  "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu",
+  "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
   font-size: 16px;
-  line-height: 1.35em;
+  line-height: 1.35;
 }
 
 a {
+  padding: 0.1em;
   text-decoration: none;
+
   &:hover {
     text-decoration: underline;
   }
@@ -77,6 +166,13 @@ a {
     font-size: 85%;
     background-color: rgba(27, 31, 35, 0.05);
     border-radius: 6px;
+  }
+
+  a {
+
+    &:hover {
+      color: $url-hover-color;
+    }
   }
 }
 
@@ -117,4 +213,21 @@ a {
 .footnote-backref {
   float: left;
   padding-right: 10px;
+}
+
+.icon-of-link {
+  vertical-align: middle;
+  display: inline-block;
+  margin-right: 0.2em;
+
+  > svg {
+    height: 1.1em;
+  }
+}
+
+footer {
+  margin-top: 2em;
+  border-top: 1px dotted $footer-separator-color;
+  padding-top: 1em;
+  padding-bottom: 1em;
 }

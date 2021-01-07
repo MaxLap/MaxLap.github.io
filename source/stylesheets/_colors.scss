@@ -1,5 +1,32 @@
+
+// A couple of other nice colors:
+$coolors-rhythm: #777DA7;
+$coolors-charcoal: #364156;
+$coolors-midnight-green-eagle-green: #104F55;
+$coolors-cyber-grape: #57467B;
+$coolors-dark-green: #01200F;
+$coolors-dark-jungle-green: #011502;
+$coolors-dark-sienna: #2D080A;
+
+
 $background-color: #f7fff4;
 $text-color: #022700;
+
+$site-name-color: #2D080A;//#3D2C2E;
+$site-name-extension-color: #8d94c3;
+$nav-color: $site-name-color;
+
+$footer-separator-color: #cbcddd;
+
+$url-unvisited-color: #2a7ae2;
+$url-visited-color: #1756a9;
+$url-hover-color: inherit;
+
+$blog-post-title-color: $text-color;
+$blog-post-link-color: darkred;
+$blog-post-link-visited-color: darkred;
+$blog-post-date-color: #8d94c3;
+
 
 $code-book-left-background-color: #e5f4e2;
 $code-book-left-after-background-color: #fadebd;
@@ -8,3 +35,5 @@ $code-book-disabled-left-border: #aed9a6;
 $spoiler-background-color: white;
 $spoiler-border-color: lightgrey;
 $spoiler-text-color: inherit;
+
+

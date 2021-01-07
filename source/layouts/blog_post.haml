@@ -1,6 +1,10 @@
 = wrap_layout :blog do
   %main.blog-post-content{role: "main"}
-    %h1= current_article.title
+    .blog-post-header
+      .blog-post-title
+        = current_article.title
+        %span.blog-post-date.blog-post-title__date<>
+          = current_article.date.to_date.iso8601
     = yield
 
     - if @custom_footnotes_data[:name_to_number].present?
