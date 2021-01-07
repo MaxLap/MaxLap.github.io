@@ -47,6 +47,13 @@ body {
   line-height: 1.35em;
 }
 
+a {
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .lone-highlighted-code {
   padding: 0.7em;
   border-radius: 5px;
