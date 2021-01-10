@@ -1,7 +1,7 @@
 module Customizing::Filters::Content
   include Haml::Filters::Base
 
-  def compile(compiler, text)
+  def filter_footnotes(compiler, text)
     fn_data = compiler.options.context.instance_variable_get(:@custom_footnotes_data)
     if fn_data.nil?
       fn_data = {}
@@ -35,7 +35,11 @@ module Customizing::Filters::Content
       end
       %(<sup id="fn-ref-#{footnote_name}"><a href="#fn-#{footnote_name}">#{footnote_number}</a></sup>)
     end
+    text
+  end
 
+  def compile(compiler, text)
+    text = filter_footnotes(compiler, text)
     super(compiler, text)
   end
 

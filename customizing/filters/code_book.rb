@@ -1,7 +1,11 @@
 module Customizing::Filters::CodeBook
   include Haml::Filters::Base
-  def render(content, top_classes: nil)
-    top_classes = Array(top_classes)
+  def compile(compiler, content)
+    content = Customizing::Filters::Content.filter_footnotes(compiler, content)
+    super(compiler, content)
+  end
+
+  def render(content)
     parts = []
     parts << %(<div class="code-book #{top_classes.join(' ')}">)
 
@@ -44,29 +48,36 @@ module Customizing::Filters::CodeBook
     parts << %(</div>)
     parts.join
   end
+
+  def top_classes
+    []
+  end
 end
 
 module Customizing::Filters::CodeBook1L
+  include Customizing::Filters::CodeBook
   include Haml::Filters::Base
 
-  def render(content)
-    Customizing::Filters::CodeBook.render(content, top_classes: 'code-book--1l')
+  def top_classes
+    ['code-book--1l']
   end
 end
 
 
 module Customizing::Filters::CodeBook2L
+  include Customizing::Filters::CodeBook
   include Haml::Filters::Base
 
-  def render(content)
-    Customizing::Filters::CodeBook.render(content, top_classes: 'code-book--2l')
+  def top_classes
+    ['code-book--2l']
   end
 end
 
 module Customizing::Filters::CodeBook3L
+  include Customizing::Filters::CodeBook
   include Haml::Filters::Base
 
-  def render(content)
-    Customizing::Filters::CodeBook.render(content, top_classes: 'code-book--3l')
+  def top_classes
+    ['code-book--3l']
   end
 end
