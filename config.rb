@@ -18,6 +18,30 @@ end
 ::Middleman::Extensions.register(:front_matter_ignorer, FrontMatterIgnorer)
 activate :front_matter_ignorer
 
+# Customization of the workflow that must be done before the blog has loaded and transformed resources.
+# We want it before the blog extension runs so that it fully ignores some content.
+# Doing this "ignore" later would still create tags.
+class MyCustomizeResourcesPreBlog < Middleman::Extension
+  def manipulate_resource_list(resources)
+    if app.config[:environment] == :production
+      # When building:
+
+      # Ignore posts in source/blog/repo/ unless they have preprint: true
+      resources = resources.select do |resource|
+        !resource.normalized_path.start_with?('blog/repo/') || resource.data[:preprint]
+      end
+    else
+      # When developing (server):
+
+      # Nothing to do for this at the moment
+    end
+
+    resources
+  end
+end
+::Middleman::Extensions.register(:my_customize_resources_pre_blog, MyCustomizeResourcesPreBlog)
+activate :my_customize_resources_pre_blog
+
 activate :blog do |blog|
   # This will add a prefix to all links, template references and source paths
   blog.prefix = "blog"
@@ -37,11 +61,20 @@ activate :blog do |blog|
   blog.tag_template = "blog/tag.html"
   blog.calendar_template = "blog/calendar.html"
 
+  if config[:environment] == :production
+    # When building, do not show preprint in index and css and etc.
+    # They will still be available as paths, but won't be visible unless you have the url
+    blog.filter = proc { |abc| !abc.data[:preprint] }
+  end
+
+
   # Enable pagination
   # blog.paginate = true
   # blog.per_page = 10
   # blog.page_link = "page/{num}"
 end
+
+
 
 activate :livereload
 activate :syntax
@@ -72,14 +105,6 @@ page '/blog/released/*.html', layout: 'blog_post'
 page '/blog/repo/*.html', layout: 'blog_post'
 page '/blog/*.html', layout: 'blog'
 
-configure :build do
-  # The source/blog/repo is where work in progress posts are placed.
-  # It is either a 2nd git repository, or a symbolic link to a 2nd repository.
-  # Details are in the readme's workflow section.
-  Dir['source/blog/repo/*'].each do |path|
-    ignore path.gsub(/\.md$/, '').gsub(%r{^source/}, '')
-  end
-end
 
 # With alternative layout
 # page '/path/to/file.html', layout: 'other_layout'
@@ -113,22 +138,39 @@ end
 #   activate :minify_javascript
 # end
 
-
-# Adds a [REPO] to title of articles from the repo blog dir
-# Must be after the blog engine ran
-class REPOMarker < Middleman::Extension
+# Customization of the workflow that must be done after the blog has loaded and transformed resources happens here.
+# We are editing some of the fields.
+class MyCustomizeResourcesPostBlog < Middleman::Extension
   def manipulate_resource_list(resources)
-    resources.each do |resource|
-      if resource.data[:blogdir] == 'repo'
-        resource.data[:title] += ' [REPO]'
-        resource.destination_path = resource.destination_path.gsub(/\.html$/, '-repo.html')
+    # Add [PREPRINT] posts pages that have preprint: true
+    resources = resources.each do |resource|
+      next unless resource.data[:preprint]
+      resource.data[:title] += ' [PREPRINT]'
+      resource.metadata[:page][:title] += ' [PREPRINT]'
+      resource.destination_path = resource.destination_path.gsub(/\.html$/, '-preprint.html')
+    end
+
+    if app.config[:environment] == :production
+      # When building:
+
+      # Nothing to do for this at the moment
+    else
+      # When developing (server):
+
+      # Add [REPO] to title of articles from source/blog/repo/
+      resources.each do |resource|
+        if resource.normalized_path.start_with?('blog/repo/')
+          resource.metadata[:page][:title] += ' [REPO]'
+          resource.destination_path = resource.destination_path.gsub(/\.html$/, '-repo.html')
+        end
       end
     end
+
+    resources
   end
 end
-::Middleman::Extensions.register(:repo_marker, REPOMarker)
-activate :repo_marker
-
+::Middleman::Extensions.register(:my_customize_resources_post_blog, MyCustomizeResourcesPostBlog)
+activate :my_customize_resources_post_blog
 
 helpers do
   def spoiler_toggler(text)

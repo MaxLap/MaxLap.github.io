@@ -13,6 +13,11 @@ Basic workflow:
   The directory is excluded from builds. That way incomplete stuff is not public and intermediary commits are also
   private.
 
+* If I want to let someone read a post before I publish it:
+  1) Add `preprint: true` to the yaml part (FrontMatter). This works for posts in `source/blog/repo` too
+  2) `middleman build`, commit and push
+  3) When done, remove the `preprint: true`
+
 * When a post is to be published:
   1) Copy it over to `source/blog/released` 
   2) In the version that is in `source/blog/repo`, add `ignore: true` to the yaml part (FrontMatter). 
