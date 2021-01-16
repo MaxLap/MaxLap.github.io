@@ -53,7 +53,7 @@ module Customizing::Filters::Content
 
     parts = []
     parts << %(<div class="markdown-body">)
-    parts << Redcarpet::Markdown.new(Redcarpet::Render::HTML, ::REDCARPET_CONFIG).render(text)
+    parts << Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(::REDCARPET_RENDER_CONFIG), ::REDCARPET_CONFIG).render(text)
     parts << %(</div>)
     parts.join
   end

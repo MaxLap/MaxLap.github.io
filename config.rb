@@ -92,6 +92,13 @@ redcarpet_config = {
 Object.send(:remove_const, :REDCARPET_CONFIG) rescue nil
 Object.const_set(:REDCARPET_CONFIG, redcarpet_config)
 
+redcarpet_render_config = {
+    with_toc_data: true,
+}
+Object.send(:remove_const, :REDCARPET_RENDER_CONFIG) rescue nil
+Object.const_set(:REDCARPET_RENDER_CONFIG, redcarpet_render_config)
+
+
 set :markdown_engine, :redcarpet
 set :markdown, redcarpet_config
 
