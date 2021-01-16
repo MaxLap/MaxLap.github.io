@@ -1,5 +1,6 @@
 # Activate and configure extensions
 # https://middlemanapp.com/advanced/configuration/#configuring-extensions
+require_relative 'customizing/__init__'
 
 activate :autoprefixer do |prefix|
   prefix.browsers = "last 2 versions"
@@ -193,6 +194,3 @@ helpers do
     end
   end
 end
-
-
-require_relative 'customizing/filters/__init__'
