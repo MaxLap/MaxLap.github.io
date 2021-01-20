@@ -5,6 +5,11 @@
         = current_article.title
         %span.blog-post-date.blog-post-title__date<>
           = current_article.date.to_date.iso8601
+
+    - if current_article.data[:preprint]
+      .warning-bubble
+        This post is not meant to be shared yet, it is only here to make it easier to gather feedback. Thank you
+
     = yield
 
     - if @custom_footnotes_data[:name_to_number].present?
