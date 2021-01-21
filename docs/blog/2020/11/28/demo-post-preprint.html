@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'>
+<meta charset='utf-8'>
+<meta content='ie=edge' http-equiv='x-ua-compatible'>
+<meta content='width=device-width, initial-scale=1, shrink-to-fit=no' name='viewport'>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/blog/feed.xml" />
+
+<title>
+
+Demo post [PREPRINT]
+| maxlap.dev
+</title>
+<link href="/stylesheets/highlighting.css" rel="stylesheet" />
+<link href="/stylesheets/site.css" rel="stylesheet" />
+<script src="/javascripts/site.js"></script>
+</head>
+<body>
+<div class='page-wrapper'>
+<header>
+<nav>
+<div class='header__site-name site-name'>
+<a href="/blog">MaxLap<span class='header__site-name-extension'>.dev</span></a></div>
+<div class='header__navbar'>
+<a href="/blog" class="navbar-item">Blog</a>
+<a href="/about.html" class="navbar-item">About</a>
+</div>
+</nav>
+</header>
+<div>
+<main class='blog-post-content' role='main'>
+<div class='blog-post-header'>
+<div class='blog-post-title'>Demo post [PREPRINT]<span class='blog-post-date blog-post-title__date'>2020-11-28</span></div>
+</div>
+<div class='warning-bubble'>
+This post is not meant to be shared yet, it is only here to make it easier to gather feedback. Thank you
+</div>
+<div class="markdown-body"><p>Text goes in <code>:content</code> filters. It&#39;s markdown, and wraps it in a div with a <code>markdown-body</code> class. This is useful to apply css styles to it.</p>
+
+<p>We style <code>code</code> with single ticks to look nice using this.</p>
+
+<p>But code with triple ticks isn&#39;t great:</p>
+
+<pre><code class="ruby">def hello&#x000A;  puts &#39;world&#39;&#x000A;end&#x000A;</code></pre>
+
+<p>It&#39;s better to use the <code>:code</code> filter:</p>
+</div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="k">def</span> <span class="nf">hello</span>&#x000A;  <span class="nb">puts</span> <span class="s1">'hi'</span>&#x000A;<span class="k">end</span></code></pre></div></div>
+<div class="markdown-body"><p>The <code>#lang: name</code> as first line (which isn&#39;t displayed) is special, it tells the highlighter which language to pick. If not is given,
+it defaults to <code>ruby</code>.</p>
+</div>
+<div class="markdown-body"><p>Another cute way of displaying code is as a <code>:codebook</code>. Text one the left, code on the right:</p>
+</div>
+<div class="code-book "><div class="code-book__left"><div class="markdown-body"><p>Some text here</p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="k">def</span> <span class="nf">hello</span>&#x000A;  <span class="nb">puts</span> <span class="s1">'This is some code'</span>&#x000A;<span class="k">end</span></code></pre></div></div></div><div class="code-book__left"><div class="markdown-body"><p>This is another line of text, it will line up with the code that follows it in the filter.</p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">hello</span><span class="p">()</span></code></pre></div></div></div></div>
+<div class="markdown-body"><p>Basically, you use <code>%ROW</code> to separate the rows.<br>
+Right after <code>%ROW</code>, and at the begining of <code>:codebook</code>&#39;s content, you are in a <code>:content</code> filter (displayed on the left).</p>
+
+<p>Then you use <code>%RUBY</code> or <code>%CODE</code> to switch to the right side and write code from inside a <code>:code</code>.
+Using <code>%RUBY</code> will default the highlighting to ruby, otherwise specify the language with <code># lang: css</code> as first line.</p>
+</div>
+<div class="code-book "><div class="code-book__left"><div class="markdown-body"><p>Here is plain code</p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight plaintext"><code>echo "hello"</code></pre></div></div></div><div class="code-book__left"><div class="markdown-body"><p>Now for some CSS!</p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight css"><code><span class="nt">p</span> <span class="p">{</span> <span class="nl">margin</span><span class="p">:</span> <span class="m">0</span> <span class="p">}</span></code></pre></div></div></div></div>
+<div class="markdown-body"><p>When the screen width gets too small, <code>:codebook</code> switches to a single column view.</p>
+</div>
+<div class="code-book "><div class="code-book__left"><div class="markdown-body"><p>If the code is too long, that side will stretch</p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="nb">puts</span> <span class="s2">"This is a longer line of code. It is longer"</span></code></pre></div></div></div></div>
+<div class="markdown-body"><p>The stretching is not ideal as it can require scrolling if the screen size is between the point where the
+code-book switches to single column and the width of the codebook, so prefer to avoid it when possible.</p>
+
+<p>If you need a larger code side, it&#39;s better to can use <code>:codebook1l</code> to <code>:codebook3l</code> filters, which will add 100px to 300px to the code side.<br>
+These react better to reduced screen size by moving to single column style earlier.</p>
+</div>
+<div class="code-book code-book--1l"><div class="code-book__left"><div class="markdown-body"><p><code>:codebook1l</code></p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># once larger</span></code></pre></div></div></div></div>
+<div class="code-book code-book--2l"><div class="code-book__left"><div class="markdown-body"><p><code>:codebook2l</code></p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># twice larger</span></code></pre></div></div></div></div>
+<div class="code-book code-book--3l"><div class="code-book__left"><div class="markdown-body"><p><code>:codebook3l</code></p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># thrice larger</span></code></pre></div></div></div></div>
+<div class="markdown-body"><p>Because this file isn&#39;t a markdown file, many editors tend to remove trailing whitespace. <code>:content</code> turns trailing carets <code>^</code> into two space, so that breaking lines is possible by ending it with a single carret.<br>
+Never been a fan of this trailing spaces idea...</p>
+
+<p>But wanna know something i&#39;m quite a fan of? <span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span>
+<span class="spoiler-target">Being able to hide content until the user clicks on it. (You can also re-hide this by clicking on this)</span></p>
+
+<p>Using Ruby&#39;s interpolation, you insert <code>#{spoiler_toggler(&quot;Name in button&quot;)}</code>.
+Right after it (it must be the next html element), you do the same with <code>#{spoiler_target(tag_name, content)}</code>.</p>
+
+<p>If you use a <code>div</code> as target, <span class="spoiler-toggler btn btn-default btn-flat btn-xs">then...</span></p>
+
+<div class="spoiler-target">The content appears under as a div!</div>
+
+<p>If you want a spoiler in a <code>:codebook</code>, an possible option is to use <code>%AFTER</code> after the <code>%CODE</code> or <code>%RUBY</code> part.
+The look is a little different, but mostly, when the code-book switched to single column style, the <code>%AFTER</code> part
+will be after the code.</p>
+</div>
+<div class="code-book "><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>Guess the number this will return</p>
+</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="no">Random</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span></p>
+
+<div class="spoiler-target">7</div>
+</div></div><div class="highlight code-book__right code-book__right--after"></div><div class="code-book__left"><div class="markdown-body"><p>And if you try reducing the width of the window</p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># You can see the single column style</span></code></pre></div></div></div></div>
+<div class="markdown-body"><p>You can also use footnotes. Using <code>[^name]</code>, like so<sup id="fn-ref-footnote_example"><a href="#fn-footnote_example">1</a></sup>.</p>
+
+<p>The name can also just be a number. In any case, the footnotes will be numbers in order from the top of the document.</p>
+</div>
+
+<div class='footnotes' role='doc-endnotes'>
+<ol class='footnotes-list'>
+<li class='footnote-item' id='fn-footnote_example' role='doc-endnote'>
+<a class='footnote-backref' href='#fn-ref-footnote_example'>
+↩
+</a>
+<div class='footnote-content'>
+<div class="markdown-body"><p>You get this footnote at the bottom of the post, which can also have <strong>formatting</strong>.</p>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</main>
+
+</div>
+<footer>
+<a href="https://github.com/MaxLap"><span class="icon-of-link"><svg viewBox='0 0 16 16'>
+<path d='M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z' fill='#828282'></path>
+</svg>
+</span>MaxLap</a>
+<br>
+<a href="mailto:maxhlap@gmail.com">maxhlap@gmail.com</a>
+</footer>
+</div>
+
+</body>
+</html>
