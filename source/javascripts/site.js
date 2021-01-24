@@ -9,7 +9,11 @@ document.addEventListener("DOMContentLoaded", function() {
       target.classList.toggle('spoiler-target--displayed');
     });
 
-    target.addEventListener('click', function() {
+    target.addEventListener('click', function(e) {
+      if (e.target.classList.contains('with-tooltip')) {
+        return;
+      }
+
       toggler.classList.toggle('spoiler-toggler--hidden');
       target.classList.toggle('spoiler-target--displayed');
     });
@@ -34,6 +38,13 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   });
+
+  tippy('[data-tippy-content]',
+        {allowHTML: true,
+         hideOnClick: false,
+         interactive: true,
+         interactiveBorder: 5,
+         interactiveDebounce: 75});
 });
 
 function bubblingNextElementSibling(elem) {

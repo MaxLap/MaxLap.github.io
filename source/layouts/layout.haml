@@ -13,8 +13,10 @@
       = yield_content :title
       = current_page.data.title
       | maxlap.dev
+    = javascript_include_tag "https://unpkg.com/@popperjs/core@2", defer: true
+    = javascript_include_tag "https://unpkg.com/tippy.js@6", defer: true
+    = javascript_include_tag "site", defer: true
     = stylesheet_link_tag "highlighting"
     = stylesheet_link_tag "site"
-    = javascript_include_tag "site"
   %body
     = yield

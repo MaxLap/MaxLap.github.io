@@ -25,7 +25,7 @@ $url-hover-color: inherit;
 $blog-post-title-color: $text-color;
 $blog-post-link-color: darkred;
 $blog-post-link-visited-color: darkred;
-$blog-post-date-color: #8d94c3;
+$blog-post-date-color: $site-name-extension-color;
 
 
 $code-book-left-background-color: #e5f4e2;
@@ -36,4 +36,7 @@ $spoiler-background-color: white;
 $spoiler-border-color: lightgrey;
 $spoiler-text-color: inherit;
 
-
+$tooltip-border-color: $site-name-extension-color;
+$tooltip-text-color: $site-name-extension-color;
+$tooltip-background-color: none;
+$tooltip-hover-background-color: #dedede;

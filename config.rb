@@ -201,4 +201,10 @@ helpers do
       end + text
     end
   end
+
+  def tooltip(text, tooltip_content)
+    content_tag('button', class: 'with-tooltip', 'data-tippy-content' => tooltip_content) do
+      text
+    end
+  end
 end
