@@ -10,7 +10,7 @@ gem 'tzinfo-data', platforms: [:mswin, :mingw, :jruby, :x64_mingw]
 gem 'wdm', '~> 0.1', platforms: [:mswin, :mingw, :x64_mingw]
 
 # Was in the blog template, is that needed?
-gem 'redcarpet', '~> 3.3', '>= 3.3.3'
+gem 'redcarpet', '~> 3.5', '>= 3.5.1'
 
 # For feed.xml.builder
 gem 'builder', '~> 3.0'
