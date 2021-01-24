@@ -51,9 +51,16 @@ module Customizing::Filters::Content
     # The HAML files don't know that the :content filter is trailing-spaces dependant.
     text = text.gsub(/\^\s*$/, '  ')
 
+    # Work around https://github.com/vmg/redcarpet/issues/703
+    # For some reason, when we embed content in another content, Redcarpet does some
+    # wonky stuff... Seems it doesn't handle complex nested divs in some cases if their
+    # closing tags are only separated by newlines
+    text = text.gsub(%r{</div>\s*</div>}, '</div></div>')
+
     parts = []
     parts << %(<div class="markdown-body">)
-    parts << Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(::REDCARPET_RENDER_CONFIG), ::REDCARPET_CONFIG).render(text)
+    rendered_text = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(::REDCARPET_RENDER_CONFIG), ::REDCARPET_CONFIG).render(text)
+    parts << rendered_text
     parts << %(</div>)
     parts.join
   end
