@@ -41,10 +41,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   tippy('[data-tippy-content]',
         {allowHTML: true,
+         duration: [150, 150],
          hideOnClick: false,
          interactive: true,
          interactiveBorder: 5,
-         interactiveDebounce: 75});
+         interactiveDebounce: 50});
 });
 
 function bubblingNextElementSibling(elem) {
