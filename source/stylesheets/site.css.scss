@@ -120,6 +120,10 @@ a {
 }
 
 .blog-post-content > :not(.code-book) {
+  max-width: 750px;
+}
+
+.blog-post-content > .lone-highlighted-code {
   max-width: 800px;
 }
 
