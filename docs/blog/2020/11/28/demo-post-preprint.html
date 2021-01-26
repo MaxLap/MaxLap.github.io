@@ -12,9 +12,11 @@
 Demo post [PREPRINT]
 | maxlap.dev
 </title>
+<script src="https://unpkg.com/@popperjs/core@2" defer="defer"></script>
+<script src="https://unpkg.com/tippy.js@6" defer="defer"></script>
+<script src="/javascripts/site.js" defer="defer"></script>
 <link href="/stylesheets/highlighting.css" rel="stylesheet" />
 <link href="/stylesheets/site.css" rel="stylesheet" />
-<script src="/javascripts/site.js"></script>
 </head>
 <body>
 <div class='page-wrapper'>
@@ -67,7 +69,7 @@ Using <code>%RUBY</code> will default the highlighting to ruby, otherwise specif
 <div class="markdown-body"><p>When the screen width gets too small, <code>:codebook</code> switches to a single column view.</p>
 </div>
 <div class="code-book "><div class="code-book__left"><div class="markdown-body"><p>If the code is too long, that side will stretch</p>
-</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="nb">puts</span> <span class="s2">"This is a longer line of code. It is longer"</span></code></pre></div></div></div></div>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="nb">puts</span> <span class="s2">"This is a longer line of code. It is longer, so it goes farther right"</span></code></pre></div></div></div></div>
 <div class="markdown-body"><p>The stretching is not ideal as it can require scrolling if the screen size is between the point where the
 code-book switches to single column and the width of the codebook, so prefer to avoid it when possible.</p>
 
@@ -83,24 +85,24 @@ These react better to reduced screen size by moving to single column style earli
 <div class="markdown-body"><p>Because this file isn&#39;t a markdown file, many editors tend to remove trailing whitespace. <code>:content</code> turns trailing carets <code>^</code> into two space, so that breaking lines is possible by ending it with a single carret.<br>
 Never been a fan of this trailing spaces idea...</p>
 
-<p>But wanna know something i&#39;m quite a fan of? <span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span>
-<span class="spoiler-target">Being able to hide content until the user clicks on it. (You can also re-hide this by clicking on this)</span></p>
+<p>But wanna know something i&#39;m quite a fan of? <button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button>
+<span class="spoiler-target"><p>Being able to hide content until the user clicks on it. (You can also re-hide this by clicking on this)</p></span></p>
 
 <p>Using Ruby&#39;s interpolation, you insert <code>#{spoiler_toggler(&quot;Name in button&quot;)}</code>.
 Right after it (it must be the next html element), you do the same with <code>#{spoiler_target(tag_name, content)}</code>.</p>
 
-<p>If you use a <code>div</code> as target, <span class="spoiler-toggler btn btn-default btn-flat btn-xs">then...</span></p>
+<p>If you use a <code>div</code> as target, <button class="spoiler-toggler btn btn-default btn-flat btn-xs">then...</button></p>
 
-<div class="spoiler-target">The content appears under as a div!</div>
+<div class="spoiler-target"><p>The content appears under as a div!</p></div>
 
 <p>If you want a spoiler in a <code>:codebook</code>, an possible option is to use <code>%AFTER</code> after the <code>%CODE</code> or <code>%RUBY</code> part.
 The look is a little different, but mostly, when the code-book switched to single column style, the <code>%AFTER</code> part
 will be after the code.</p>
 </div>
 <div class="code-book "><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>Guess the number this will return</p>
-</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="no">Random</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span></p>
+</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="no">Random</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button></p>
 
-<div class="spoiler-target">7</div>
+<div class="spoiler-target"><p>7</p></div>
 </div></div><div class="highlight code-book__right code-book__right--after"></div><div class="code-book__left"><div class="markdown-body"><p>And if you try reducing the width of the window</p>
 </div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># You can see the single column style</span></code></pre></div></div></div></div>
 <div class="markdown-body"><p>You can also use footnotes. Using <code>[^name]</code>, like so<sup id="fn-ref-footnote_example"><a href="#fn-footnote_example">1</a></sup>.</p>

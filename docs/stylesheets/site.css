@@ -900,7 +900,7 @@ a {
 body {
   background-color: #f7fff4;
   color: #022700;
-  font-family: -apple-system, BlinkMacSystemFont, "Avenir Next", "Avenir", "Segoe UI", "Lucida Grande", "Helvetica Neue", "Helvetica", "Fira Sans", "Roboto", "Noto", "Droid Sans", "Cantarell", "Oxygen", "Ubuntu", "Franklin Gothic Medium", "Century Gothic", "Liberation Sans", sans-serif;
+  font-family: Calibri,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   font-size: 16px;
   line-height: 1.35; }
 
@@ -933,12 +933,15 @@ p + *, .markdown-body + *, .code-book + * {
 .markdown-body code {
   padding: .2em .4em;
   margin: 0;
-  font-size: 85%;
   background-color: rgba(27, 31, 35, 0.05);
   border-radius: 6px; }
 
 .markdown-body a:hover {
   color: inherit; }
+
+code {
+  font-size: 0.85em;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
 
 .spoiler-target {
   margin: 0 !important;
@@ -992,3 +995,15 @@ footer {
   border-radius: 10px;
   padding: 0.8em;
   font-size: 1.3em; }
+
+.with-tooltip {
+  background: none;
+  border: 0;
+  border-bottom: 2px dotted #8d94c3;
+  padding: 0 4px;
+  -webkit-transition: background 0.3s ease 0s;
+  transition: background 0.3s ease 0s; }
+  .with-tooltip:focus {
+    outline: none; }
+  .with-tooltip:hover {
+    background: #dedede; }

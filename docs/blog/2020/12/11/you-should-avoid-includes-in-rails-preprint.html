@@ -12,9 +12,11 @@
 You should avoid `includes` in Rails [PREPRINT]
 | maxlap.dev
 </title>
+<script src="https://unpkg.com/@popperjs/core@2" defer="defer"></script>
+<script src="https://unpkg.com/tippy.js@6" defer="defer"></script>
+<script src="/javascripts/site.js" defer="defer"></script>
 <link href="/stylesheets/highlighting.css" rel="stylesheet" />
 <link href="/stylesheets/site.css" rel="stylesheet" />
-<script src="/javascripts/site.js"></script>
 </head>
 <body>
 <div class='page-wrapper'>
@@ -38,41 +40,42 @@ This post is not meant to be shared yet, it is only here to make it easier to ga
 </div>
 <div class="markdown-body"><p><code>includes</code> is the recommended way to load associations of your records eagerly. In fact, the
 <a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations">Rails guide for eager loading</a>
-only mentions <code>includes</code>.</p>
-
-<p>But is there are 2 other methods: <code>preload</code> and <code>eager_load</code> which have the same goal of eager loading data, but
-with different means and possible side effects.</p>
+only mentions <code>includes</code>. However, there are other ways, and I want to argue that you should
+always use <code>preload</code> instead.</p>
 
 <p>Here&#39;s why you should avoid <code>includes</code>:</p>
 
 <ul>
 <li><code>includes</code> makes it easy to introduce an odd bug</li>
-<li>There is an alternative method that cannot introduce the bug</li>
+<li><code>preload</code> takes the same arguments as <code>includes</code>, but only does the safe things</li>
 </ul>
 
 <p>What bug? Lets show the introduction of an unexpected bug:</p>
 </div>
 <div class="code-book "><div class="code-book__left"><div class="markdown-body"><p>Say you have these records:</p>
 </div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="nb">p</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">create!</span>&#x000A;<span class="nb">p</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="ss">content: </span><span class="s1">'hello'</span><span class="p">,</span> <span class="ss">spam: </span><span class="kp">true</span><span class="p">)</span>&#x000A;<span class="nb">p</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">create!</span><span class="p">(</span><span class="ss">content: </span><span class="s1">'world'</span><span class="p">)</span></code></pre></div></div></div><div class="code-book__left"><div class="markdown-body"><p>You want posts that have at least one comment marked as spam.</p>
-</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># distinct because joins can make duplicates</span>&#x000A;<span class="n">posts</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">distinct</span>&#x000A;            <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span></code></pre></div></div></div><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>How many comments in this array?</p>
-</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">to_a</span><span class="p">.</span><span class="nf">size</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span></p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># distinct because joins can make duplicates</span>&#x000A;<span class="c1"># I dislike using joins for this.</span>&#x000A;<span class="n">posts</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">distinct</span>&#x000A;            <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span></code></pre></div></div></div><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>How many comments in this array?</p>
+</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">to_a</span><span class="p">.</span><span class="nf">size</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button></p>
 
-<div class="spoiler-target">2</div>
+<div class="spoiler-target"><p>2, nothing special there.</p></div>
 </div></div><div class="highlight code-book__right code-book__right--after"></div><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>You will need to display the comments of the posts, so you <code>includes</code> them.</p>
 
 <p>How many comments are in the array?</p>
-</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">to_a</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span></p>
+</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">to_a</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button></p>
 
-<div class="spoiler-target">Only 1!</div>
+<div class="spoiler-target"><p>Only 1, the one with `spam = true`</p></div>
 </div></div><div class="highlight code-book__right code-book__right--after"></div><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>What&#39;s the <code>count</code>?</p>
-</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">count</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span></p>
+</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">count</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button></p>
 
-<div class="spoiler-target">2</div>
+<div class="spoiler-target">Back to 2! <span class="with-tooltip" data-tippy-content="`count` does a new query, ignoring what is already loaded.">?</span></div>
 </div></div><div class="highlight code-book__right code-book__right--after"></div><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>What about <code>size</code>?</p>
-</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">size</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><span class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</span></p>
+</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">size</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button></p>
 
-<div class="spoiler-target">1</div>
-</div></div><div class="highlight code-book__right code-book__right--after"></div></div>
+<div class="spoiler-target">Back to 1! <span class="with-tooltip" data-tippy-content="`size` just returns the size of what is already loaded.">?</span></div>
+</div></div><div class="highlight code-book__right code-book__right--after"></div><div class="code-book__left"><div class="markdown-body"><p>To be clear, the <code>joins</code> is not needed for this to happen.</p>
+
+<p>It was just to show a progression.</p>
+</div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="no">Post</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">)</span>&#x000A;    <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;    <span class="p">.</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">size</span>&#x000A;<span class="c1"># =&gt; 1</span></code></pre></div></div></div></div>
 <div class="markdown-body"><p>Personally, I find that unexpected.</p>
 
 <p>Imagine if the <code>post</code> is passed to a view or a helper, which uses the <code>comments</code>. It
@@ -85,88 +88,191 @@ up where the <code>post</code> comes from and figure it out. Good luck otherwise
 <p>This is considered <a href="https://guides.rubyonrails.org/active_record_querying.html#specifying-conditions-on-eager-loaded-associations">a feature</a>.
 I consider it a maintenance burden. At least the documentation doesn&#39;t recommend using it.</p>
 
-<h2 id="the-alternative">The alternative</h2>
+<h2 id="tl-dr-my-recommendations">TL;DR: my recommendations</h2>
 
-<p>So what should you use when you want to avoid the dreaded N+1 query problem?</p>
-
-<p><code>includes</code> has 2 modes of operation, it either:</p>
+<p>Things will get more technical in the next sections. So my condensed and straightforward recommendations are:</p>
 
 <ul>
-<li>calls <code>preload</code>, which will do a 2nd query to load all of the associated records.</li>
-<li><p>calls <code>eager_load</code> if your query refers to the table of an association passed to <code>includes</code>. This
-will change the query to do <code>JOIN</code> on the table.</p>
-
-<p>If you reference that table with a condition, you will only get records with the matching association
-and only eager load the associated records that match the condition. This is what causes the bug.</p></li>
+<li>For new code, always use <code>preload</code> instead of <code>includes</code>. It does the same eager loading as <code>includes</code>,
+and takes the same arguments, but it cannot cause the bug mentioned above. With it, things are as expected:</li>
 </ul>
-
-<p>That switch to <code>eager_load</code> is what caused the bug above. I&#39;d say <code>includes</code> couples the eager loading
-to the logic of filtering the data we want. <code>preload</code> doesn&#39;t do that.</p>
-
-<p><code>preload</code> only does eager loading, the same way all the time. Don&#39;t risk <code>includes</code> doing something wrong
-just use <code>preload</code> all the time; it works like <code>includes</code>, without the booby trap.</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">distinct</span>&#x000A;            <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">to_a</span><span class="p">.</span><span class="nf">size</span> <span class="c1">#=&gt; 2</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">count</span> <span class="c1">#=&gt; 2</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">size</span> <span class="c1">#=&gt; 2</span></code></pre></div></div>
-<div class="markdown-body"><h2 id="but-includes-is-everywhere">But <code>includes</code> is everywhere...</h2>
-
-<p>So why is <code>includes</code> the popular way of eager loading data? I think it&#39;s for two reasons:</p>
+<div class="markdown-body"><ul>
+<li>If you need a condition (a <code>where</code>) which uses an association, don&#39;t use <code>includes</code> or <code>joins</code>.<br>
+Instead, I highly recommend my gem, <a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a>.
+Here&#39;s an <a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md">introduction to it</a>.<br>
+It&#39;s made for this purpose, and will support many more use cases, such as:
 
 <ul>
-<li>It&#39;s the &quot;smart&quot; function out of the 3, it will pick the &quot;right&quot; strategy when needed, and since it usually
-picks the safer <code>preload</code>, then most don&#39;t get hurt by it.</li>
-<li><code>includes</code> as been the recommended one from the start, so most use it and are familiar with it, so most recommend it.</li>
+<li>Recursive associations (parent/child)</li>
+<li>Polymorphic belongs_to</li>
+<li>Negative conditions (ex: posts without comments)</li>
+<li>Multiple conditions on different records of the same association</li>
+<li>Only consider one record for <code>has_one</code> associations. (All other tools I mentionned will treat those like <code>has_many</code>)</li>
+</ul></li>
 </ul>
+</div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># Same as before, posts that have at least one comment marked as spam</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">where_assoc_exists</span><span class="p">(</span><span class="ss">:comments</span><span class="p">,</span> <span class="ss">spam: </span><span class="kp">true</span><span class="p">)</span></code></pre></div></div>
+<div class="markdown-body"><ul>
+<li><p>If <code>includes</code> seem to work somewhere that <code>preload</code> doesn&#39;t, you are probably doing a condition
+on an associations. See the previous point for this.</p></li>
+<li><p>For existing code, you can&#39;t mindlessly change all <code>includes</code> to <code>preload</code>, because some of it may rely on
+<code>includes</code> adding a <code>JOIN</code> to the query, which happens when the query refers to the table of the
+included associations. So while it would be better to change everything to <code>preload</code>, every such change must
+be tested.</p></li>
+</ul>
+
+<p>So don&#39;t risk <code>includes</code> doing the wrong thing. <code>preload</code> means simple eager loading without the the booby trap,
+you should use it.</p>
+
+<h2 id="down-the-rabbit-hole">Down the rabbit hole</h2>
+
+<p>Lets get technical.</p>
+
+<p>Eager loading means loading associations of multiples records before they are needed. This is done to reduce
+the number of queries executed, making execution faster.</p>
+
+<p>There are actually 3 methods for eager loading in Rails:</p>
+
+<ul>
+<li><code>preload</code>: Executes one extra query per association being eager loaded. Same as <code>includes</code> usually does.</li>
+<li><code>eager_load</code>: Adds <code>JOIN</code> to the SQL query and load the association without doing an extra query. This also
+enables adding conditions on the table, which is the cause of the bug mentioned earlier.</li>
+<li><code>includes</code>: Picks between <code>preload</code> and <code>eager_load</code> based on if there is a reference, in the query, to the
+table of an association that was passed to <code>includes</code>. This can be from <code>where</code> or from <code>joins</code>.<br>
+You may also specify an association with <code>references</code> to force the <code>eager_load</code> path, which is needed when
+your conditions are done with a <code>String</code> instead of a <code>Hash</code> (which, again, is the cause of the bug).</li>
+</ul>
+
+<p>So out of the 3 methods, only one of them cannot trigger this bug: <code>preload</code>. It only does eager loading, always
+the same way.</p>
 
 <h2 id="when-is-eager_load-needed">When is <code>eager_load</code> needed?</h2>
 
 <p>Rarely...</p>
 
 <p>Maybe some use it to reduce the number of queries when they do eager loading. I don&#39;t think it really saves much,
-and there is a risk of slowing things down by making queries that are heavier (lots of joins).</p>
+and there is a risk of slowing things down by making queries that are <span class="with-tooltip" data-tippy-content="If you use `eager_load` with multiple `has_many`, the rows kind of multiply themselves, and you end up with a massive amount of data that your DB is returning to your web server.">heavier</span>.</p>
+</div>
+<div class="markdown-body"><p>Some may use it for the actual &quot;feature&quot; of loading partial associations. I still heavily disagree with that use-case.
+<button class="spoiler-toggler btn btn-default btn-flat btn-xs">Anecdote</button></p>
 
-<p>I mostly see it used to do a <code>where</code> on an association. You may see a recommendation to use <code>includes</code>,
-and then have a condition on that table. This is actually using <code>eager_load</code> and, as mentionned at the begining,
-this can cause subtle bugs.</p>
+<div class="spoiler-target"><div class="markdown-body"><p>I&#39;ve had to edit code that used this &quot;feature&quot; once...</p>
+
+<p>You look at a method and it looks wrong; it can&#39;t be doing what it should be doing. It&#39;s using every
+<code>project.users</code>, not just those we want! When I did an interactive console there (<code>binding.pry</code>
+or <code>byebug</code>), I saw that users were missing from <code>project.users</code>.</p>
+
+<p>Since I knew of this &quot;feature&quot;, I started looking and, as expected, a condition on an <code>includes</code> was found...
+3 method calls away from where the association was used, not a single comment to explain what is going on anywhere.</p>
+
+<p>That developer had already been fired for, let&#39;s say, related reasons.</p>
+</div></div>
+
+<p>I mostly see <code>eager_load</code> used to do a condition (a <code>where</code>) which uses an association. Lets dig into these.</p>
+
+<h2 id="where-on-an-association-with-eager_load"><code>where</code> on an association with <code>eager_load</code></h2>
+
+<p>It&#39;s a somewhat frequent need, there are many questions about this on stack overflow.</p>
+
+<p>The bug at the top started with such a need: &quot;I want the posts that have comments marked as spam&quot;.</p>
+
+<p>You may see a recommendation to use <code>includes</code>, and then have a condition on its table. This actually
+uses the <code>eager_load</code> path and it can lead to the bug from the start of this post.</p>
 
 <p>It looks like this:</p>
 </div>
-<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># Please stop doing this :(</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">eager_load</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span></code></pre></div></div>
-<div class="markdown-body"><p>Problems with <code>includes</code>/<code>eager_load</code> for this:</p>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># Please stop doing this :(</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;<span class="c1"># which is equivalent to this (and stop doing this too)</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">eager_load</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span></code></pre></div></div>
+<div class="markdown-body"><p>Again, this opens you up to the bug at the start of this post.</p>
+
+<p>To be clear, the <code>where</code> on an association with <code>includes</code> / <code>eager_load</code> <strong>can</strong> be safe. But only <strong>if</strong>
+the association is a <code>belongs_to</code>. When it is, there are only 2 possibilities: either load the
+record and the associated <code>belongs_to</code> records, or don&#39;t load either. No partial loading is possible.</p>
+
+<p>But even when it&#39;s safe, there are risks:</p>
 
 <ul>
-<li>The partial loading of <code>has_many</code> associations, as mentionned above is unexpected / confusing</li>
-<li>If you don&#39;t need the association to be loaded it is wasteful to do so</li>
-<li>Doesn&#39;t compose well</li>
-<li>Doesn&#39;t handle recursive associations (ex: parent/children)</li>
+<li>Using <code>includes</code> / <code>eager_load</code> increases the chance for a mistake, where you or someone else <em>just</em>
+add another association to the existing eager loading call.</li>
+<li>Everytime a reader sees <code>includes</code> / <code>eager_load</code>, he may wonder if it is safe, or if there is a risk
+of causing the partial loading bug.</li>
 </ul>
 
-<p>Truth is, this need for a <code>where</code> on an association is not something that ActiveRecord handles well. Avoiding
-the <code>includes</code> / <code>eager_load</code>, the only remaining options is to use <code>joins</code>. But there are still multiple problems
-with it.</p>
+<p>And as a tool, this isn&#39;t so great:</p>
+
+<ul>
+<li>If you don&#39;t need the associated records, then eager loading them is wasteful.</li>
+<li>Doesn&#39;t handle recursive associations (ex: parent/children)</li>
+<li>Doesn&#39;t compose well (TODO)</li>
+<li>Looks potentially wrong when you know of the partial eager loading &quot;feature&quot;</li>
+</ul>
+
+<h2 id="where-on-an-association-with-joins"><code>where</code> on an association with <code>joins</code></h2>
+
+<p>The next option is to use <code>joins</code>. It still has downsides.</p>
 
 <p>It looks like this:</p>
 </div>
-<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># Please stop doing this :(</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">distinct</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span></code></pre></div></div>
-<div class="markdown-body"><p>Using <code>joins</code> like this is better than <code>includes</code> / <code>eager_load</code>, but still far from great:</p>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># Please stop doing this :(</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;<span class="c1"># and stop doing this</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">distinct</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span></code></pre></div></div>
+<div class="markdown-body"><p>Using <code>joins</code> like this is better than <code>includes</code> / <code>eager_load</code> since at least, there is no risk of partially
+loading an association. But there are still problems with it:</p>
 
 <ul>
 <li>Doesn&#39;t handle recursive associations (ex: parent/children)</li>
-<li>Doesn&#39;t compose well with other similar conditions</li>
-<li>Doesn&#39;t interact work well with <code>or</code></li>
+<li>Doesn&#39;t compose well (TODO)</li>
+<li>Requires a distinct for has_many to avoid duplicated records for <code>has_many</code>.<br>
+This can be unexpected if you are doing a more complex query than just fetching records.</li>
 </ul>
 
-<p>What I recommend is to instead use a gem I made just for this purpose: <a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a>.</p>
+<h2 id="where-on-an-association-with-arel"><code>where</code> on an association with Arel</h2>
+
+<p>Truth is, this need for a <code>where</code> on an association is not something that ActiveRecord supports well. So
+leaving the ActiveRecord only solutions, you can do an actual <code>EXISTS</code> query with Arel. <code>EXISTS</code> is
+the SQL tool that is meant to do this type of conditions, not <code>JOIN</code>.</p>
+
+<p>It looks like this:</p>
+</div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># An ok way, but error prone</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="no">Comment</span><span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="s2">"posts.id = comments.post_id"</span><span class="p">).</span><span class="nf">where</span><span class="p">(</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">).</span><span class="nf">arel</span><span class="p">.</span><span class="nf">exists</span><span class="p">)</span></code></pre></div></div>
+<div class="markdown-body"><p>This composes much better with other tools because all it does is add a single <code>WHERE</code> clause to the query.
+It works as you would expect with <code>or</code>, <code>not</code> and with other conditions on the same association.</p>
+
+<p>But there still are new downsides:</p>
+
+<ul>
+<li>You must manually write condition to link the <code>posts</code> to the <code>comments</code>. It&#39;s easy to forget it, and I&#39;ve seen
+StackOverflow answers that forgot to do so.<br>
+You won&#39;t get any error for forgetting, your query will just be wrong, which may not even be obvious if all
+you have is a little test data.
+Bonus: This can get extra tedious for polymorphic associations, where you also need to this check: <code>foos.owner_type = #{Bar.base_class.name}</code>.</li>
+<li>If a condition was given when defining the association, you must also manually rewrite it.</li>
+<li>Only the models are named in the code, not the association of interest. This makes the intent less clear, especially
+when non-trivial associations exist.</li>
+<li>Extra work to handle recursive associations (ex: parent/children)</li>
+<li>Quite a bit longer to write, and this is a short example.</li>
+</ul>
+
+<p>Other than writing the whole condition manually, which would have all the problems of the Arel way, but be
+more verbose and more error prone, I think we are out of built-in ways.</p>
+
+<h2 id="where-on-an-association-with-activerecord_where_assoc"><code>where</code> on an association with activerecord_where_assoc</h2>
+
+<p>What I recommend for conditions based on associations is a gem I made just for this purpose:
+<a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a>. It looks like this:</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># Please consider doing this:</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">where_assoc_exists</span><span class="p">(</span><span class="ss">:comments</span><span class="p">,</span> <span class="ss">spam: </span><span class="kp">true</span><span class="p">)</span>&#x000A;<span class="c1"># Or using a scope such as is_spam:</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">where_assoc_exists</span><span class="p">(</span><span class="ss">:comments</span><span class="p">)</span> <span class="p">{</span> <span class="n">is_spam</span> <span class="p">}</span></code></pre></div></div>
-<div class="markdown-body"><p>How much better?</p>
+<div class="markdown-body"><p>How much better is that? The query it generates is the same as the Arel example, with the same benefits and more.
+See for yourself:</p>
 
 <ul>
-<li>It just adds a single <code>where</code> condition, so it composes well and works with <code>or</code></li>
-<li>Handles recursive associations (ex: parent/children)</li>
-<li>Can handle polymorphic belongs_to (<code>includes</code> and <code>joins</code> would simply refuse)</li>
-<li>Easy to do a <code>NOT</code> of the condition (I.E: Where no comment has the content <code>&#39;hello&#39;</code>)</li>
+<li>It just adds a single <code>where</code> condition, so it composes well and works with <code>or</code> and with
+other conditions on the same association.</li>
+<li>Handles recursive associations automatically (ex: parent/children)</li>
+<li>Handles polymorphic belongs_to (<code>includes</code> and <code>joins</code> would simply refuse)</li>
+<li>Easy to do a <code>NOT</code> of the condition (I.E: Where no comment has the content <code>&#39;hello&#39;</code>)
+with <code>where_assoc_not_exists</code>.</li>
 <li>Composes with other such queries, even on the same association, even with negations</li>
-<li>Works well with the <code>or</code> method</li>
+<li>Unlike Arel, this uses the association&#39;s name, so its clearer.</li>
 </ul>
 
 <p>So if you need to do this kind of conditions, here&#39;s some references about it:</p>
@@ -176,8 +282,27 @@ with it.</p>
 <li><a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/ALTERNATIVES_PROBLEMS.md">The problems of the other ways of doing such conditions</a>.</li>
 <li><a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/EXAMPLES.md">Multiple example usages</a>.</li>
 </ul>
+
+<p>Seriously, try it, it&#39;s liberating how simple this once complex task becomes.</p>
 </div>
-<div class="markdown-body"><h2 id="one-more-reason-against-includes">One more reason against <code>includes</code></h2>
+<div class="markdown-body"><h2 id="but-includes-is-everywhere">But <code>includes</code> is everywhere</h2>
+
+<p>It is, let&#39;s explore the reasons I can think of.</p>
+
+<p><strong><code>includes</code> is the &quot;smart&quot; function out of the 3, it will pick the &quot;right&quot; strategy when needed.</strong></p>
+
+<p>Marketing-wise, this sounds like a good thing... Until you learn that the alternate path, <code>eager_load</code>, is
+not really what you want and it can cause bugs.</p>
+
+<p><strong><code>includes</code> has always been recommended, so most are familiar with it, and most recommend it.</strong></p>
+
+<p>Heck, <code>preload</code>&#39;s <a href="https://apidock.com/rails/ActiveRecord/QueryMethods/preload">documentation</a> make it
+sound like an <span class="with-tooltip" data-tippy-content="As of writing this post it only says: &quot;Allows preloading of args,
+in the same way that #includes does&quot;, with one trivial example.">alias for <code>includes</code></span>, and the Rails guide only mentions <code>includes</code> for eager loading data.</p>
+
+<p>I think not enough people were both harmed by <code>includes</code> and aware of the alternative option for it to spread.</p>
+
+<h2 id="one-more-reason-against-includes">One more reason against <code>includes</code></h2>
 
 <p>If you are just going to end up doing a <code>preload</code> behind the scene, then using <code>includes</code> is slower
 since there are extra checks before running the request. Testing with a trivial case, I get a consistent
@@ -189,19 +314,8 @@ since there are extra checks before running the request. Testing with a trivial 
 <div class="markdown-body"><h1 id="todo">TODO:</h1>
 
 <ul>
-<li>Link to a rb file that contains and runs all code.</li>
-<li>An extra hook in the &quot;Here&#39;s why&quot; at the top would be great.</li>
-<li>Explain what I mean by &quot;doesn&#39;t compose well&quot; in a footer</li>
+<li>Link to a rb file that contains and runs all code. Maybe a gist would be even better?</li>
 <li>Find something to say at the end of the post?</li>
-<li><p>Setup a comment system</p></li>
-<li><p>Figure out which font to use, for text and for code.</p></li>
-</ul>
-
-<h1 id="questions-about-this-post">Questions about this post:</h1>
-
-<ul>
-<li>Is the title too long?</li>
-<li>Should I explain the possible heavier queries of eager_load?</li>
 </ul>
 </div>
 
