@@ -1003,7 +1003,6 @@ footer {
   background: none;
   border: 0;
   border-bottom: 2px dotted #8d94c3;
-  padding: 0 4px;
   -webkit-transition: background 0.3s ease 0s;
   transition: background 0.3s ease 0s; }
   .with-tooltip:focus {

@@ -207,7 +207,7 @@ helpers do
   end
 
   def tooltip(text, tooltip_content)
-    content_tag('span', class: 'with-tooltip', 'data-tippy-content' => tooltip_content) do
+    content_tag('span', class: 'with-tooltip', 'data-tippy-content' => tooltip_content.gsub(/\s+/, ' ')) do
       text
     end
   end
