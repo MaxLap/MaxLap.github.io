@@ -181,6 +181,16 @@ end
 ::Middleman::Extensions.register(:my_customize_resources_post_blog, MyCustomizeResourcesPostBlog)
 activate :my_customize_resources_post_blog
 
+after_build do
+  # Having a .rb file in source just breaks middleman. It want to use tilt to render it with opal
+  # But I don't want that! I can't even monkey-patch middleman/tilt, because the exception happens
+  # before the config is executed!
+  # Even installing the gem, I still had the exception.
+  # So now, this is dumb work-around, every time I build, I must see that middleman removed
+  # the file. Knowing full well that I'm just copying it over. Awesome!
+  FileUtils.cp_r(File.join(__dir__, 'ruby_sources'), File.join(__dir__, 'docs'))
+end
+
 helpers do
   def spoiler_toggler(text)
     content_tag 'button', class: 'spoiler-toggler btn btn-default btn-flat btn-xs' do
