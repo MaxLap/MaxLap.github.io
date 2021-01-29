@@ -221,4 +221,8 @@ helpers do
       text
     end
   end
+
+  def content(text)
+    Customizing::Filters::Content.render(text)
+  end
 end
