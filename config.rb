@@ -192,8 +192,8 @@ after_build do
 end
 
 helpers do
-  def spoiler_toggler(text)
-    content_tag 'button', class: 'spoiler-toggler btn btn-default btn-flat btn-xs' do
+  def spoiler_toggler(text, html_class: "btn-default")
+    content_tag 'button', class: "spoiler-toggler btn btn-xs #{html_class}" do
       text
     end
   end

@@ -85,13 +85,13 @@ These react better to reduced screen size by moving to single column style earli
 <div class="markdown-body"><p>Because this file isn&#39;t a markdown file, many editors tend to remove trailing whitespace. <code>:content</code> turns trailing carets <code>^</code> into two space, so that breaking lines is possible by ending it with a single carret.<br>
 Never been a fan of this trailing spaces idea...</p>
 
-<p>But wanna know something i&#39;m quite a fan of? <button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button>
+<p>But wanna know something i&#39;m quite a fan of? <button class="spoiler-toggler btn btn-xs btn-default">Answer</button>
 <span class="spoiler-target"><p>Being able to hide content until the user clicks on it. (You can also re-hide this by clicking on this)</p></span></p>
 
 <p>Using Ruby&#39;s interpolation, you insert <code>#{spoiler_toggler(&quot;Name in button&quot;)}</code>.
 Right after it (it must be the next html element), you do the same with <code>#{spoiler_target(tag_name, content)}</code>.</p>
 
-<p>If you use a <code>div</code> as target, <button class="spoiler-toggler btn btn-default btn-flat btn-xs">then...</button></p>
+<p>If you use a <code>div</code> as target, <button class="spoiler-toggler btn btn-xs btn-default">then...</button></p>
 
 <div class="spoiler-target"><p>The content appears under as a div!</p></div>
 
@@ -100,7 +100,7 @@ The look is a little different, but mostly, when the code-book switched to singl
 will be after the code.</p>
 </div>
 <div class="code-book "><div class="code-book__left code-book__left--has-after"><div class="markdown-body"><p>Guess the number this will return</p>
-</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="no">Random</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><button class="spoiler-toggler btn btn-default btn-flat btn-xs">Answer</button></p>
+</div></div><div class="highlight code-book__right code-book__right--has-after"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="no">Random</span><span class="p">.</span><span class="nf">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span></code></pre></div></div></div><div class="code-book__left code-book__left--after"><div class="markdown-body"><p><button class="spoiler-toggler btn btn-xs btn-default">Answer</button></p>
 
 <div class="spoiler-target"><p>7</p></div>
 </div></div><div class="highlight code-book__right code-book__right--after"></div><div class="code-book__left"><div class="markdown-body"><p>And if you try reducing the width of the window</p>

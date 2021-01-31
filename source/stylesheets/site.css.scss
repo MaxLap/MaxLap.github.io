@@ -196,8 +196,7 @@ code {
   display: none;
 }
 
-// Making it so that it being hidden doesn't move text around by changing
-.spoiler-toggler--hidden {
+.spoiler-toggler--hidden:not(.spoiler-toggler--always-displayed) {
   display: none !important;
 }
 
