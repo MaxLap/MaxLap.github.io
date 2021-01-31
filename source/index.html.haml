@@ -1,4 +1,24 @@
 ---
-title: The index!
+layout: blog
+pageable: true
+per_page: 10
 ---
-%h1 Coming soon!
+-# This is a copy of blog/index until I do more on this site
+- if paginate && num_pages > 1
+  %p
+    Page #{page_number} of #{num_pages}
+  - if prev_page
+    %p= link_to 'Previous page', prev_page
+
+%main.blog-post-content{role: "main"}
+  %h1 Posts
+
+  - page_articles.each_with_index do |article, i|
+    .blog-post-content
+      .blog-post-link
+        = link_to article.title, article
+        %span.blog-post-date= article.date.to_date.iso8601
+
+- if paginate
+  - if next_page
+    %p= link_to 'Next page', next_page
