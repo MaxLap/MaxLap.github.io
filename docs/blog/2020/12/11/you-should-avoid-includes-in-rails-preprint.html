@@ -105,7 +105,7 @@ and takes the same arguments, but it ignores the conditions in the query. With i
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">distinct</span>&#x000A;            <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">to_a</span><span class="p">.</span><span class="nf">size</span> <span class="c1">#=&gt; 2</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">count</span> <span class="c1">#=&gt; 2</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">size</span> <span class="c1">#=&gt; 2</span></code></pre></div></div>
 <div class="markdown-body"><ul>
 <li>If you need a condition (a <code>where</code>) which uses an association, don&#39;t use <code>includes</code> or <code>joins</code>.<br>
-Instead, I  recommend my gem, <a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a>.
+Instead, I recommend my gem, <a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a>.
 Here&#39;s an <a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md">introduction to it</a>.<br>
 It&#39;s made for this purpose, and will support many more use cases, such as:
 
@@ -161,7 +161,7 @@ full eager loading, always the same way.</p>
 <p>Maybe some use it to reduce the number of queries when they do eager loading. I don&#39;t think it really saves much,
 and there is a risk of slowing things down by making queries that are <span class="with-tooltip" data-tippy-content="If you use `eager_load` with multiple `has_many`, the rows get multiplied, and you end up with a massive amount of data that your DB is returning to your web server.">heavier</span>.</p>
 </div>
-<div class="markdown-body"><p>Some may use it for the actual &quot;feature&quot; of loading partial associations. I still heavily disagree with that use-case.
+<div class="markdown-body"><p>Some may use it to actually do conditional eager loading. I still heavily disagree with that use-case.
 <button class="spoiler-toggler btn btn-xs btn-aside btn-inline spoiler-toggler--always-displayed">Anecdote</button></p>
 
 <div class="spoiler-target"><div class="markdown-body"><p>I&#39;ve had to edit code that used this &quot;feature&quot; once...</p>
@@ -173,7 +173,9 @@ or <code>byebug</code>), I saw that users were missing from <code>project.users<
 <p>Since I knew of this &quot;feature&quot;, I started looking and, as expected, a condition on an <code>includes</code> was found...
 3 method calls away from where the association was used, not a single comment to explain what is going on anywhere.</p>
 
-<p>That developer was already not working with us anymore at that point.</p>
+<p>You should avoid code that looks wrong. Code that uses conditional eager loading looks wrong. In our case
+the overall module was already something that we wanted to rewrite from scratch, so this was just another reason
+to do so.</p>
 </div></div>
 
 <p>I mostly see <code>eager_load</code> used to do a condition (a <code>where</code>) which uses an association. Lets dig into these.</p>
@@ -195,7 +197,7 @@ uses the <code>eager_load</code> path.</p>
 
 <p>To be clear, the <code>where</code> on an association with <code>includes</code> / <code>eager_load</code> <strong>can</strong> be safe. But only <strong>if</strong>
 the association is a <code>belongs_to</code>. When it is, there are only 2 possibilities: either load the
-record and the associated <code>belongs_to</code> records, or don&#39;t load either. No partial loading is possible.</p>
+record and the associated <code>belongs_to</code> records, or don&#39;t load either. No conditional eager loading is possible.</p>
 
 <p>But even when it&#39;s safe, there are risks:</p>
 
@@ -297,6 +299,8 @@ Either live with the booby traps, write your own methods to do this cleanly, or 
 <li>Mine: <a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a></li>
 <li><a href="https://github.com/EugZol/where_exists">where_exists</a></li>
 </ul>
+
+<p>Seriously, try any of them, it&#39;s liberating how simple this once complex task becomes.</p>
 </div>
 <div class="markdown-body"><h2 id="but-includes-is-everywhere">But <code>includes</code> is everywhere</h2>
 
@@ -314,7 +318,7 @@ not really what you want and it can cause bugs due to conditional eager loading.
 
 <p><strong><code>includes</code> has always been recommended, so most are familiar with it, and most recommend it.</strong></p>
 
-<p>Incredibly, <code>preload</code>&#39;s <a href="https://apidock.com/rails/ActiveRecord/QueryMethods/preload">documentation</a> make it
+<p>Going to, <code>preload</code>&#39;s <a href="https://apidock.com/rails/ActiveRecord/QueryMethods/preload">documentation</a> make it
 sound like an <span class="with-tooltip" data-tippy-content="As of writing this post it only says: &quot;Allows preloading of args, in the same way that #includes does&quot;, with one trivial example.">alias for <code>includes</code></span>, and the Rails guide only mentions <code>includes</code> for eager loading data.</p>
 
 <p>I think not enough people were both harmed by <code>includes</code> and aware of the <code>preload</code> option for it to spread.</p>
@@ -325,8 +329,8 @@ sound like an <span class="with-tooltip" data-tippy-content="As of writing this 
 
 <ul>
 <li><code>includes</code> and <code>eager_load</code> can accidentally eager load only part of an associations, a good source of bugs.</li>
-<li>Doing conditional eager loading voluntarily can be maintenance burden.</li>
-<li>If you do want conditional eager loading, using <code>eager_load</code> makes it more obvious.</li>
+<li>Doing conditional eager loading voluntarily can be maintenance burden</li>
+<li>If you do want conditional eager loading, using <code>eager_load</code> makes it a bit more obvious.</li>
 </ul>
 
 <p>Conditions based on associations:</p>

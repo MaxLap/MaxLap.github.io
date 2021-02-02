@@ -575,8 +575,6 @@ p, pre {
   width: -moz-min-content;
   width: min-content;
   min-width: 800px; }
-  .page-wrapper main {
-    grid-area: main; }
 
 .header__site-name {
   font-size: 1.3em;
