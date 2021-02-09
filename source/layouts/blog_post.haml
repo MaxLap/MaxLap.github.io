@@ -26,3 +26,6 @@
       - unreferenced_footnotes = @custom_footnotes_data[:name_to_content].keys - @custom_footnotes_data[:name_to_number].keys
       - if unreferenced_footnotes.present?
         - raise "Some footnotes are not referenced right now: #{unreferenced_footnotes.join(', ')}"
+
+    %script{src: "https://commento.maxlap.dev/js/commento.js", defer: true}
+    #commento
