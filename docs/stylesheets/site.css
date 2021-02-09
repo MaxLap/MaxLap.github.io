@@ -756,3 +756,11 @@ footer {
     outline: none; }
   .with-tooltip:hover {
     background: #dedede; }
+
+hr {
+  border: 1px solid #cbcddd;
+  border-top: 0; }
+
+hr.commento-separator {
+  margin-top: 2em;
+  margin-bottom: 2em; }

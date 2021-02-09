@@ -27,5 +27,9 @@
       - if unreferenced_footnotes.present?
         - raise "Some footnotes are not referenced right now: #{unreferenced_footnotes.join(', ')}"
 
+    %hr.commento-separator
+
     %script{src: "https://commento.maxlap.dev/js/commento.js", defer: true}
     #commento
+    %noscript
+      Please enable JavaScript to load the comments.

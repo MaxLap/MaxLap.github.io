@@ -228,7 +228,7 @@ code {
 
 footer {
   margin-top: 2em;
-  border-top: 1px solid $footer-separator-color;
+  border-top: 1px solid $hr-separator-color;
   padding-top: 1em;
   padding-bottom: 1em;
 }
@@ -253,4 +253,14 @@ footer {
   &:hover {
     background: $tooltip-hover-background-color;
   }
+}
+
+hr {
+  border: 1px solid $hr-separator-color;
+  border-top: 0;
+}
+
+hr.commento-separator {
+  margin-top: 2em;
+  margin-bottom: 2em;
 }
