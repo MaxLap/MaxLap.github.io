@@ -27,9 +27,20 @@
       - if unreferenced_footnotes.present?
         - raise "Some footnotes are not referenced right now: #{unreferenced_footnotes.join(', ')}"
 
-    %hr.commento-separator
+    %hr.comments-separator
 
-    %script{src: "https://commento.maxlap.dev/js/commento.js", defer: true}
-    #commento
+    :javascript
+      var remark_config = {
+        host: "https://remark42.maxlap.dev",
+        site_id: 'remark42.maxlap.dev',
+        components: ['embed'],
+        max_shown_comments: 30,
+        theme: 'light',
+        locale: 'en',
+        show_email_subscription: false
+      };
+      !function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".js"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)}}(remark_config.components||["embed"],document);
+    #remark42
+
     %noscript
       Please enable JavaScript to load the comments.

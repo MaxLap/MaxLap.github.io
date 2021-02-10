@@ -346,9 +346,20 @@ the same time, you will get bitten.</li>
 <p>If you want to run the examples from this post, here is a <a href="/ruby_sources/2020-12-11-you-should-avoid-includes-in-rails.rb">self-contained ruby script</a>.</p>
 </div>
 
-<hr class='commento-separator'>
-<script defer src='https://commento.maxlap.dev/js/commento.js'></script>
-<div id='commento'></div>
+<hr class='comments-separator'>
+<script>
+  var remark_config = {
+    host: "https://remark42.maxlap.dev",
+    site_id: 'remark42.maxlap.dev',
+    components: ['embed'],
+    max_shown_comments: 30,
+    theme: 'light',
+    locale: 'en',
+    show_email_subscription: false
+  };
+  !function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".js"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)}}(remark_config.components||["embed"],document);
+</script>
+<div id='remark42'></div>
 <noscript>
 Please enable JavaScript to load the comments.
 </noscript>
