@@ -1,0 +1,380 @@
+---
+title: You should avoid `includes` in Rails
+date: 2021-02-15
+tags: [rails, activerecord]
+---
+:content
+  `includes` is the recommended way to load associations of your records eagerly. In fact, the
+  [Rails guide for eager loading](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations)
+  only mentions `includes`. However, there are other ways, and I want to argue that you should
+  always use `preload` instead.
+
+  Here's why you should avoid `includes`:
+  * `includes` makes it easy to introduce an odd bug
+  * `preload` takes the same arguments as `includes`, but only does the safe things
+
+  What bug? Let's show the introduction of an unexpected bug:
+
+:codebook
+  Say you have these records:
+
+  %RUBY
+  p = Post.create!
+  p.comments.create!(content: 'hello', spam: true)
+  p.comments.create!(content: 'world')
+
+  %ROW
+  You want posts that have at least one comment marked as spam.
+
+  %RUBY
+  # distinct because joins can make duplicates
+  # I dislike using joins for this.
+  posts = Post.joins(:comments).distinct
+              .where(comments: {spam: true})
+
+  %ROW
+  How many comments in this array?
+
+  %RUBY
+  posts.first.comments.to_a.size
+
+  %AFTER
+  #{spoiler_toggler('Answer')}
+  #{spoiler_target('div', '2, nothing special there.')}
+
+  %ROW
+  You will need to display the comments of the posts, so you `includes` them.
+
+  How many comments are in the array?
+
+  %RUBY
+  posts.includes(:comments).first.comments.to_a
+
+  %AFTER
+  #{spoiler_toggler('Answer')}
+  #{spoiler_target('div', 'Only 1, the one with `spam = true`')}
+
+  %ROW
+  What's the `count`?
+
+  %RUBY
+  posts.includes(:comments).first.comments.count
+
+  %AFTER
+  #{spoiler_toggler('Answer')}
+  #{spoiler_target('div', 'Back to 2! '.html_safe + tooltip('&nbsp;?&nbsp;', "`count` does a new query, ignoring what is already loaded."))}
+
+  %ROW
+  What about `size`?
+
+  %RUBY
+  posts.includes(:comments).first.comments.size
+
+  %AFTER
+  #{spoiler_toggler('Answer')}
+  #{spoiler_target('div', 'Back to 1! '.html_safe + tooltip('&nbsp;?&nbsp;', "`size` just returns the size of what is already loaded."))}
+
+  %ROW
+  To be clear, the `joins` isn't needed for this to happen.
+
+  It was just to show a progression.
+
+  %RUBY
+  Post.includes(:comments)
+      .where(comments: {spam: true})
+      .first.comments.size
+  # => 1
+
+:content
+  Personally, I find that unexpected.
+
+  Imagine if the `post` is passed to a view or a helper, which uses the `comments`. It
+  would only print the comments that matched the condition. Now if you try to debug from that helper,
+  you would see that `post.comments` only has 1 comment.
+
+  Hopefully, you know that this is how `includes` (and `eager_load`, see below) behaves, so you may look
+  up where the `post` comes from and figure it out. Good luck otherwise.
+
+  This is considered [a feature](https://guides.rubyonrails.org/active_record_querying.html#specifying-conditions-on-eager-loaded-associations).
+  The consequences of doing conditions on eager loaded association are not in the guide, but they
+  are in the [middle of this section of the documentation](https://guides.rubyonrails.org/active_record_querying.html#specifying-conditions-on-eager-loaded-associations).
+
+  I sometimes see this called "conditional eager loading", and the bug is doing it accidentally.
+
+  I consider the whole feature a maintenance burden. At least the guide doesn't recommend using it.
+
+  ## TL;DR: my recommendations
+
+  Things will get more technical in the next sections, so my condensed and straightforward recommendations are:
+
+  * For new code, always use `preload` instead of `includes`. It does the same eager loading as `includes`,
+    and takes the same arguments, but it ignores the conditions in the query. With it, things work as expected:
+
+:code
+  posts = Post.joins(:comments).distinct
+              .where(comments: {spam: true})
+  posts.preload(:comments).first.comments.to_a.size #=> 2
+  posts.preload(:comments).first.comments.count #=> 2
+  posts.preload(:comments).first.comments.size #=> 2
+
+:content
+  * If you need a condition (a `where`) which uses an association, don't use `includes` or `joins`.^
+    Instead, I recommend my gem: [activerecord_where_assoc](https://github.com/MaxLap/activerecord_where_assoc).
+    Here's an [introduction to it](https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md).^
+    It's made for this purpose, and will support many more use cases, such as:
+      * Recursive associations (parent/child)
+      * Polymorphic belongs_to
+      * Negative conditions (ex: posts without comments marked as spam)
+      * Multiple conditions on different records of the same association
+
+      Alternatively, there's another gem for this: [where_exists](https://github.com/EugZol/where_exists)
+:code
+  # Same as before, posts that have at least one comment marked as spam
+  Post.where_assoc_exists(:comments, spam: true)
+
+:content
+  * If `includes` seem to work somewhere that `preload` doesn't, you're probably doing a condition
+    on an association. See the previous point for this.
+
+  * For existing code, you can't mindlessly change all `includes` to `preload`, because some of it may rely on
+    `includes` adding a `JOIN` to the query, which happens when the query refers to the table of the
+    included associations. So while it would be better to change everything to `preload`, every such change must
+    be tested.
+
+  So don't risk `includes` doing the wrong thing. `preload` means simple eager loading without the booby trap;
+  you should use it.
+
+  ## Down the rabbit hole
+
+  If you want to understand why I make those recommendations, we'll have to get technical...
+
+  Eager loading means loading associations of multiple records before they are needed. This is done to reduce
+  the number of queries executed, making execution faster.
+
+  There are actually 3 methods for eager loading in Rails:
+
+  * `preload`: Executes one extra query per association being eager loaded. Same as `includes` usually does.
+  * `eager_load`: Adds `JOIN` to the SQL query and load the association without doing an extra query. This also
+    enables adding conditions on the table, which is the cause of the conditional eager loading bug from the
+    introduction.
+  * `includes`: Picks between `preload` and `eager_load` based on if there is a reference, in the query, to the
+    table of an association that was passed to `includes`. This can be from `where` or from `joins`.^
+    You may also specify an association with `references` to force the `eager_load` path, which is needed when
+    your conditions are specified with a `String` instead of a `Hash` (which, again, causes conditional eager loading).
+
+  So out of the 3 methods, only one of them cannot trigger conditional eager loading: `preload`. It only does
+  full eager loading, always the same way.
+
+  ## When is `eager_load` needed?
+
+  Rarely...
+
+  Maybe some use it to reduce the number of queries when they do eager loading. I don't think it really saves much,
+  and there is a risk of slowing things down by making queries that are #{tooltip('heavier', 'If you use `eager_load` with multiple `has_many`, the rows get multiplied, and you end up with a massive amount of data that your DB is returning to your web server.')}.
+
+- anecdote = capture_haml do
+  :content
+    I've had to edit code that used this "feature" once...
+
+    You look at a method and it looks wrong; it can't be doing what it should be doing. It's using every
+    `project.users`, not just those we want! When I did an interactive console there (`binding.pry`
+    or `byebug`), I saw that users were missing from `project.users`.
+
+    Since I knew of this "feature", I started looking and, as expected, a condition on an `includes` was found...
+    3 method calls away from where the association was used, not a single comment to explain what is going on anywhere.
+
+    You should avoid code that looks wrong. Code that uses conditional eager loading looks wrong. In our case
+    the overall module was already something that we wanted to rewrite from scratch, so this was just another reason
+    to do so.
+
+:content
+  Some may use it to actually do conditional eager loading. I still heavily disagree with that use case.
+  #{spoiler_toggler('Anecdote', html_class: 'btn-aside btn-inline spoiler-toggler--always-displayed')}
+  #{spoiler_target('div', anecdote)}
+
+  I mostly see `eager_load` used to do a condition (a `where`) which uses an association. Let's dig into these.
+
+  ## `where` on an association with `eager_load`
+
+  It's a somewhat frequent need and there are many questions about this on stack overflow.
+
+  The bug from the introduction, accidentally doing conditional eager loading, started with such a need: "I want the
+  posts that have comments marked as spam".
+
+  You may see a recommendation to use `includes`, and then have a condition on its table. This actually
+  uses the `eager_load` path.
+
+  It looks like this:
+
+:code
+  # Please stop doing this :(
+  Post.includes(:comments).where(comments: {spam: true})
+  # which is equivalent to this (and don't do this either)
+  Post.eager_load(:comments).where(comments: {spam: true})
+
+:content
+  Again, this does conditional eager loading, which isn't what we asked for.
+
+  To be clear, the `where` on an association with `includes` / `eager_load` **can** be safe. But only **if**
+  the association is a `belongs_to`. When it is, there are only 2 possibilities: either load the
+  record and the associated `belongs_to` records, or don't load either. No conditional eager loading is possible.
+
+  But even when it's safe, there are risks:
+  * Using `includes` / `eager_load` increases the chance for a mistake, where you or someone else *just*
+    add another association to the existing eager loading call.
+  * Every time a reader sees `includes` / `eager_load`, he may wonder if it is safe, or if there could be
+    accidental conditional eager loading.
+
+- includes_doesnt_compose = capture_haml do
+  :content
+    A query for posts with "a comment marked as spam" and "a comment by an admin" will actually only return
+    posts with "a comment that is both marked as spam and made by an admin" instead it being possible to be
+    two different comments.
+
+    So doing this kind of query in `scope` means they can interact incorrectly.
+
+:content
+  And as a tool, this isn't so great:
+  * If you don't need the associated records, then eager loading them is wasteful.
+  * Doesn't handle recursive associations (ex: parent/children)
+  * #{tooltip("Doesn't compose well", includes_doesnt_compose)}
+  * Looks potentially wrong when you know of the conditional eager loading "feature"
+
+  ## `where` on an association with `joins`
+
+  The next option is to use `joins`. It also has downsides.
+
+  It looks like this:
+
+:code
+  # Please stop doing this :(
+  Post.joins(:comments).where(comments: {spam: true})
+  # and stop doing this
+  Post.joins(:comments).distinct.where(comments: {spam: true})
+
+- joins_doesnt_compose = capture_haml do
+  :content
+    A query for posts with "a comment marked as spam" and "a comment by an admin" will actually only return
+    posts with "a comment that is both marked as spam and made by an admin" instead it being possible to be
+    two different comments.
+
+    So doing this kind of query in `scope` means they can interact incorrectly and change more things than
+    just adding a condition (it adds a `distinct`).
+
+:content
+  Using `joins` like this is better than `includes` / `eager_load` since at least, there is no risk of conditionally
+  loading an association. But there are still problems with it:
+  * Doesn't handle recursive associations (ex: parent/children)
+  * Requires a `distinct` to avoid duplicated records when used with `has_many` associations.^
+    This can be unexpected if you're doing a more complex query than j ust fetching records.
+  * #{tooltip("Doesn't compose well", joins_doesnt_compose)}
+
+  ## `where` on an association with Arel
+
+  Truth is, this need for a `where` on an association isn't something that ActiveRecord supports well. So
+  leaving the ActiveRecord only solutions, you can do an actual `EXISTS` query with Arel. `EXISTS` is
+  the SQL tool that is meant to do this type of condition, not `JOIN`.
+
+  It looks like this:
+
+:code
+  # An OK way, but error prone
+  Post.where(Comment.where("posts.id = comments.post_id").where(spam: true).arel.exists)
+
+:content
+  This composes much better with other tools because all it does is add a single `WHERE` clause to the query.
+  It works as you would expect with `or`, `not` and with other conditions on the same association.
+
+  But there still are new downsides:
+  * You must manually write condition to link the `posts` to the `comments`. It's easy to forget it, and I've seen
+    StackOverflow answers that forgot to do so.^
+    You won't get any error for forgetting, your query will just be wrong, which may not even be obvious if all
+    you have is a little test data.
+    Bonus: This can get extra tedious for polymorphic associations, where you also need to this check: `foos.owner_type = \#{Bar.base_class.name}`.
+  * If a condition was given when defining the association, you must also manually rewrite it.
+  * Only the models are named in the code, not the association of interest. This makes the intent less clear, especially
+    when non-trivial associations exist.
+  * Extra work to handle recursive associations (ex: parent/children)
+  * Quite a bit longer to write, and this is a short example.
+
+  Other than writing the whole condition manually, which would have all the problems of the Arel way, but be
+  more verbose and more error-prone, I think we're out of built-in ways.
+
+  ## `where` on an association with activerecord_where_assoc
+
+  What I recommend for conditions based on associations is a gem I made just for this purpose:
+  [activerecord_where_assoc](https://github.com/MaxLap/activerecord_where_assoc). It looks like this:
+
+:code
+  # Please consider doing this:
+  Post.where_assoc_exists(:comments, spam: true)
+  # Or using a scope such as is_spam:
+  Post.where_assoc_exists(:comments) { is_spam }
+
+:content
+  The query it generates is the same as the Arel example, with the same benefits and more.
+  See for yourself:
+
+  * It just adds a single `where` condition, so it composes well and works with `or` and with
+    other conditions on the same association.
+  * Handles recursive associations automatically (ex: parent/children)
+  * Handles polymorphic belongs_to (`includes` and `joins` would simply refuse)
+  * Easy to do a `NOT` of the condition (I.E.: where no comment is marked as spam)
+    with `where_assoc_not_exists`.
+  * Composes with other such queries, even on the same association, even with negations
+  * Unlike Arel, this uses the association's name, so the intent is clearer.
+
+  So if you need to do this kind of condition, here are some references for my gem:
+
+  * [Introduction to activerecord_where_assoc](https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md).
+  * [The problems of the other ways of doing such conditions](https://github.com/MaxLap/activerecord_where_assoc/blob/master/ALTERNATIVES_PROBLEMS.md).
+  * [Multiple example usages](https://github.com/MaxLap/activerecord_where_assoc/blob/master/EXAMPLES.md).
+
+  There's simply no way I could find to use builtin tools to have this query be clear, succinct and not booby trapped.
+  Either live with the booby traps, write your own methods to do this cleanly, or use one of the gems written for this purpose:
+
+  * Mine: [activerecord_where_assoc](https://github.com/MaxLap/activerecord_where_assoc)
+  * [where_exists](https://github.com/EugZol/where_exists)
+
+  Seriously, try any of them, it's liberating how simple this once complex task becomes.
+
+:content
+  ## But `includes` is everywhere
+
+  It is! Let's explore the reasons I can think of.
+
+  **`includes` is the "smart" function out of the 3, it will pick the "right" strategy when needed.**
+
+  Marketing-wise, this sounds like a good thing... Until you learn that the alternate path, `eager_load`, is
+  not really what you want and it can cause bugs due to conditional eager loading.
+
+  **For a long time, `includes` (and `eager_load`) were the only way to do a `LEFT JOIN`**
+
+  The method `left_joins` was added in Rails 5.0. Before that, if you wanted one, you had to either do
+  `includes` / `eager_load`, or write the whole "LEFT JOIN" yourself like this: `joins("LEFT JOIN
+  comments ON comments.post_id = posts.id")`. The `includes` shortcut was often suggested.
+
+  **`includes` has always been recommended, so most are familiar with it, and most recommend it.**
+
+  Everything is against `preload`, even it's [documentation](https://apidock.com/rails/ActiveRecord/QueryMethods/preload) makes `preload`
+  sound like an #{tooltip('alias for `includes`', 'As of writing this post it only says: "Allows preloading of args,
+  in the same way that #includes does", with one trivial example.')}, and the Rails guide only mentions `includes` for eager loading data.
+
+  I think not enough people were both harmed by `includes` and aware of the `preload` option for it to spread.
+
+  ## Recap
+
+  Conditional eager loading:
+  * `includes` and `eager_load` can accidentally eager load only part of an association, a good source of bugs.
+  * Doing conditional eager loading voluntarily can be maintenance burden
+  * If you do want conditional eager loading, using `eager_load` makes it a bit more obvious.
+
+  Conditions based on associations:
+  * Using `includes` and `eager_load` for conditions based on associations does conditional eager loading at
+    the same time, you will get bitten.
+  * Using specialized gems to do conditions based on association is safer, clearer and easier.
+
+  We're left with `preload`, which only does full eager loading. You should use it!
+
+  If you want to run the examples from this post, here is a [self-contained ruby script](/ruby_sources/2020-12-11-you-should-avoid-includes-in-rails.rb).
+

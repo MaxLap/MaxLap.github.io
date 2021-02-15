@@ -9,7 +9,7 @@
 
 <title>
 
-You should avoid `includes` in Rails [PREPRINT]
+You should avoid `includes` in Rails
 | maxlap.dev
 </title>
 <script src="https://unpkg.com/@popperjs/core@2" defer="defer"></script>
@@ -33,10 +33,7 @@ You should avoid `includes` in Rails [PREPRINT]
 <div>
 <main class='blog-post-content' role='main'>
 <div class='blog-post-header'>
-<div class='blog-post-title'>You should avoid `includes` in Rails [PREPRINT]<span class='blog-post-date blog-post-title__date'>2020-12-11</span></div>
-</div>
-<div class='warning-bubble'>
-This post isn't meant to be shared yet, it's only here to make it easier to gather feedback. Thank you
+<div class='blog-post-title'>You should avoid `includes` in Rails<span class='blog-post-date blog-post-title__date'>2021-02-15</span></div>
 </div>
 <div class="markdown-body"><p><code>includes</code> is the recommended way to load associations of your records eagerly. In fact, the
 <a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations">Rails guide for eager loading</a>
@@ -104,18 +101,19 @@ and takes the same arguments, but it ignores the conditions in the query. With i
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">posts</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">distinct</span>&#x000A;            <span class="p">.</span><span class="nf">where</span><span class="p">(</span><span class="ss">comments: </span><span class="p">{</span><span class="ss">spam: </span><span class="kp">true</span><span class="p">})</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">to_a</span><span class="p">.</span><span class="nf">size</span> <span class="c1">#=&gt; 2</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">count</span> <span class="c1">#=&gt; 2</span>&#x000A;<span class="n">posts</span><span class="p">.</span><span class="nf">preload</span><span class="p">(</span><span class="ss">:comments</span><span class="p">).</span><span class="nf">first</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">size</span> <span class="c1">#=&gt; 2</span></code></pre></div></div>
 <div class="markdown-body"><ul>
-<li>If you need a condition (a <code>where</code>) which uses an association, don&#39;t use <code>includes</code> or <code>joins</code>.<br>
-Instead, I recommend my gem, <a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a>.
+<li><p>If you need a condition (a <code>where</code>) which uses an association, don&#39;t use <code>includes</code> or <code>joins</code>.<br>
+Instead, I recommend my gem: <a href="https://github.com/MaxLap/activerecord_where_assoc">activerecord_where_assoc</a>.
 Here&#39;s an <a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md">introduction to it</a>.<br>
-It&#39;s made for this purpose, and will support many more use cases, such as:
+It&#39;s made for this purpose, and will support many more use cases, such as:</p>
 
 <ul>
 <li>Recursive associations (parent/child)</li>
 <li>Polymorphic belongs_to</li>
 <li>Negative conditions (ex: posts without comments marked as spam)</li>
-<li>Multiple conditions on different records of the same association
-Alternatively, there&#39;s another gem for this: <a href="https://github.com/EugZol/where_exists">where_exists</a></li>
-</ul></li>
+<li>Multiple conditions on different records of the same association</li>
+</ul>
+
+<p>Alternatively, there&#39;s another gem for this: <a href="https://github.com/EugZol/where_exists">where_exists</a></p></li>
 </ul>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># Same as before, posts that have at least one comment marked as spam</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">where_assoc_exists</span><span class="p">(</span><span class="ss">:comments</span><span class="p">,</span> <span class="ss">spam: </span><span class="kp">true</span><span class="p">)</span></code></pre></div></div>
@@ -357,7 +355,14 @@ the same time, you will get bitten.</li>
     locale: 'en',
     show_email_subscription: false
   };
-  !function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".js"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)}}(remark_config.components||["embed"],document);
+  (function(c) {
+    for(var i = 0; i < c.length; i++){
+      var d = document, s = d.createElement('script');
+      s.src = remark_config.host + '/web/' +c[i] +'.js';
+      s.defer = true;
+      (d.head || d.body).appendChild(s);
+    }
+  })(remark_config.components || ['embed']);
 </script>
 <div id='remark42'></div>
 <noscript>

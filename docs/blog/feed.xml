@@ -5,7 +5,327 @@
   <id>http://blog.url.com/blog</id>
   <link href="http://blog.url.com/blog"/>
   <link href="http://blog.url.com/blog/feed.xml" rel="self"/>
+  <updated>2021-02-14T19:00:00-05:00</updated>
   <author>
     <name>Blog Author</name>
   </author>
+  <entry>
+    <title>You should avoid `includes` in Rails</title>
+    <link rel="alternate" href="http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>
+    <id>http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html</id>
+    <published>2021-02-14T19:00:00-05:00</published>
+    <updated>2021-02-15T19:37:02-05:00</updated>
+    <author>
+      <name>Article Author</name>
+    </author>
+    <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;code&gt;includes&lt;/code&gt; is the recommended way to load associations of your records eagerly. In fact, the
+&lt;a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations"&gt;Rails guide for eager loading&lt;/a&gt;
+only mentions &lt;code&gt;includes&lt;/code&gt;. However, there are other ways, and I want to argue that you should
+always use &lt;code&gt;preload&lt;/code&gt; instead.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;#39;s why you should avoid &lt;code&gt;includes&lt;/code&gt;:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;includes&lt;/code&gt; makes it easy to introduce an odd bug&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;preload&lt;/code&gt; takes the same arguments as &lt;code&gt;includes&lt;/code&gt;, but only does the safe things&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;What bug? Let&amp;#39;s show the introduction of an unexpected bug:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="code-book "&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;Say you have these records:&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;create!&lt;/span&gt;&amp;#x000A;&lt;span class="nb"&gt;p&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;create!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;content: &lt;/span&gt;&lt;span class="s1"&gt;'hello'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="nb"&gt;p&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;create!&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;content: &lt;/span&gt;&lt;span class="s1"&gt;'world'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;You want posts that have at least one comment marked as spam.&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# distinct because joins can make duplicates&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# I dislike using joins for this.&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;posts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;joins&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;distinct&lt;/span&gt;&amp;#x000A;            &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--has-after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;How many comments in this array?&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--has-after"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;to_a&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;size&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;button class="spoiler-toggler btn btn-xs btn-default"&gt;Answer&lt;/button&gt;&lt;/p&gt;
+
+&lt;div class="spoiler-target"&gt;&lt;p&gt;2, nothing special there.&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--after"&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--has-after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;You will need to display the comments of the posts, so you &lt;code&gt;includes&lt;/code&gt; them.&lt;/p&gt;
+
+&lt;p&gt;How many comments are in the array?&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--has-after"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;includes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;to_a&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;button class="spoiler-toggler btn btn-xs btn-default"&gt;Answer&lt;/button&gt;&lt;/p&gt;
+
+&lt;div class="spoiler-target"&gt;&lt;p&gt;Only 1, the one with `spam = true`&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--after"&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--has-after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;What&amp;#39;s the &lt;code&gt;count&lt;/code&gt;?&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--has-after"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;includes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;button class="spoiler-toggler btn btn-xs btn-default"&gt;Answer&lt;/button&gt;&lt;/p&gt;
+
+&lt;div class="spoiler-target"&gt;Back to 2! &lt;span class="with-tooltip" data-tippy-content="`count` does a new query, ignoring what is already loaded."&gt;&amp;nbsp;?&amp;nbsp;&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--after"&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--has-after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;What about &lt;code&gt;size&lt;/code&gt;?&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--has-after"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;includes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;size&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left code-book__left--after"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;button class="spoiler-toggler btn btn-xs btn-default"&gt;Answer&lt;/button&gt;&lt;/p&gt;
+
+&lt;div class="spoiler-target"&gt;Back to 1! &lt;span class="with-tooltip" data-tippy-content="`size` just returns the size of what is already loaded."&gt;&amp;nbsp;?&amp;nbsp;&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right code-book__right--after"&gt;&lt;/div&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;To be clear, the &lt;code&gt;joins&lt;/code&gt; isn&amp;#39;t needed for this to happen.&lt;/p&gt;
+
+&lt;p&gt;It was just to show a progression.&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;includes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&amp;#x000A;    &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;size&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# =&amp;gt; 1&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Personally, I find that unexpected.&lt;/p&gt;
+
+&lt;p&gt;Imagine if the &lt;code&gt;post&lt;/code&gt; is passed to a view or a helper, which uses the &lt;code&gt;comments&lt;/code&gt;. It
+would only print the comments that matched the condition. Now if you try to debug from that helper,
+you would see that &lt;code&gt;post.comments&lt;/code&gt; only has 1 comment.&lt;/p&gt;
+
+&lt;p&gt;Hopefully, you know that this is how &lt;code&gt;includes&lt;/code&gt; (and &lt;code&gt;eager_load&lt;/code&gt;, see below) behaves, so you may look
+up where the &lt;code&gt;post&lt;/code&gt; comes from and figure it out. Good luck otherwise.&lt;/p&gt;
+
+&lt;p&gt;This is considered &lt;a href="https://guides.rubyonrails.org/active_record_querying.html#specifying-conditions-on-eager-loaded-associations"&gt;a feature&lt;/a&gt;.
+The consequences of doing conditions on eager loaded association are not in the guide, but they
+are in the &lt;a href="https://guides.rubyonrails.org/active_record_querying.html#specifying-conditions-on-eager-loaded-associations"&gt;middle of this section of the documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I sometimes see this called &amp;quot;conditional eager loading&amp;quot;, and the bug is doing it accidentally.&lt;/p&gt;
+
+&lt;p&gt;I consider the whole feature a maintenance burden. At least the guide doesn&amp;#39;t recommend using it.&lt;/p&gt;
+
+&lt;h2 id="tl-dr-my-recommendations"&gt;TL;DR: my recommendations&lt;/h2&gt;
+
+&lt;p&gt;Things will get more technical in the next sections, so my condensed and straightforward recommendations are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;For new code, always use &lt;code&gt;preload&lt;/code&gt; instead of &lt;code&gt;includes&lt;/code&gt;. It does the same eager loading as &lt;code&gt;includes&lt;/code&gt;,
+and takes the same arguments, but it ignores the conditions in the query. With it, things work as expected:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;posts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;joins&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;distinct&lt;/span&gt;&amp;#x000A;            &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;preload&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;to_a&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;size&lt;/span&gt; &lt;span class="c1"&gt;#=&amp;gt; 2&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;preload&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt; &lt;span class="c1"&gt;#=&amp;gt; 2&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;preload&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;size&lt;/span&gt; &lt;span class="c1"&gt;#=&amp;gt; 2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;If you need a condition (a &lt;code&gt;where&lt;/code&gt;) which uses an association, don&amp;#39;t use &lt;code&gt;includes&lt;/code&gt; or &lt;code&gt;joins&lt;/code&gt;.&lt;br&gt;
+Instead, I recommend my gem: &lt;a href="https://github.com/MaxLap/activerecord_where_assoc"&gt;activerecord_where_assoc&lt;/a&gt;.
+Here&amp;#39;s an &lt;a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md"&gt;introduction to it&lt;/a&gt;.&lt;br&gt;
+It&amp;#39;s made for this purpose, and will support many more use cases, such as:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Recursive associations (parent/child)&lt;/li&gt;
+&lt;li&gt;Polymorphic belongs_to&lt;/li&gt;
+&lt;li&gt;Negative conditions (ex: posts without comments marked as spam)&lt;/li&gt;
+&lt;li&gt;Multiple conditions on different records of the same association&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Alternatively, there&amp;#39;s another gem for this: &lt;a href="https://github.com/EugZol/where_exists"&gt;where_exists&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Same as before, posts that have at least one comment marked as spam&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where_assoc_exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;If &lt;code&gt;includes&lt;/code&gt; seem to work somewhere that &lt;code&gt;preload&lt;/code&gt; doesn&amp;#39;t, you&amp;#39;re probably doing a condition
+on an association. See the previous point for this.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;For existing code, you can&amp;#39;t mindlessly change all &lt;code&gt;includes&lt;/code&gt; to &lt;code&gt;preload&lt;/code&gt;, because some of it may rely on
+&lt;code&gt;includes&lt;/code&gt; adding a &lt;code&gt;JOIN&lt;/code&gt; to the query, which happens when the query refers to the table of the
+included associations. So while it would be better to change everything to &lt;code&gt;preload&lt;/code&gt;, every such change must
+be tested.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So don&amp;#39;t risk &lt;code&gt;includes&lt;/code&gt; doing the wrong thing. &lt;code&gt;preload&lt;/code&gt; means simple eager loading without the booby trap;
+you should use it.&lt;/p&gt;
+
+&lt;h2 id="down-the-rabbit-hole"&gt;Down the rabbit hole&lt;/h2&gt;
+
+&lt;p&gt;If you want to understand why I make those recommendations, we&amp;#39;ll have to get technical...&lt;/p&gt;
+
+&lt;p&gt;Eager loading means loading associations of multiple records before they are needed. This is done to reduce
+the number of queries executed, making execution faster.&lt;/p&gt;
+
+&lt;p&gt;There are actually 3 methods for eager loading in Rails:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;preload&lt;/code&gt;: Executes one extra query per association being eager loaded. Same as &lt;code&gt;includes&lt;/code&gt; usually does.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;eager_load&lt;/code&gt;: Adds &lt;code&gt;JOIN&lt;/code&gt; to the SQL query and load the association without doing an extra query. This also
+enables adding conditions on the table, which is the cause of the conditional eager loading bug from the
+introduction.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;includes&lt;/code&gt;: Picks between &lt;code&gt;preload&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt; based on if there is a reference, in the query, to the
+table of an association that was passed to &lt;code&gt;includes&lt;/code&gt;. This can be from &lt;code&gt;where&lt;/code&gt; or from &lt;code&gt;joins&lt;/code&gt;.&lt;br&gt;
+You may also specify an association with &lt;code&gt;references&lt;/code&gt; to force the &lt;code&gt;eager_load&lt;/code&gt; path, which is needed when
+your conditions are specified with a &lt;code&gt;String&lt;/code&gt; instead of a &lt;code&gt;Hash&lt;/code&gt; (which, again, causes conditional eager loading).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So out of the 3 methods, only one of them cannot trigger conditional eager loading: &lt;code&gt;preload&lt;/code&gt;. It only does
+full eager loading, always the same way.&lt;/p&gt;
+
+&lt;h2 id="when-is-eager_load-needed"&gt;When is &lt;code&gt;eager_load&lt;/code&gt; needed?&lt;/h2&gt;
+
+&lt;p&gt;Rarely...&lt;/p&gt;
+
+&lt;p&gt;Maybe some use it to reduce the number of queries when they do eager loading. I don&amp;#39;t think it really saves much,
+and there is a risk of slowing things down by making queries that are &lt;span class="with-tooltip" data-tippy-content="If you use `eager_load` with multiple `has_many`, the rows get multiplied, and you end up with a massive amount of data that your DB is returning to your web server."&gt;heavier&lt;/span&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Some may use it to actually do conditional eager loading. I still heavily disagree with that use case.
+&lt;button class="spoiler-toggler btn btn-xs btn-aside btn-inline spoiler-toggler--always-displayed"&gt;Anecdote&lt;/button&gt;&lt;/p&gt;
+
+&lt;div class="spoiler-target"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;I&amp;#39;ve had to edit code that used this &amp;quot;feature&amp;quot; once...&lt;/p&gt;
+
+&lt;p&gt;You look at a method and it looks wrong; it can&amp;#39;t be doing what it should be doing. It&amp;#39;s using every
+&lt;code&gt;project.users&lt;/code&gt;, not just those we want! When I did an interactive console there (&lt;code&gt;binding.pry&lt;/code&gt;
+or &lt;code&gt;byebug&lt;/code&gt;), I saw that users were missing from &lt;code&gt;project.users&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Since I knew of this &amp;quot;feature&amp;quot;, I started looking and, as expected, a condition on an &lt;code&gt;includes&lt;/code&gt; was found...
+3 method calls away from where the association was used, not a single comment to explain what is going on anywhere.&lt;/p&gt;
+
+&lt;p&gt;You should avoid code that looks wrong. Code that uses conditional eager loading looks wrong. In our case
+the overall module was already something that we wanted to rewrite from scratch, so this was just another reason
+to do so.&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I mostly see &lt;code&gt;eager_load&lt;/code&gt; used to do a condition (a &lt;code&gt;where&lt;/code&gt;) which uses an association. Let&amp;#39;s dig into these.&lt;/p&gt;
+
+&lt;h2 id="where-on-an-association-with-eager_load"&gt;&lt;code&gt;where&lt;/code&gt; on an association with &lt;code&gt;eager_load&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;It&amp;#39;s a somewhat frequent need and there are many questions about this on stack overflow.&lt;/p&gt;
+
+&lt;p&gt;The bug from the introduction, accidentally doing conditional eager loading, started with such a need: &amp;quot;I want the
+posts that have comments marked as spam&amp;quot;.&lt;/p&gt;
+
+&lt;p&gt;You may see a recommendation to use &lt;code&gt;includes&lt;/code&gt;, and then have a condition on its table. This actually
+uses the &lt;code&gt;eager_load&lt;/code&gt; path.&lt;/p&gt;
+
+&lt;p&gt;It looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Please stop doing this :(&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;includes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# which is equivalent to this (and don't do this either)&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;eager_load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Again, this does conditional eager loading, which isn&amp;#39;t what we asked for.&lt;/p&gt;
+
+&lt;p&gt;To be clear, the &lt;code&gt;where&lt;/code&gt; on an association with &lt;code&gt;includes&lt;/code&gt; / &lt;code&gt;eager_load&lt;/code&gt; &lt;strong&gt;can&lt;/strong&gt; be safe. But only &lt;strong&gt;if&lt;/strong&gt;
+the association is a &lt;code&gt;belongs_to&lt;/code&gt;. When it is, there are only 2 possibilities: either load the
+record and the associated &lt;code&gt;belongs_to&lt;/code&gt; records, or don&amp;#39;t load either. No conditional eager loading is possible.&lt;/p&gt;
+
+&lt;p&gt;But even when it&amp;#39;s safe, there are risks:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Using &lt;code&gt;includes&lt;/code&gt; / &lt;code&gt;eager_load&lt;/code&gt; increases the chance for a mistake, where you or someone else &lt;em&gt;just&lt;/em&gt;
+add another association to the existing eager loading call.&lt;/li&gt;
+&lt;li&gt;Every time a reader sees &lt;code&gt;includes&lt;/code&gt; / &lt;code&gt;eager_load&lt;/code&gt;, he may wonder if it is safe, or if there could be
+accidental conditional eager loading.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;And as a tool, this isn&amp;#39;t so great:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;If you don&amp;#39;t need the associated records, then eager loading them is wasteful.&lt;/li&gt;
+&lt;li&gt;Doesn&amp;#39;t handle recursive associations (ex: parent/children)&lt;/li&gt;
+&lt;li&gt;&lt;span class="with-tooltip" data-tippy-content="&amp;lt;div class=&amp;quot;markdown-body&amp;quot;&amp;gt;&amp;lt;p&amp;gt;A query for posts with &amp;amp;quot;a comment marked as spam&amp;amp;quot; and &amp;amp;quot;a comment by an admin&amp;amp;quot; will actually only return posts with &amp;amp;quot;a comment that is both marked as spam and made by an admin&amp;amp;quot; instead it being possible to be two different comments.&amp;lt;/p&amp;gt; &amp;lt;p&amp;gt;So doing this kind of query in &amp;lt;code&amp;gt;scope&amp;lt;/code&amp;gt; means they can interact incorrectly.&amp;lt;/p&amp;gt; &amp;lt;/div&amp;gt; "&gt;Doesn&amp;#39;t compose well&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;Looks potentially wrong when you know of the conditional eager loading &amp;quot;feature&amp;quot;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id="where-on-an-association-with-joins"&gt;&lt;code&gt;where&lt;/code&gt; on an association with &lt;code&gt;joins&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;The next option is to use &lt;code&gt;joins&lt;/code&gt;. It also has downsides.&lt;/p&gt;
+
+&lt;p&gt;It looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Please stop doing this :(&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;joins&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# and stop doing this&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;joins&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;distinct&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Using &lt;code&gt;joins&lt;/code&gt; like this is better than &lt;code&gt;includes&lt;/code&gt; / &lt;code&gt;eager_load&lt;/code&gt; since at least, there is no risk of conditionally
+loading an association. But there are still problems with it:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Doesn&amp;#39;t handle recursive associations (ex: parent/children)&lt;/li&gt;
+&lt;li&gt;Requires a &lt;code&gt;distinct&lt;/code&gt; to avoid duplicated records when used with &lt;code&gt;has_many&lt;/code&gt; associations.&lt;br&gt;
+This can be unexpected if you&amp;#39;re doing a more complex query than j ust fetching records.&lt;/li&gt;
+&lt;li&gt;&lt;span class="with-tooltip" data-tippy-content="&amp;lt;div class=&amp;quot;markdown-body&amp;quot;&amp;gt;&amp;lt;p&amp;gt;A query for posts with &amp;amp;quot;a comment marked as spam&amp;amp;quot; and &amp;amp;quot;a comment by an admin&amp;amp;quot; will actually only return posts with &amp;amp;quot;a comment that is both marked as spam and made by an admin&amp;amp;quot; instead it being possible to be two different comments.&amp;lt;/p&amp;gt; &amp;lt;p&amp;gt;So doing this kind of query in &amp;lt;code&amp;gt;scope&amp;lt;/code&amp;gt; means they can interact incorrectly and change more things than just adding a condition (it adds a &amp;lt;code&amp;gt;distinct&amp;lt;/code&amp;gt;).&amp;lt;/p&amp;gt; &amp;lt;/div&amp;gt; "&gt;Doesn&amp;#39;t compose well&lt;/span&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id="where-on-an-association-with-arel"&gt;&lt;code&gt;where&lt;/code&gt; on an association with Arel&lt;/h2&gt;
+
+&lt;p&gt;Truth is, this need for a &lt;code&gt;where&lt;/code&gt; on an association isn&amp;#39;t something that ActiveRecord supports well. So
+leaving the ActiveRecord only solutions, you can do an actual &lt;code&gt;EXISTS&lt;/code&gt; query with Arel. &lt;code&gt;EXISTS&lt;/code&gt; is
+the SQL tool that is meant to do this type of condition, not &lt;code&gt;JOIN&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;It looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# An OK way, but error prone&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;Comment&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"posts.id = comments.post_id"&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;arel&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;exists&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;This composes much better with other tools because all it does is add a single &lt;code&gt;WHERE&lt;/code&gt; clause to the query.
+It works as you would expect with &lt;code&gt;or&lt;/code&gt;, &lt;code&gt;not&lt;/code&gt; and with other conditions on the same association.&lt;/p&gt;
+
+&lt;p&gt;But there still are new downsides:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You must manually write condition to link the &lt;code&gt;posts&lt;/code&gt; to the &lt;code&gt;comments&lt;/code&gt;. It&amp;#39;s easy to forget it, and I&amp;#39;ve seen
+StackOverflow answers that forgot to do so.&lt;br&gt;
+You won&amp;#39;t get any error for forgetting, your query will just be wrong, which may not even be obvious if all
+you have is a little test data.
+Bonus: This can get extra tedious for polymorphic associations, where you also need to this check: &lt;code&gt;foos.owner_type = #{Bar.base_class.name}&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;If a condition was given when defining the association, you must also manually rewrite it.&lt;/li&gt;
+&lt;li&gt;Only the models are named in the code, not the association of interest. This makes the intent less clear, especially
+when non-trivial associations exist.&lt;/li&gt;
+&lt;li&gt;Extra work to handle recursive associations (ex: parent/children)&lt;/li&gt;
+&lt;li&gt;Quite a bit longer to write, and this is a short example.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Other than writing the whole condition manually, which would have all the problems of the Arel way, but be
+more verbose and more error-prone, I think we&amp;#39;re out of built-in ways.&lt;/p&gt;
+
+&lt;h2 id="where-on-an-association-with-activerecord_where_assoc"&gt;&lt;code&gt;where&lt;/code&gt; on an association with activerecord_where_assoc&lt;/h2&gt;
+
+&lt;p&gt;What I recommend for conditions based on associations is a gem I made just for this purpose:
+&lt;a href="https://github.com/MaxLap/activerecord_where_assoc"&gt;activerecord_where_assoc&lt;/a&gt;. It looks like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Please consider doing this:&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where_assoc_exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# Or using a scope such as is_spam:&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where_assoc_exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;is_spam&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;The query it generates is the same as the Arel example, with the same benefits and more.
+See for yourself:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;It just adds a single &lt;code&gt;where&lt;/code&gt; condition, so it composes well and works with &lt;code&gt;or&lt;/code&gt; and with
+other conditions on the same association.&lt;/li&gt;
+&lt;li&gt;Handles recursive associations automatically (ex: parent/children)&lt;/li&gt;
+&lt;li&gt;Handles polymorphic belongs_to (&lt;code&gt;includes&lt;/code&gt; and &lt;code&gt;joins&lt;/code&gt; would simply refuse)&lt;/li&gt;
+&lt;li&gt;Easy to do a &lt;code&gt;NOT&lt;/code&gt; of the condition (I.E.: where no comment is marked as spam)
+with &lt;code&gt;where_assoc_not_exists&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Composes with other such queries, even on the same association, even with negations&lt;/li&gt;
+&lt;li&gt;Unlike Arel, this uses the association&amp;#39;s name, so the intent is clearer.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So if you need to do this kind of condition, here are some references for my gem:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md"&gt;Introduction to activerecord_where_assoc&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/ALTERNATIVES_PROBLEMS.md"&gt;The problems of the other ways of doing such conditions&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/EXAMPLES.md"&gt;Multiple example usages&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;There&amp;#39;s simply no way I could find to use builtin tools to have this query be clear, succinct and not booby trapped.
+Either live with the booby traps, write your own methods to do this cleanly, or use one of the gems written for this purpose:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Mine: &lt;a href="https://github.com/MaxLap/activerecord_where_assoc"&gt;activerecord_where_assoc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/EugZol/where_exists"&gt;where_exists&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Seriously, try any of them, it&amp;#39;s liberating how simple this once complex task becomes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;h2 id="but-includes-is-everywhere"&gt;But &lt;code&gt;includes&lt;/code&gt; is everywhere&lt;/h2&gt;
+
+&lt;p&gt;It is! Let&amp;#39;s explore the reasons I can think of.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;includes&lt;/code&gt; is the &amp;quot;smart&amp;quot; function out of the 3, it will pick the &amp;quot;right&amp;quot; strategy when needed.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Marketing-wise, this sounds like a good thing... Until you learn that the alternate path, &lt;code&gt;eager_load&lt;/code&gt;, is
+not really what you want and it can cause bugs due to conditional eager loading.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;For a long time, &lt;code&gt;includes&lt;/code&gt; (and &lt;code&gt;eager_load&lt;/code&gt;) were the only way to do a &lt;code&gt;LEFT JOIN&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The method &lt;code&gt;left_joins&lt;/code&gt; was added in Rails 5.0. Before that, if you wanted one, you had to either do
+&lt;code&gt;includes&lt;/code&gt; / &lt;code&gt;eager_load&lt;/code&gt;, or write the whole &amp;quot;LEFT JOIN&amp;quot; yourself like this: &lt;code&gt;joins(&amp;quot;LEFT JOIN&amp;#x000A;comments ON comments.post_id = posts.id&amp;quot;)&lt;/code&gt;. The &lt;code&gt;includes&lt;/code&gt; shortcut was often suggested.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;includes&lt;/code&gt; has always been recommended, so most are familiar with it, and most recommend it.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Everything is against &lt;code&gt;preload&lt;/code&gt;, even it&amp;#39;s &lt;a href="https://apidock.com/rails/ActiveRecord/QueryMethods/preload"&gt;documentation&lt;/a&gt; makes &lt;code&gt;preload&lt;/code&gt;
+sound like an &lt;span class="with-tooltip" data-tippy-content="As of writing this post it only says: &amp;quot;Allows preloading of args, in the same way that #includes does&amp;quot;, with one trivial example."&gt;alias for &lt;code&gt;includes&lt;/code&gt;&lt;/span&gt;, and the Rails guide only mentions &lt;code&gt;includes&lt;/code&gt; for eager loading data.&lt;/p&gt;
+
+&lt;p&gt;I think not enough people were both harmed by &lt;code&gt;includes&lt;/code&gt; and aware of the &lt;code&gt;preload&lt;/code&gt; option for it to spread.&lt;/p&gt;
+
+&lt;h2 id="recap"&gt;Recap&lt;/h2&gt;
+
+&lt;p&gt;Conditional eager loading:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;includes&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt; can accidentally eager load only part of an association, a good source of bugs.&lt;/li&gt;
+&lt;li&gt;Doing conditional eager loading voluntarily can be maintenance burden&lt;/li&gt;
+&lt;li&gt;If you do want conditional eager loading, using &lt;code&gt;eager_load&lt;/code&gt; makes it a bit more obvious.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Conditions based on associations:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Using &lt;code&gt;includes&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt; for conditions based on associations does conditional eager loading at
+the same time, you will get bitten.&lt;/li&gt;
+&lt;li&gt;Using specialized gems to do conditions based on association is safer, clearer and easier.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We&amp;#39;re left with &lt;code&gt;preload&lt;/code&gt;, which only does full eager loading. You should use it!&lt;/p&gt;
+
+&lt;p&gt;If you want to run the examples from this post, here is a &lt;a href="/ruby_sources/2020-12-11-you-should-avoid-includes-in-rails.rb"&gt;self-contained ruby script&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+  </entry>
 </feed>
