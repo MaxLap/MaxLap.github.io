@@ -115,6 +115,10 @@
 .highlight .se {
   color: #ae81ff;
 }
+.highlight .sa {
+  color: #66d9ef;
+  font-weight: bold;
+}
 .highlight .sb {
   color: #e6db74;
 }
@@ -145,7 +149,7 @@
 .highlight .ss {
   color: #e6db74;
 }
-.highlight .s, .highlight .sa, .highlight .dl {
+.highlight .s, .highlight .dl {
   color: #e6db74;
 }
 .highlight .na {
