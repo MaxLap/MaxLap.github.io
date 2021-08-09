@@ -1,6 +1,7 @@
 # Activate and configure extensions
 # https://middlemanapp.com/advanced/configuration/#configuring-extensions
 require_relative 'customizing/__init__'
+require_relative 'my_tools/extract_special_section'
 
 activate :autoprefixer do |prefix|
   prefix.browsers = "last 2 versions"
@@ -169,6 +170,7 @@ class MyCustomizeResourcesPostBlog < Middleman::Extension
       # Add [REPO] to title of articles from source/blog/repo/
       resources.each do |resource|
         if resource.normalized_path.start_with?('blog/repo/')
+          next unless resource.metadata[:page][:title]
           resource.metadata[:page][:title] += ' [REPO]'
           resource.destination_path = resource.destination_path.gsub(/\.html$/, '-repo.html')
         end
@@ -181,15 +183,43 @@ end
 ::Middleman::Extensions.register(:my_customize_resources_post_blog, MyCustomizeResourcesPostBlog)
 activate :my_customize_resources_post_blog
 
-after_build do
-  # Having a .rb file in source just breaks middleman. It want to use tilt to render it with opal
-  # But I don't want that! I can't even monkey-patch middleman/tilt, because the exception happens
-  # before the config is executed!
-  # Even installing the gem, I still had the exception.
-  # So now, this is dumb work-around, every time I build, I must see that middleman removed
-  # the file. Knowing full well that I'm just copying it over. Awesome!
-  FileUtils.cp_r(File.join(__dir__, 'ruby_sources'), File.join(__dir__, 'docs'))
+
+class MyStripSpecialSections < Middleman::Extension
+  def initialize(app, options_hash={}, &block)
+    super
+    app.before_render do |body, path, locs, template_class|
+      source, code, line_no = MyTools.extract_special_section(body, '__RB__')
+      source
+    end
+    @tmpfile_cache = [] # Just to avoid the ifle being cleaned up too soon
+  end
+
+  def manipulate_resource_list(resources)
+    new_resources = resources.map do |resource|
+      next unless resource.source_file
+
+      source, code, line_no = MyTools.extract_special_section(File.read(resource.source_file), '__RB__')
+      next if code.nil?
+
+      code_lines = code.lines
+      indent_size = code_lines.select(&:present?).map { |l| l[/^\s*/].size }.min
+
+      code = code_lines.map { |l| l.sub(' ' * indent_size, '') }.join
+      code = code.lstrip
+
+      # No way in middleman to just provide the source code itself :(
+      temp_file = Tempfile.new(File.basename(resource.source_file))
+      temp_file.write(code)
+      temp_file.close
+      @tmpfile_cache << temp_file
+
+      Middleman::Sitemap::Resource.new(@app.sitemap, resource.destination_path.sub(/\.html$/, '.rb'), temp_file.path)
+    end
+    resources + new_resources.compact
+  end
 end
+::Middleman::Extensions.register(:my_strip_special_sections, MyStripSpecialSections)
+activate :my_strip_special_sections
 
 helpers do
   def spoiler_toggler(text, html_class: "btn-default")

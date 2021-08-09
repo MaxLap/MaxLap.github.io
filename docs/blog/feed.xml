@@ -14,7 +14,7 @@
     <link rel="alternate" href="http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>
     <id>http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html</id>
     <published>2021-02-14T19:00:00-05:00</published>
-    <updated>2021-02-15T19:37:02-05:00</updated>
+    <updated>2021-08-08T23:03:30-04:00</updated>
     <author>
       <name>Article Author</name>
     </author>
@@ -324,7 +324,7 @@ the same time, you will get bitten.&lt;/li&gt;
 
 &lt;p&gt;We&amp;#39;re left with &lt;code&gt;preload&lt;/code&gt;, which only does full eager loading. You should use it!&lt;/p&gt;
 
-&lt;p&gt;If you want to run the examples from this post, here is a &lt;a href="/ruby_sources/2020-12-11-you-should-avoid-includes-in-rails.rb"&gt;self-contained ruby script&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you want to run the examples from this post, here is a &lt;a href="/blog/2021/02/15/you-should-avoid-includes-in-rails.rb"&gt;self-contained ruby script&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;
 </content>
   </entry>

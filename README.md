@@ -30,3 +30,12 @@ Basic workflow:
   3) When ready, overwrite the post from `source/blog/released` with the one from `source/blog/repo`, and complete the "when a post is to be published".
 
 The docs/CNAME is necessary to allow hosting on Github Pages with a custom domain, and putting it in source/CNAME avoids Middleman deleting it on each build.
+
+## Embed source in a post
+Using __RB__, before and after a :ruby block will make it disappear from the rendered file, but available
+as the same file with .rb as extension.
+
+This could be improved, but right now:
+
+* URL to the page: `#{current_page.url.sub(/\.html$/, '.rb')}`
+* Run the code from the page: `bin/console_on_post path_to_post` (You can use reload! from it)
