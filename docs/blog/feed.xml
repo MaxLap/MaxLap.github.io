@@ -14,20 +14,21 @@
     <link rel="alternate" href="http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>
     <id>http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html</id>
     <published>2021-02-14T19:00:00-05:00</published>
-    <updated>2021-08-08T23:03:30-04:00</updated>
+    <updated>2021-08-20T14:52:53-04:00</updated>
     <author>
       <name>Article Author</name>
     </author>
     <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;code&gt;includes&lt;/code&gt; is the recommended way to load associations of your records eagerly. In fact, the
 &lt;a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations"&gt;Rails guide for eager loading&lt;/a&gt;
 only mentions &lt;code&gt;includes&lt;/code&gt;. However, there are other ways, and I want to argue that you should
-always use &lt;code&gt;preload&lt;/code&gt; instead.&lt;/p&gt;
+avoid &lt;code&gt;includes&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;Here&amp;#39;s why you should avoid &lt;code&gt;includes&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Here&amp;#39;s why:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;includes&lt;/code&gt; makes it easy to introduce an odd bug&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;preload&lt;/code&gt; takes the same arguments as &lt;code&gt;includes&lt;/code&gt;, but only does the safe things&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;preload&lt;/code&gt; takes the same arguments as &lt;code&gt;includes&lt;/code&gt;, but can&amp;#39;t introduce the bug&lt;/li&gt;
+&lt;li&gt;When needed, &lt;code&gt;eager_load&lt;/code&gt; also takes the same arguments, can introduce the bug, but makes it explicit&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;What bug? Let&amp;#39;s show the introduction of an unexpected bug:&lt;/p&gt;
@@ -78,13 +79,15 @@ are in the &lt;a href="https://guides.rubyonrails.org/active_record_querying.htm
 &lt;p&gt;Things will get more technical in the next sections, so my condensed and straightforward recommendations are:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;For new code, always use &lt;code&gt;preload&lt;/code&gt; instead of &lt;code&gt;includes&lt;/code&gt;. It does the same eager loading as &lt;code&gt;includes&lt;/code&gt;,
-and takes the same arguments, but it ignores the conditions in the query. With it, things work as expected:&lt;/li&gt;
+&lt;li&gt;For new code, if you are only doing eager loading, use &lt;code&gt;preload&lt;/code&gt; instead of &lt;code&gt;includes&lt;/code&gt;. It does the same eager
+loading as &lt;code&gt;includes&lt;/code&gt;, and takes the same arguments, but it ignores the conditions in the query. With it, things
+work as expected:&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 &lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;posts&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;joins&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;distinct&lt;/span&gt;&amp;#x000A;            &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;preload&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;to_a&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;size&lt;/span&gt; &lt;span class="c1"&gt;#=&amp;gt; 2&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;preload&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt; &lt;span class="c1"&gt;#=&amp;gt; 2&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;posts&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;preload&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;first&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;size&lt;/span&gt; &lt;span class="c1"&gt;#=&amp;gt; 2&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class="markdown-body"&gt;&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;If you need a condition (a &lt;code&gt;where&lt;/code&gt;) which uses an association, don&amp;#39;t use &lt;code&gt;includes&lt;/code&gt; or &lt;code&gt;joins&lt;/code&gt;.&lt;br&gt;
+&lt;li&gt;If you need to order by an association, then &lt;code&gt;eager_load&lt;/code&gt; is basically the only simple way to do so.&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If you need a condition (a &lt;code&gt;where&lt;/code&gt;) which uses an association, avoid &lt;code&gt;includes&lt;/code&gt;, &lt;code&gt;joins&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt;.&lt;br&gt;
 Instead, I recommend my gem: &lt;a href="https://github.com/MaxLap/activerecord_where_assoc"&gt;activerecord_where_assoc&lt;/a&gt;.
 Here&amp;#39;s an &lt;a href="https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md"&gt;introduction to it&lt;/a&gt;.&lt;br&gt;
 It&amp;#39;s made for this purpose, and will support many more use cases, such as:&lt;/p&gt;
@@ -102,15 +105,18 @@ It&amp;#39;s made for this purpose, and will support many more use cases, such a
 &lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Same as before, posts that have at least one comment marked as spam&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where_assoc_exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class="markdown-body"&gt;&lt;ul&gt;
 &lt;li&gt;&lt;p&gt;If &lt;code&gt;includes&lt;/code&gt; seem to work somewhere that &lt;code&gt;preload&lt;/code&gt; doesn&amp;#39;t, you&amp;#39;re probably doing a condition
-on an association. See the previous point for this.&lt;/p&gt;&lt;/li&gt;
+on an association or ordering by an association. See the previous points for this.&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;For existing code, you can&amp;#39;t mindlessly change all &lt;code&gt;includes&lt;/code&gt; to &lt;code&gt;preload&lt;/code&gt;, because some of it may rely on
-&lt;code&gt;includes&lt;/code&gt; adding a &lt;code&gt;JOIN&lt;/code&gt; to the query, which happens when the query refers to the table of the
-included associations. So while it would be better to change everything to &lt;code&gt;preload&lt;/code&gt;, every such change must
+&lt;code&gt;includes&lt;/code&gt; adding a &lt;code&gt;JOIN&lt;/code&gt; to the query (the &lt;code&gt;eager_load&lt;/code&gt; way), which happens when the query refers to the table of the
+included associations. So while it would be better to change everything to &lt;code&gt;preload&lt;/code&gt; and sometimes &lt;code&gt;eager_load&lt;/code&gt;, every such change must
 be tested.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;If you see an &lt;code&gt;includes&lt;/code&gt; with a &lt;code&gt;references&lt;/code&gt;, then that&amp;#39;s just a call to &lt;code&gt;eager_load&lt;/code&gt;. At this point, just use
+&lt;code&gt;eager_load&lt;/code&gt; to make your code shorter.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;So don&amp;#39;t risk &lt;code&gt;includes&lt;/code&gt; doing the wrong thing. &lt;code&gt;preload&lt;/code&gt; means simple eager loading without the booby trap;
-you should use it.&lt;/p&gt;
+you should use it. Treat &lt;code&gt;eager_load&lt;/code&gt; as a warning sign that this could be doing conditional eager loading and
+be careful around it.&lt;/p&gt;
 
 &lt;h2 id="down-the-rabbit-hole"&gt;Down the rabbit hole&lt;/h2&gt;
 
@@ -137,9 +143,10 @@ full eager loading, always the same way.&lt;/p&gt;
 
 &lt;h2 id="when-is-eager_load-needed"&gt;When is &lt;code&gt;eager_load&lt;/code&gt; needed?&lt;/h2&gt;
 
-&lt;p&gt;Rarely...&lt;/p&gt;
-
-&lt;p&gt;Maybe some use it to reduce the number of queries when they do eager loading. I don&amp;#39;t think it really saves much,
+&lt;p&gt;The main reason to use &lt;code&gt;eager_load&lt;/code&gt;, that I have no alternative for, is ordering by an association&amp;#39;s field.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Ordering posts by created_at of last comment&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;eager_load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;order&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"comments.created_at DESC"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Maybe some use it to reduce the number of queries when they do eager loading. I don&amp;#39;t think it really saves much,
 and there is a risk of slowing things down by making queries that are &lt;span class="with-tooltip" data-tippy-content="If you use `eager_load` with multiple `has_many`, the rows get multiplied, and you end up with a massive amount of data that your DB is returning to your web server."&gt;heavier&lt;/span&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class="markdown-body"&gt;&lt;p&gt;Some may use it to actually do conditional eager loading. I still heavily disagree with that use case.
@@ -159,7 +166,7 @@ the overall module was already something that we wanted to rewrite from scratch,
 to do so.&lt;/p&gt;
 &lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;I mostly see &lt;code&gt;eager_load&lt;/code&gt; used to do a condition (a &lt;code&gt;where&lt;/code&gt;) which uses an association. Let&amp;#39;s dig into these.&lt;/p&gt;
+&lt;p&gt;Other than ordering, I mostly see &lt;code&gt;eager_load&lt;/code&gt; used to do a condition (a &lt;code&gt;where&lt;/code&gt;) which uses an association. Let&amp;#39;s dig into these.&lt;/p&gt;
 
 &lt;h2 id="where-on-an-association-with-eager_load"&gt;&lt;code&gt;where&lt;/code&gt; on an association with &lt;code&gt;eager_load&lt;/code&gt;&lt;/h2&gt;
 
@@ -173,7 +180,7 @@ uses the &lt;code&gt;eager_load&lt;/code&gt; path.&lt;/p&gt;
 
 &lt;p&gt;It looks like this:&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Please stop doing this :(&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;includes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# which is equivalent to this (and don't do this either)&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;eager_load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# Please stop doing this :(&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;includes&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# which is equivalent to this; don't do this either&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;eager_load&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;comments: &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="ss"&gt;spam: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;div class="markdown-body"&gt;&lt;p&gt;Again, this does conditional eager loading, which isn&amp;#39;t what we asked for.&lt;/p&gt;
 
 &lt;p&gt;To be clear, the &lt;code&gt;where&lt;/code&gt; on an association with &lt;code&gt;includes&lt;/code&gt; / &lt;code&gt;eager_load&lt;/code&gt; &lt;strong&gt;can&lt;/strong&gt; be safe. But only &lt;strong&gt;if&lt;/strong&gt;
@@ -290,7 +297,7 @@ Either live with the booby traps, write your own methods to do this cleanly, or 
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;includes&lt;/code&gt; is the &amp;quot;smart&amp;quot; function out of the 3, it will pick the &amp;quot;right&amp;quot; strategy when needed.&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Marketing-wise, this sounds like a good thing... Until you learn that the alternate path, &lt;code&gt;eager_load&lt;/code&gt;, is
-not really what you want and it can cause bugs due to conditional eager loading.&lt;/p&gt;
+not always what you want and it can cause bugs due to conditional eager loading.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;For a long time, &lt;code&gt;includes&lt;/code&gt; (and &lt;code&gt;eager_load&lt;/code&gt;) were the only way to do a &lt;code&gt;LEFT JOIN&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
 
@@ -302,7 +309,7 @@ not really what you want and it can cause bugs due to conditional eager loading.
 &lt;p&gt;Everything is against &lt;code&gt;preload&lt;/code&gt;, even it&amp;#39;s &lt;a href="https://apidock.com/rails/ActiveRecord/QueryMethods/preload"&gt;documentation&lt;/a&gt; makes &lt;code&gt;preload&lt;/code&gt;
 sound like an &lt;span class="with-tooltip" data-tippy-content="As of writing this post it only says: &amp;quot;Allows preloading of args, in the same way that #includes does&amp;quot;, with one trivial example."&gt;alias for &lt;code&gt;includes&lt;/code&gt;&lt;/span&gt;, and the Rails guide only mentions &lt;code&gt;includes&lt;/code&gt; for eager loading data.&lt;/p&gt;
 
-&lt;p&gt;I think not enough people were both harmed by &lt;code&gt;includes&lt;/code&gt; and aware of the &lt;code&gt;preload&lt;/code&gt; option for it to spread.&lt;/p&gt;
+&lt;p&gt;I think not enough people were both harmed by &lt;code&gt;includes&lt;/code&gt; and aware that you can just specify &lt;code&gt;preload&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt; for that knowledge to spread.&lt;/p&gt;
 
 &lt;h2 id="recap"&gt;Recap&lt;/h2&gt;
 
@@ -317,12 +324,24 @@ sound like an &lt;span class="with-tooltip" data-tippy-content="As of writing th
 &lt;p&gt;Conditions based on associations:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Using &lt;code&gt;includes&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt; for conditions based on associations does conditional eager loading at
-the same time, you will get bitten.&lt;/li&gt;
+&lt;li&gt;Using &lt;code&gt;includes&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt; for conditions based on associations can do conditional eager loading at
+the same time, you will get bitten by the bugs it can causes.&lt;/li&gt;
+&lt;li&gt;if you don&amp;#39;t need to load the association, eager loading it is wasteful&lt;/li&gt;
 &lt;li&gt;Using specialized gems to do conditions based on association is safer, clearer and easier.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;We&amp;#39;re left with &lt;code&gt;preload&lt;/code&gt;, which only does full eager loading. You should use it!&lt;/p&gt;
+&lt;p&gt;Order based on association:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;includes&lt;/code&gt; and &lt;code&gt;eager_load&lt;/code&gt; are the only simple way.&lt;/li&gt;
+&lt;li&gt;Using &lt;code&gt;eager_load&lt;/code&gt; is explicit about the use case, and you don&amp;#39;t need to also call &lt;code&gt;references&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Regular old eager loading:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Just use &lt;code&gt;preload&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;If you want to run the examples from this post, here is a &lt;a href="/blog/2021/02/15/you-should-avoid-includes-in-rails.rb"&gt;self-contained ruby script&lt;/a&gt;.&lt;/p&gt;
 &lt;/div&gt;

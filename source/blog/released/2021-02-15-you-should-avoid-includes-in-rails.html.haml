@@ -7,11 +7,12 @@ tags: [rails, activerecord]
   `includes` is the recommended way to load associations of your records eagerly. In fact, the
   [Rails guide for eager loading](https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations)
   only mentions `includes`. However, there are other ways, and I want to argue that you should
-  always use `preload` instead.
+  avoid `includes`.
 
-  Here's why you should avoid `includes`:
+  Here's why:
   * `includes` makes it easy to introduce an odd bug
-  * `preload` takes the same arguments as `includes`, but only does the safe things
+  * `preload` takes the same arguments as `includes`, but can't introduce the bug
+  * When needed, `eager_load` also takes the same arguments, can introduce the bug, but makes it explicit
 
   What bug? Let's show the introduction of an unexpected bug:
 
@@ -107,8 +108,9 @@ tags: [rails, activerecord]
 
   Things will get more technical in the next sections, so my condensed and straightforward recommendations are:
 
-  * For new code, always use `preload` instead of `includes`. It does the same eager loading as `includes`,
-    and takes the same arguments, but it ignores the conditions in the query. With it, things work as expected:
+  * For new code, if you are only doing eager loading, use `preload` instead of `includes`. It does the same eager
+    loading as `includes`, and takes the same arguments, but it ignores the conditions in the query. With it, things
+    work as expected:
 
 :code
   posts = Post.joins(:comments).distinct
@@ -118,7 +120,8 @@ tags: [rails, activerecord]
   posts.preload(:comments).first.comments.size #=> 2
 
 :content
-  * If you need a condition (a `where`) which uses an association, don't use `includes` or `joins`.^
+  * If you need to order by an association, then `eager_load` is basically the only simple way to do so.
+  * If you need a condition (a `where`) which uses an association, avoid `includes`, `joins` and `eager_load`.^
     Instead, I recommend my gem: [activerecord_where_assoc](https://github.com/MaxLap/activerecord_where_assoc).
     Here's an [introduction to it](https://github.com/MaxLap/activerecord_where_assoc/blob/master/INTRODUCTION.md).^
     It's made for this purpose, and will support many more use cases, such as:
@@ -134,15 +137,19 @@ tags: [rails, activerecord]
 
 :content
   * If `includes` seem to work somewhere that `preload` doesn't, you're probably doing a condition
-    on an association. See the previous point for this.
+    on an association or ordering by an association. See the previous points for this.
 
   * For existing code, you can't mindlessly change all `includes` to `preload`, because some of it may rely on
-    `includes` adding a `JOIN` to the query, which happens when the query refers to the table of the
-    included associations. So while it would be better to change everything to `preload`, every such change must
+    `includes` adding a `JOIN` to the query (the `eager_load` way), which happens when the query refers to the table of the
+    included associations. So while it would be better to change everything to `preload` and sometimes `eager_load`, every such change must
     be tested.
 
+  * If you see an `includes` with a `references`, then that's just a call to `eager_load`. At this point, just use
+    `eager_load` to make your code shorter.
+
   So don't risk `includes` doing the wrong thing. `preload` means simple eager loading without the booby trap;
-  you should use it.
+  you should use it. Treat `eager_load` as a warning sign that this could be doing conditional eager loading and
+  be careful around it.
 
   ## Down the rabbit hole
 
@@ -167,8 +174,13 @@ tags: [rails, activerecord]
 
   ## When is `eager_load` needed?
 
-  Rarely...
+  The main reason to use `eager_load`, that I have no alternative for, is ordering by an association's field.
 
+:code
+  # Ordering posts by created_at of last comment
+  Post.eager_load(:comments).order("comments.created_at DESC")
+
+:content
   Maybe some use it to reduce the number of queries when they do eager loading. I don't think it really saves much,
   and there is a risk of slowing things down by making queries that are #{tooltip('heavier', 'If you use `eager_load` with multiple `has_many`, the rows get multiplied, and you end up with a massive amount of data that your DB is returning to your web server.')}.
 
@@ -192,7 +204,7 @@ tags: [rails, activerecord]
   #{spoiler_toggler('Anecdote', html_class: 'btn-aside btn-inline spoiler-toggler--always-displayed')}
   #{spoiler_target('div', anecdote)}
 
-  I mostly see `eager_load` used to do a condition (a `where`) which uses an association. Let's dig into these.
+  Other than ordering, I mostly see `eager_load` used to do a condition (a `where`) which uses an association. Let's dig into these.
 
   ## `where` on an association with `eager_load`
 
@@ -209,7 +221,7 @@ tags: [rails, activerecord]
 :code
   # Please stop doing this :(
   Post.includes(:comments).where(comments: {spam: true})
-  # which is equivalent to this (and don't do this either)
+  # which is equivalent to this; don't do this either
   Post.eager_load(:comments).where(comments: {spam: true})
 
 :content
@@ -346,7 +358,7 @@ tags: [rails, activerecord]
   **`includes` is the "smart" function out of the 3, it will pick the "right" strategy when needed.**
 
   Marketing-wise, this sounds like a good thing... Until you learn that the alternate path, `eager_load`, is
-  not really what you want and it can cause bugs due to conditional eager loading.
+  not always what you want and it can cause bugs due to conditional eager loading.
 
   **For a long time, `includes` (and `eager_load`) were the only way to do a `LEFT JOIN`**
 
@@ -359,7 +371,7 @@ tags: [rails, activerecord]
   Everything is against `preload`, even it's [documentation](https://apidock.com/rails/ActiveRecord/QueryMethods/preload) makes `preload`
   sound like an #{tooltip('alias for `includes`', 'As of writing this post it only says: "Allows preloading of args, in the same way that #includes does", with one trivial example.')}, and the Rails guide only mentions `includes` for eager loading data.
 
-  I think not enough people were both harmed by `includes` and aware of the `preload` option for it to spread.
+  I think not enough people were both harmed by `includes` and aware that you can just specify `preload` and `eager_load` for that knowledge to spread.
 
   ## Recap
 
@@ -369,11 +381,17 @@ tags: [rails, activerecord]
   * If you do want conditional eager loading, using `eager_load` makes it a bit more obvious.
 
   Conditions based on associations:
-  * Using `includes` and `eager_load` for conditions based on associations does conditional eager loading at
-    the same time, you will get bitten.
+  * Using `includes` and `eager_load` for conditions based on associations can do conditional eager loading at
+    the same time, you will get bitten by the bugs it can causes.
+  * if you don't need to load the association, eager loading it is wasteful
   * Using specialized gems to do conditions based on association is safer, clearer and easier.
 
-  We're left with `preload`, which only does full eager loading. You should use it!
+  Order based on association:
+  * `includes` and `eager_load` are the only simple way.
+  * Using `eager_load` is explicit about the use case, and you don't need to also call `references`.
+
+  Regular old eager loading:
+  * Just use `preload`
 
   If you want to run the examples from this post, here is a [self-contained ruby script](#{current_page.url.sub(/\.html$/, '.rb')}).
 
