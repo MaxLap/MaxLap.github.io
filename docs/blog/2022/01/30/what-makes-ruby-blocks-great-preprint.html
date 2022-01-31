@@ -41,8 +41,8 @@ This post isn't meant to be shared yet, it's only here to make it easier to gath
 <div class="markdown-body"><p>In Ruby, we often talk about &quot;blocks&quot;. While not unique to Ruby, few mainstream languages
 have something I would consider equivalent.</p>
 
-<p>Explaining to someone what&#39;s special about them can be a bit tricky, I think many rubyists
-use blocks without noticing how exactly they are different from what is possible in other
+<p>Explaining to someone what&#39;s special about them can be a bit tricky. I think many rubyists
+use blocks without noticing how exactly they are different from what&#39;s possible in other
 mainstream languages.</p>
 
 <p>This post is an attempt to explain what&#39;s unusual about them without being a verbose
@@ -76,7 +76,7 @@ Here is what blocks look like in Ruby.</p>
 <div class="markdown-body"><p>Other than the clean syntax for passing the block (anonymous function), this is nothing special.
 In javascript, this would be:</p>
 </div>
-<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight javascript"><code><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>&#x000A;  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">v</span><span class="p">);</span>&#x000A;<span class="p">})</span></code></pre></div></div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight javascript"><code><span class="err">#</span> <span class="nx">Another</span> <span class="nx">syntax</span> <span class="nx">exists</span><span class="p">,</span> <span class="nx">but</span> <span class="nx">I</span> <span class="nx">think</span> <span class="k">this</span> <span class="nx">is</span> <span class="nx">more</span> <span class="nx">universally</span> <span class="nx">recognizable</span>&#x000A;<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>&#x000A;  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">v</span><span class="p">);</span>&#x000A;<span class="p">})</span></code></pre></div></div>
 <div class="markdown-body"><p>From this common ground, let&#39;s see how blocks compare to passing anonymous functions for
 replacing loops.</p>
 
@@ -86,7 +86,7 @@ replacing loops.</p>
 
 <p>Think of the previous examples, but stopping (like <code>break</code>) after <code>v == 3</code>.</p>
 
-<p>How do you do this with the <code>forEach</code> method JavaScript? The simple answer is that you can&#39;t
+<p>How do you do this with the <code>forEach</code> method in JavaScript? The simple answer is that you can&#39;t
 use the <code>break</code> keyword and must instead either switch to a for loop, use exceptions or some
 other work-around.</p>
 
@@ -140,10 +140,10 @@ using <code>return</code>. They cannot use <code>continue</code> or <code>next</
 <h2 id="next-42"><code>next 42</code></h2>
 
 <p>Blocks are used for more than just replacing a simple for loop. Let&#39;s switch to using
-<code>map</code> for our examples. For those unfamiliar <code>map</code> is &quot;for loop&quot; which also saves a
+<code>map</code> for our examples. For those unfamiliar, <code>map</code> is a &quot;for loop&quot; which also saves a
 return value for each iteration in an array and returns that array.</p>
 
-<p>As an example, <code>squares</code> gets set to an array of the squares of each number.</p>
+<p>As an example, <code>squares</code> gets set to an array of the square (2nd power) of each number.</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">squares</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nf">map</span><span class="p">()</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>&#x000A;  <span class="c1"># Ruby detail: the `next` is optional for the last expression, it always has a `next`</span>&#x000A;  <span class="k">next</span> <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span>&#x000A;<span class="k">end</span></code></pre></div></div>
 <div class="markdown-body"><p><code>next</code> can receive a value. It&#39;s what it will &quot;return&quot; to the calling method (<code>map</code> in this case).
@@ -163,15 +163,15 @@ contain <code>[-666]</code>.</p>
 
 <p>Again, no equivalent here in JavaScript and most other languages.</p>
 
-<p>Alright, these were the main things that make blocks in Ruby more than just anonymous functions.
-Still with me? Here is a little wrap to make it more intuitive.</p>
+<p>These were the main things that make blocks in Ruby more than just anonymous functions.
+Still with me? Here is a little wrap up to make it more intuitive.</p>
 
 <h2 id="building-an-intuition">Building an intuition</h2>
 
-<p>With the right perspective, it&#39;s actually consistent and and be intuitive.</p>
+<p>With the right perspective, it&#39;s actually consistent and intuitive.</p>
 
-<p>When dealing with loops, you have 3 constructs interacting: a wrapping function, a loop statement and the loop&#39;s body;
-and you have 3 keywords to choose where the flow of the code goes.</p>
+<p>When dealing with loops, you have 3 constructs interacting: a wrapping function, a loop
+statement and the loop&#39;s body; and you have 3 keywords to choose where the flow of the code goes.</p>
 
 <ul>
 <li><code>return</code> returns from the wrapping function</li>
@@ -180,7 +180,7 @@ and you have 3 keywords to choose where the flow of the code goes.</p>
 </ul>
 
 <p>When dealing with blocks or anonymous functions, it&#39;s instead 3 &quot;functions&quot; (including the block) that are
-interacting: a calling function, a called function and a block (or anonymous functions).</p>
+interacting: a calling function, a called function and an anonymous functions (or block).</p>
 
 <p>In Ruby, the same 3 keywords serve as return from each of these &quot;functions&quot; which correspond to the same
 behaviors of a loop:</p>
@@ -192,7 +192,7 @@ behaviors of a loop:</p>
 </ul>
 
 <p>Quite consistent. But since we are talking about functions instead of statements (loop),
-return values are also involved. Allowing both <code>break</code> and <code>next</code> to give a return value fits
+return values are also involved. Allowing both <code>break</code> and <code>next</code> to provide a return value fits
 well in that model and is quite useful.</p>
 
 <h2 id="more-than-just-loops">More than just loops</h2>
