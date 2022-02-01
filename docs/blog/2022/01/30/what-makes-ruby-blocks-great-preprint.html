@@ -39,19 +39,20 @@ What makes Ruby's blocks great [PREPRINT]
 This post isn't meant to be shared yet, it's only here to make it easier to gather feedback. Thank you
 </div>
 <div class="markdown-body"><p>In Ruby, we often talk about &quot;blocks&quot;. While not unique to Ruby, few mainstream languages
-have something I would consider equivalent.</p>
+have something I would consider equivalent and, to be frank, I think they&#39;re missing out.</p>
 
-<p>Explaining to someone what&#39;s special about them can be a bit tricky. I think many rubyists
+<p>Just explaining to someone what&#39;s special about them can be tricky. I think many rubyists
 use blocks without noticing how exactly they are different from what&#39;s possible in other
 mainstream languages.</p>
 
 <p>This post is an attempt to explain what&#39;s unusual about them without being a verbose
-in-depth guide.</p>
+in-depth guide. I hope it can pique your interest.</p>
 
 <h2 id="anonymous-function-with-a-nicer-syntax">Anonymous function with a nicer syntax</h2>
 
-<p>That&#39;s a start. The nicer syntax is certainly an important part of what makes Ruby&#39;s blocks
-feel great to use, but there is more than just than.</p>
+<p>That&#39;s the first thing one may use to try to explain them, or the first thing that someone
+hearing about them will think of, and... that&#39;s a start. The nicer syntax is certainly an
+important part of what makes Ruby&#39;s blocks feel great to use, but there is more than just that.</p>
 
 <p>Blocks are more complete and more consistent with other standard constructs such as for loops.
 So much so that they have entirely replaced for loops in Ruby; you instead call a method and
@@ -60,8 +61,8 @@ pass it a block.</p>
 <p>Blocks managed to do that because they have more control over the flow of code than your regular
 anonymous functions, giving them as much power as a for loop.</p>
 
-<p>To investigate what&#39;s different with blocks, let&#39;s work with a simple &quot;for each&quot; loop.
-Here is what blocks look like in Ruby.</p>
+<p>To explain what I mean, let&#39;s work with a simple &quot;for each&quot; loop. Here is what a block looks like
+in Ruby.</p>
 </div>
 <div class="code-book "><div class="code-book__left"><div class="markdown-body"><p>To make it easier for non-rubyists, I&#39;m using a style closer to other languages.</p>
 
@@ -76,7 +77,7 @@ Here is what blocks look like in Ruby.</p>
 <div class="markdown-body"><p>Other than the clean syntax for passing the block (anonymous function), this is nothing special.
 In javascript, this would be:</p>
 </div>
-<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight javascript"><code><span class="err">#</span> <span class="nx">Another</span> <span class="nx">syntax</span> <span class="nx">exists</span><span class="p">,</span> <span class="nx">but</span> <span class="nx">I</span> <span class="nx">think</span> <span class="k">this</span> <span class="nx">is</span> <span class="nx">more</span> <span class="nx">universally</span> <span class="nx">recognizable</span>&#x000A;<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>&#x000A;  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">v</span><span class="p">);</span>&#x000A;<span class="p">})</span></code></pre></div></div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight javascript"><code><span class="c1">// Another syntax exists, but I think this is more universally recognizable</span>&#x000A;<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>&#x000A;  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">v</span><span class="p">);</span>&#x000A;<span class="p">})</span></code></pre></div></div>
 <div class="markdown-body"><p>From this common ground, let&#39;s see how blocks compare to passing anonymous functions for
 replacing loops.</p>
 
