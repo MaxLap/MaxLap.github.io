@@ -42,21 +42,21 @@ This post isn't meant to be shared yet, it's only here to make it easier to gath
 have something I would consider equivalent and, to be frank, I think they&#39;re missing out.</p>
 
 <p>Just explaining to someone what&#39;s special about them can be tricky. I think many rubyists
-use blocks without noticing how exactly they are different from what&#39;s possible in other
+use blocks without realizing that they are different from what&#39;s possible in other
 mainstream languages.</p>
 
-<p>This post is an attempt to explain what&#39;s unusual about them without being a verbose
+<p>This post is an attempt to explain what&#39;s great about blocks without being a verbose
 in-depth guide. I hope it can pique your interest.</p>
 
 <h2 id="anonymous-function-with-a-nicer-syntax">Anonymous function with a nicer syntax</h2>
 
-<p>That&#39;s the first thing one may use to try to explain them, or the first thing that someone
+<p>That&#39;s the first thing one may say to describe them, or the first thing that someone
 hearing about them will think of, and... that&#39;s a start. The nicer syntax is certainly an
 important part of what makes Ruby&#39;s blocks feel great to use, but there is more than just that.</p>
 
-<p>Blocks are more complete and more consistent with other standard constructs such as for loops.
-So much so that they have entirely replaced for loops in Ruby; you instead call a method and
-pass it a block.</p>
+<p>Compared to anonymous functions, blocks are more powerful and more consistent with other
+standard constructs such as for loops. So much so that they have entirely replaced for loops
+in Ruby; you instead call a method and pass it a block.</p>
 
 <p>Blocks managed to do that because they have more control over the flow of code than your regular
 anonymous functions, giving them as much power as a for loop.</p>
@@ -74,7 +74,7 @@ in Ruby.</p>
 </div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="p">.</span><span class="nf">each</span><span class="p">()</span> <span class="k">do</span> <span class="o">...</span> <span class="k">end</span></code></pre></div></div></div><div class="code-book__left"><div class="markdown-body"><p>The parameters the block accepts: one parameter called &quot;v&quot;.</p>
 </div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="o">|</span><span class="n">v</span><span class="o">|</span></code></pre></div></div></div><div class="code-book__left"><div class="markdown-body"><p>The content of the block, what will run when it is called. This prints the value to the console.</p>
 </div></div><div class="highlight code-book__right"><div class="code-book__right-wrapper"><div class="highlight"><pre class="highlight ruby"><code><span class="nb">puts</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></code></pre></div></div></div></div>
-<div class="markdown-body"><p>Other than the clean syntax for passing the block (anonymous function), this is nothing special.
+<div class="markdown-body"><p>Other than the clean syntax for passing the block (&quot;anonymous function&quot;), this is nothing special.
 In javascript, this would be:</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight javascript"><code><span class="c1">// Another syntax exists, but I think this is more universally recognizable</span>&#x000A;<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>&#x000A;  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">v</span><span class="p">);</span>&#x000A;<span class="p">})</span></code></pre></div></div>
@@ -147,8 +147,8 @@ return value for each iteration in an array and returns that array.</p>
 <p>As an example, <code>squares</code> gets set to an array of the square (2nd power) of each number.</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">squares</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nf">map</span><span class="p">()</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>&#x000A;  <span class="c1"># Ruby detail: the `next` is optional for the last expression, it always has a `next`</span>&#x000A;  <span class="k">next</span> <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span>&#x000A;<span class="k">end</span></code></pre></div></div>
-<div class="markdown-body"><p><code>next</code> can receive a value. It&#39;s what it will &quot;return&quot; to the calling method (<code>map</code> in this case).
-It really is just a <code>return</code> that stays at the block&#39;s level.</p>
+<div class="markdown-body"><p><code>next</code> can receive a value. It&#39;s what it will &quot;return&quot; to the method that called the block
+(<code>map</code> in this case). It really is just a <code>return</code> that stays at the block&#39;s level.</p>
 
 <p>In JavaScript, that would be using the <code>return</code> keyword with a value.</p>
 </div>
@@ -165,13 +165,13 @@ contain <code>[-666]</code>.</p>
 <p>Again, no equivalent here in JavaScript and most other languages.</p>
 
 <p>These were the main things that make blocks in Ruby more than just anonymous functions.
-Still with me? Here is a little wrap up to make it more intuitive.</p>
+Still with me? Here is a little wrap up.</p>
 
 <h2 id="building-an-intuition">Building an intuition</h2>
 
-<p>With the right perspective, it&#39;s actually consistent and intuitive.</p>
+<p>With the right perspective, blocks&#39; behaviors are quite intuitive.</p>
 
-<p>When dealing with loops, you have 3 constructs interacting: a wrapping function, a loop
+<p>When dealing with loops, you have 3 nested constructs interacting: a wrapping function, a loop
 statement and the loop&#39;s body; and you have 3 keywords to choose where the flow of the code goes.</p>
 
 <ul>
@@ -180,14 +180,14 @@ statement and the loop&#39;s body; and you have 3 keywords to choose where the f
 <li><code>next</code> / <code>continue</code> leaves loop&#39;s body</li>
 </ul>
 
-<p>When dealing with blocks or anonymous functions, it&#39;s instead 3 &quot;functions&quot; (including the block) that are
-interacting: a calling function, a called function and an anonymous functions (or block).</p>
+<p>When dealing with blocks or anonymous functions, it&#39;s instead 3 nested &quot;functions&quot; that are
+interacting: a wrapping function, a called function and an anonymous functions (or block).</p>
 
-<p>In Ruby, the same 3 keywords serve as return from each of these &quot;functions&quot; which correspond to the same
-behaviors of a loop:</p>
+<p>In Ruby, the same 3 keywords serve as return from each of these nested &quot;functions&quot;, and they
+return from the same level:</p>
 
 <ul>
-<li><code>return</code> returns from the calling function (ex: <code>my_func</code>)</li>
+<li><code>return</code> returns from the wrapping function (ex: <code>my_func</code>)</li>
 <li><code>break</code> returns from the called function (ex: <code>each</code>, <code>map</code>)</li>
 <li><code>next</code> returns from the block</li>
 </ul>
