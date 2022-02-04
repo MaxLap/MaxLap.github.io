@@ -88,16 +88,15 @@ replacing loops.</p>
 <p>Think of the previous examples, but stopping (like <code>break</code>) after <code>v == 3</code>.</p>
 
 <p>How do you do this with the <code>forEach</code> method in JavaScript? The simple answer is that you can&#39;t
-use the <code>break</code> keyword and must instead either switch to a for loop, use exceptions or some
-other work-around.</p>
+so it simply. You either switch to an actual for loop or use exceptions or some other workaround.</p>
 
-<p>But in Ruby...</p>
+<p><code>break</code> cannot be used to exit an anonymous function. But in Ruby, in a block...</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nf">each</span><span class="p">()</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>&#x000A;  <span class="nb">puts</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>&#x000A;  <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="mi">3</span>&#x000A;    <span class="k">break</span>&#x000A;  <span class="k">end</span>&#x000A;<span class="k">end</span></code></pre></div></div>
 <div class="markdown-body"><p><code>break</code> just works.</p>
 
 <p><code>break</code> exits from the function to which the block was passed, so the block can stop early
-just like in regular control-flow structures.</p>
+just like in regular for loop.</p>
 
 <p>We&#39;ll talk more about <code>break</code> in a bit; it can do more, but I want to go over the simpler
 cases first.</p>
@@ -128,7 +127,7 @@ will have a <code>continue</code> or <code>next</code> keyword that can be used 
 <p>Instead of stopping, let&#39;s skip the iteration where <code>v == 3</code>.</p>
 
 <p>As mentioned in the previous section, JavaScript and most other languages can achieve this
-using <code>return</code>. They cannot use <code>continue</code> or <code>next</code> in their anonymous function:</p>
+in anonymous functions using <code>return</code>, but they cannot use the standard <code>continue</code> or <code>next</code>:</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight javascript"><code><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span> <span class="p">{</span>&#x000A;  <span class="k">if</span> <span class="p">(</span><span class="nx">v</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>&#x000A;    <span class="k">return</span><span class="p">;</span>&#x000A;  <span class="p">}</span>&#x000A;  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">v</span><span class="p">);</span>&#x000A;<span class="p">})</span></code></pre></div></div>
 <div class="markdown-body"><p>Ruby has <code>next</code> and it works in blocks exactly as one would expect in a loop.</p>
@@ -150,12 +149,12 @@ return value for each iteration in an array and returns that array.</p>
 <div class="markdown-body"><p><code>next</code> can receive a value. It&#39;s what it will &quot;return&quot; to the method that called the block
 (<code>map</code> in this case). It really is just a <code>return</code> that stays at the block&#39;s level.</p>
 
-<p>In JavaScript, that would be using the <code>return</code> keyword with a value.</p>
+<p>In JavaScript, you would use <code>return</code> with a value.</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">squares</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nf">map</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="p">{</span>&#x000A;  <span class="k">return</span> <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span><span class="p">;</span>&#x000A;<span class="p">})</span></code></pre></div></div>
 <div class="markdown-body"><h2 id="break-42"><code>break 42</code></h2>
 
-<p>In Ruby <code>break</code> can also receive a value. Breaking news right? :)</p>
+<p>In Ruby, <code>break</code> can also receive a value. <em>Break</em>-ing news, right? :)</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># We add a secret override code... it's an example ok! suggest a better one in the comments</span>&#x000A;<span class="n">squares</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">666</span><span class="p">,</span> <span class="mi">4</span><span class="p">].</span><span class="nf">map</span><span class="p">()</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>&#x000A;  <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="mi">666</span>&#x000A;    <span class="k">break</span> <span class="p">[</span><span class="o">-</span><span class="mi">666</span><span class="p">]</span>&#x000A;  <span class="k">end</span>&#x000A;  <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span>&#x000A;<span class="k">end</span></code></pre></div></div>
 <div class="markdown-body"><p>In addition to breaking out of the function that received the block (the <code>map</code> in this example),
@@ -183,8 +182,7 @@ statement and the loop&#39;s body; and you have 3 keywords to choose where the f
 <p>When dealing with blocks or anonymous functions, it&#39;s instead 3 nested &quot;functions&quot; that are
 interacting: a wrapping function, a called function and an anonymous functions (or block).</p>
 
-<p>In Ruby, the same 3 keywords serve as return from each of these nested &quot;functions&quot;, and they
-return from the same level:</p>
+<p>Ruby&#39;s blocks, let you use the same 3 keywords to choose where the flow of the code goes.</p>
 
 <ul>
 <li><code>return</code> returns from the wrapping function (ex: <code>my_func</code>)</li>
@@ -194,15 +192,14 @@ return from the same level:</p>
 
 <p>Quite consistent. But since we are talking about functions instead of statements (loop),
 return values are also involved. Allowing both <code>break</code> and <code>next</code> to provide a return value fits
-well in that model and is quite useful.</p>
+well in that model and is quite useful. The 3 keywords are <code>return</code>, but they have different targets.</p>
 
 <h2 id="more-than-just-loops">More than just loops</h2>
 
 <p>I&#39;ve been focusing on looping structures because those are common and simple to understand,
-but blocks are used for lots of things. For those, the clean syntax shines more than the
-uniform handling of control flow.</p>
+but blocks are used for lots of things.</p>
 </div>
-<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"my_file.txt"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>&#x000A;  <span class="n">f</span><span class="p">.</span><span class="nf">puts</span><span class="p">(</span><span class="s1">'x'</span><span class="p">)</span>&#x000A;  <span class="n">f</span><span class="p">.</span><span class="nf">puts</span><span class="p">(</span><span class="s1">'y'</span><span class="p">)</span>&#x000A;  <span class="n">f</span><span class="p">.</span><span class="nf">puts</span><span class="p">(</span><span class="s1">'z'</span><span class="p">)</span>&#x000A;  <span class="c1"># It is automatically closed at the end</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;<span class="n">thr</span> <span class="o">=</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">new</span><span class="p">()</span> <span class="k">do</span>&#x000A;  <span class="c1"># Do stuff in your thread</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;<span class="no">Timeout</span><span class="p">.</span><span class="nf">timeout</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="k">do</span>&#x000A;  <span class="c1"># Code that will be interrupted if it takes more than 5 seconds</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;<span class="c1"># Ok, another loop because it's cute</span>&#x000A;<span class="mi">5</span><span class="p">.</span><span class="nf">times</span><span class="p">()</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>&#x000A;  <span class="c1"># This block gets called 5 times, with `i` going from 0 to 4</span>&#x000A;<span class="k">end</span></code></pre></div></div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="no">File</span><span class="p">.</span><span class="nf">open</span><span class="p">(</span><span class="s2">"my_file.txt"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>&#x000A;  <span class="n">f</span><span class="p">.</span><span class="nf">puts</span><span class="p">(</span><span class="s1">'x'</span><span class="p">)</span>&#x000A;  <span class="n">f</span><span class="p">.</span><span class="nf">puts</span><span class="p">(</span><span class="s1">'y'</span><span class="p">)</span>&#x000A;  <span class="n">f</span><span class="p">.</span><span class="nf">puts</span><span class="p">(</span><span class="s1">'z'</span><span class="p">)</span>&#x000A;  <span class="c1"># It is automatically closed when leaving the block</span>&#x000A;  <span class="c1"># Including if you use return/break/next within</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;<span class="n">thr</span> <span class="o">=</span> <span class="no">Thread</span><span class="p">.</span><span class="nf">new</span><span class="p">()</span> <span class="k">do</span>&#x000A;  <span class="c1"># Do stuff in your thread</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;<span class="no">Timeout</span><span class="p">.</span><span class="nf">timeout</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="k">do</span>&#x000A;  <span class="c1"># Code that will be interrupted if it takes more than 5 seconds</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;<span class="c1"># (on a Hash, often called a Map or a Dictionary in different languages)</span>&#x000A;<span class="c1"># The block is only called if "my_key" is not in the hash.</span>&#x000A;<span class="n">my_hash</span><span class="p">.</span><span class="nf">fetch</span><span class="p">(</span><span class="s2">"my_key"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">key</span><span class="o">|</span>&#x000A;  <span class="c1"># generate default value, maybe set it in the hash</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;<span class="c1"># Ok, another loop because it's cute</span>&#x000A;<span class="mi">5</span><span class="p">.</span><span class="nf">times</span><span class="p">()</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>&#x000A;  <span class="c1"># This block gets called 5 times, with `i` going from 0 to 4</span>&#x000A;<span class="k">end</span></code></pre></div></div>
 <div class="markdown-body"><h2 id="tool-making">Tool making</h2>
 
 <p>Programming is all about making tools from other tools. To me, blocks are a very neat
