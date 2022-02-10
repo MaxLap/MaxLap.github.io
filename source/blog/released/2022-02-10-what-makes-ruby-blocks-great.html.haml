@@ -266,7 +266,7 @@ tags: [ruby]
 
   # (on a Hash, often called a Map or a Dictionary in different languages)
   # The block is only called if "my_key" is not in the hash.
-  my_hash.fetch("my_key") do |key|
+  value = my_hash.fetch("my_key") do |key|
     # generate default value, maybe set it in the hash
   end
 
