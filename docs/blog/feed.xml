@@ -5,10 +5,196 @@
   <id>http://blog.url.com/blog</id>
   <link href="http://blog.url.com/blog"/>
   <link href="http://blog.url.com/blog/feed.xml" rel="self"/>
-  <updated>2021-02-14T19:00:00-05:00</updated>
+  <updated>2022-02-09T19:00:00-05:00</updated>
   <author>
     <name>Blog Author</name>
   </author>
+  <entry>
+    <title>What makes Ruby's blocks great</title>
+    <link rel="alternate" href="http://blog.url.com/blog/2022/02/10/what-makes-ruby-blocks-great.html"/>
+    <id>http://blog.url.com/blog/2022/02/10/what-makes-ruby-blocks-great.html</id>
+    <published>2022-02-09T19:00:00-05:00</published>
+    <updated>2022-02-10T14:11:56-05:00</updated>
+    <author>
+      <name>Article Author</name>
+    </author>
+    <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;In Ruby, we often talk about &amp;quot;blocks&amp;quot;. While not unique to Ruby, few mainstream languages
+have something I would consider equivalent and, to be frank, I think they&amp;#39;re missing out.&lt;/p&gt;
+
+&lt;p&gt;Just explaining to someone what&amp;#39;s special about them can be tricky. I think many rubyists
+use blocks without realizing that they are different from what&amp;#39;s possible in other
+mainstream languages.&lt;/p&gt;
+
+&lt;p&gt;This post is an attempt to explain what&amp;#39;s great about blocks without being a verbose
+in-depth guide. It&amp;#39;s written with non-rubyists in mind. I hope it can pique your interest.&lt;/p&gt;
+
+&lt;h2 id="anonymous-function-with-a-nicer-syntax"&gt;Anonymous function with a nicer syntax&lt;/h2&gt;
+
+&lt;p&gt;That&amp;#39;s the first thing one may say to describe them, or the first thing that someone
+hearing about them will think of, and... that&amp;#39;s a start. The nicer syntax is certainly an
+important part of what makes Ruby&amp;#39;s blocks feel great to use, but there is more than just that.&lt;/p&gt;
+
+&lt;p&gt;Compared to anonymous functions, blocks are more powerful and more consistent with other
+standard constructs such as for loops. So much so that they have entirely replaced for loops
+in Ruby; you instead call a method and pass it a block.&lt;/p&gt;
+
+&lt;p&gt;Blocks managed to do that because they have more control over the flow of code than your regular
+anonymous functions, giving them as much power as a for loop.&lt;/p&gt;
+
+&lt;p&gt;To explain what I mean, let&amp;#39;s work with a simple &amp;quot;for each&amp;quot; loop. Here is what a block looks like
+in Ruby.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="code-book "&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;To make it easier for non-rubyists, I&amp;#39;m using a style closer to other languages.&lt;/p&gt;
+
+&lt;p&gt;What we call a &amp;quot;block&amp;quot; goes from &lt;code&gt;do&lt;/code&gt; to &lt;code&gt;end&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Quick code explanation:&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nf"&gt;each&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="nb"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;An Array literal, it &amp;quot;returns&amp;quot; an Array with those 4 values&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;Calls the method &lt;code&gt;each&lt;/code&gt; (on the Array), passing it the block that follows the parentheses&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;each&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt; &lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;The parameters the block accepts: one parameter called &amp;quot;v&amp;quot;.&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class="code-book__left"&gt;&lt;div class="markdown-body"&gt;&lt;p&gt;The content of the block, what will run when it is called. This prints the value to the console.&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;&lt;div class="highlight code-book__right"&gt;&lt;div class="code-book__right-wrapper"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="nb"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Other than the clean syntax for passing the block (&amp;quot;anonymous function&amp;quot;), this is nothing special.
+In javascript, this would be:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight javascript"&gt;&lt;code&gt;&lt;span class="c1"&gt;// Another syntax exists, but I think this is more universally recognizable&lt;/span&gt;&amp;#x000A;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nx"&gt;forEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&amp;#x000A;  &lt;span class="nx"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;v&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&amp;#x000A;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;From this common ground, let&amp;#39;s see how blocks compare to passing anonymous functions for
+replacing loops.&lt;/p&gt;
+
+&lt;h2 id="break"&gt;&lt;code&gt;break&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Most languages with loops allows you to exit early from them. Usually with a &lt;code&gt;break&lt;/code&gt; keyword.&lt;/p&gt;
+
+&lt;p&gt;Think of the previous examples, but stopping (like &lt;code&gt;break&lt;/code&gt;) after &lt;code&gt;v == 3&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;How do you do this with the &lt;code&gt;forEach&lt;/code&gt; method in JavaScript? The simple answer is that you can&amp;#39;t
+so it simply. You either switch to an actual for loop or use exceptions or some other workaround.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;break&lt;/code&gt; cannot be used to exit an anonymous function. But in Ruby, in a block...&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nf"&gt;each&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="nb"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;break&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;code&gt;break&lt;/code&gt; just works.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;break&lt;/code&gt; exits from the function to which the block was passed, so the block can stop early
+just like in regular for loop.&lt;/p&gt;
+
+&lt;p&gt;We&amp;#39;ll talk more about &lt;code&gt;break&lt;/code&gt; in a bit; it can do more, but I want to go over the simpler
+cases first.&lt;/p&gt;
+
+&lt;h2 id="return"&gt;&lt;code&gt;return&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;How about returning from a function from within a loop? That&amp;#39;s pretty common.&lt;/p&gt;
+
+&lt;p&gt;You, again, can&amp;#39;t do this using anonymous functions in most languages. The &lt;code&gt;return&lt;/code&gt; keyword
+would only return from the anonymous function, and its caller would call it again for the
+next iterations.&lt;/p&gt;
+
+&lt;p&gt;But it&amp;#39;s easy in Ruby with its blocks:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;my_func&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="c1"&gt;# Just defining a function to return out of&lt;/span&gt;&amp;#x000A;  &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nf"&gt;each&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;    &lt;span class="nb"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&amp;#x000A;      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;42&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;When the code reaches the &lt;code&gt;return&lt;/code&gt;, it&amp;#39;s not the block which returns 42, it&amp;#39;s actually
+&lt;code&gt;my_func&lt;/code&gt;. &lt;code&gt;return&lt;/code&gt; leaves the block, the call to &lt;code&gt;each&lt;/code&gt;, and returns from &lt;code&gt;my_func&lt;/code&gt;
+with the specified value. Just like &lt;code&gt;return&lt;/code&gt; does in actual loops.&lt;/p&gt;
+
+&lt;p&gt;The behavior of &lt;code&gt;return&lt;/code&gt; with anonymous functions is still useful. If you think of loops, this
+is the equivalent of the &lt;code&gt;continue&lt;/code&gt; / &lt;code&gt;next&lt;/code&gt; keywords. So let&amp;#39;s move over to these.&lt;/p&gt;
+
+&lt;h2 id="continue-next"&gt;&lt;code&gt;continue&lt;/code&gt; / &lt;code&gt;next&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;In loops, we sometimes want to skip an iteration, just go to the next one. Most languages
+will have a &lt;code&gt;continue&lt;/code&gt; or &lt;code&gt;next&lt;/code&gt; keyword that can be used in loops.&lt;/p&gt;
+
+&lt;p&gt;Instead of stopping, let&amp;#39;s skip the iteration where &lt;code&gt;v == 3&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;As mentioned in the previous section, JavaScript and most other languages can achieve this
+in anonymous functions using &lt;code&gt;return&lt;/code&gt;, but they cannot use the standard &lt;code&gt;continue&lt;/code&gt; or &lt;code&gt;next&lt;/code&gt;:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight javascript"&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nx"&gt;forEach&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;v&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&amp;#x000A;  &lt;span class="p"&gt;}&lt;/span&gt;&amp;#x000A;  &lt;span class="nx"&gt;console&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;log&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;v&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&amp;#x000A;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Ruby has &lt;code&gt;next&lt;/code&gt; and it works in blocks exactly as one would expect in a loop.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nf"&gt;each&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;next&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;  &lt;span class="nb"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Pretty neat.&lt;/p&gt;
+
+&lt;p&gt;This is where the parallels with for loops end.&lt;/p&gt;
+
+&lt;h2 id="next-42"&gt;&lt;code&gt;next 42&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;Blocks are used for more than just replacing a simple for loop. Let&amp;#39;s switch to using
+&lt;code&gt;map&lt;/code&gt; for our examples. For those unfamiliar, &lt;code&gt;map&lt;/code&gt; is a &amp;quot;for loop&amp;quot; which also saves a
+return value for each iteration in an array and returns that array.&lt;/p&gt;
+
+&lt;p&gt;As an example, &lt;code&gt;squares&lt;/code&gt; gets set to an array of the square (2nd power) of each number.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;squares&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nf"&gt;map&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# Ruby detail: the `next` is optional for the last expression, it always has a `next`&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;next&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;code&gt;next&lt;/code&gt; can receive a value. It&amp;#39;s what it will &amp;quot;return&amp;quot; to the method that called the block
+(&lt;code&gt;map&lt;/code&gt; in this case). It really is just a &lt;code&gt;return&lt;/code&gt; that stays at the block&amp;#39;s level.&lt;/p&gt;
+
+&lt;p&gt;In JavaScript, you would use &lt;code&gt;return&lt;/code&gt; with a value.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;squares&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nf"&gt;map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&amp;#x000A;&lt;span class="p"&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;h2 id="break-42"&gt;&lt;code&gt;break 42&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;In Ruby, &lt;code&gt;break&lt;/code&gt; can also receive a value. &lt;em&gt;Break&lt;/em&gt;-ing news, right? :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# We add a secret override code... it's an example ok! suggest a better one in the comments&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;squares&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;666&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;].&lt;/span&gt;&lt;span class="nf"&gt;map&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;666&lt;/span&gt;&amp;#x000A;    &lt;span class="k"&gt;break&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;666&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&amp;#x000A;  &lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;**&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;In addition to breaking out of the function that received the block (the &lt;code&gt;map&lt;/code&gt; in this example),
+the function will return the value given to &lt;code&gt;break&lt;/code&gt;. So in the above example, &lt;code&gt;squares&lt;/code&gt; will
+contain &lt;code&gt;[-666]&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Again, no equivalent here in JavaScript and most other languages.&lt;/p&gt;
+
+&lt;p&gt;These were the main things that make blocks in Ruby more than just anonymous functions.
+Still with me? Here is a little wrap up.&lt;/p&gt;
+
+&lt;h2 id="building-an-intuition"&gt;Building an intuition&lt;/h2&gt;
+
+&lt;p&gt;With the right perspective, blocks&amp;#39; behaviors are quite intuitive.&lt;/p&gt;
+
+&lt;p&gt;When dealing with loops, you have 3 nested constructs interacting: a wrapping function, a loop
+statement and the loop&amp;#39;s body; and you have 3 keywords to choose where the flow of the code goes.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;return&lt;/code&gt; returns from the wrapping function&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;break&lt;/code&gt; leaves the loop statement&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;next&lt;/code&gt; / &lt;code&gt;continue&lt;/code&gt; leaves loop&amp;#39;s body&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When dealing with blocks or anonymous functions, it&amp;#39;s instead 3 nested &amp;quot;functions&amp;quot; that are
+interacting: a wrapping function, a called function and an anonymous functions (or block).&lt;/p&gt;
+
+&lt;p&gt;Ruby&amp;#39;s blocks, let you use the same 3 keywords to choose where the flow of the code goes.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;return&lt;/code&gt; returns from the wrapping function (ex: &lt;code&gt;my_func&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;break&lt;/code&gt; returns from the called function (ex: &lt;code&gt;each&lt;/code&gt;, &lt;code&gt;map&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;next&lt;/code&gt; returns from the block&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Quite consistent. But since we are talking about functions instead of statements (loop),
+return values are also involved. Allowing both &lt;code&gt;break&lt;/code&gt; and &lt;code&gt;next&lt;/code&gt; to provide a return value fits
+well in that model and is quite useful. The 3 keywords are &lt;code&gt;return&lt;/code&gt;, but they have different targets.&lt;/p&gt;
+
+&lt;h2 id="more-than-just-loops"&gt;More than just loops&lt;/h2&gt;
+
+&lt;p&gt;I&amp;#39;ve been focusing on looping structures because those are common and simple to understand,
+but blocks are used for lots of things.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="no"&gt;File&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"my_file.txt"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"w"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'x'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'y'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;puts&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'z'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# It is automatically closed when leaving the block&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# Including if you use return/break/next within&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="n"&gt;thr&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Thread&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;new&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# Do stuff in your thread&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="no"&gt;Timeout&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;timeout&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# Code that will be interrupted if it takes more than 5 seconds&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="c1"&gt;# (on a Hash, often called a Map or a Dictionary in different languages)&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# The block is only called if "my_key" is not in the hash.&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;my_hash&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;fetch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"my_key"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# generate default value, maybe set it in the hash&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&amp;#x000A;&amp;#x000A;&lt;span class="c1"&gt;# Ok, another loop because it's cute&lt;/span&gt;&amp;#x000A;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;times&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;i&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&amp;#x000A;  &lt;span class="c1"&gt;# This block gets called 5 times, with `i` going from 0 to 4&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;h2 id="tool-making"&gt;Tool making&lt;/h2&gt;
+
+&lt;p&gt;Programming is all about making tools from other tools. To me, blocks are a very neat
+one that fit seamlessly in the Ruby language and handle many roles. They really feel
+like a generalization of anonymous functions and I wish more mainstream languages would
+have them.&lt;/p&gt;
+
+&lt;h2 id="try-ruby-out"&gt;Try Ruby out&lt;/h2&gt;
+
+&lt;p&gt;You can try Ruby from your browser at &lt;a href="https://try.ruby-lang.org/"&gt;https://try.ruby-lang.org/&lt;/a&gt;. There is a small
+Ruby lesson built into the site, but it may feel too simple for more advanced programmers.
+Anyhow, it will let you type some Ruby and see the result.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+  </entry>
   <entry>
     <title>You should avoid `includes` in Rails</title>
     <link rel="alternate" href="http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>

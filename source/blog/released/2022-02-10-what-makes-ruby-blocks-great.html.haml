@@ -1,0 +1,290 @@
+---
+title: What makes Ruby's blocks great
+date: 2022-02-10
+tags: [ruby]
+---
+
+:content
+  In Ruby, we often talk about "blocks". While not unique to Ruby, few mainstream languages
+  have something I would consider equivalent and, to be frank, I think they're missing out.
+
+  Just explaining to someone what's special about them can be tricky. I think many rubyists
+  use blocks without realizing that they are different from what's possible in other
+  mainstream languages.
+
+  This post is an attempt to explain what's great about blocks without being a verbose
+  in-depth guide. It's written with non-rubyists in mind. I hope it can pique your interest.
+
+  ## Anonymous function with a nicer syntax
+
+  That's the first thing one may say to describe them, or the first thing that someone
+  hearing about them will think of, and... that's a start. The nicer syntax is certainly an
+  important part of what makes Ruby's blocks feel great to use, but there is more than just that.
+
+  Compared to anonymous functions, blocks are more powerful and more consistent with other
+  standard constructs such as for loops. So much so that they have entirely replaced for loops
+  in Ruby; you instead call a method and pass it a block.
+
+  Blocks managed to do that because they have more control over the flow of code than your regular
+  anonymous functions, giving them as much power as a for loop.
+
+  To explain what I mean, let's work with a simple "for each" loop. Here is what a block looks like
+  in Ruby.
+
+:codebook
+  To make it easier for non-rubyists, I'm using a style closer to other languages.
+
+  What we call a "block" goes from `do` to `end`.
+
+  Quick code explanation:
+
+  %RUBY
+  [1, 2, 3, 4].each() do |v|
+    puts(v)
+  end
+
+  %ROW
+  An Array literal, it "returns" an Array with those 4 values
+  %RUBY
+  [1, 2, 3, 4]
+
+  %ROW
+  Calls the method `each` (on the Array), passing it the block that follows the parentheses
+  %RUBY
+  .each() do ... end
+
+  %ROW
+  The parameters the block accepts: one parameter called "v".
+  %RUBY
+  |v|
+
+  %ROW
+  The content of the block, what will run when it is called. This prints the value to the console.
+  %RUBY
+  puts(v)
+
+:content
+  Other than the clean syntax for passing the block ("anonymous function"), this is nothing special.
+  In javascript, this would be:
+
+:code
+  #lang: javascript
+  // Another syntax exists, but I think this is more universally recognizable
+  [1, 2, 3, 4].forEach(function(v) {
+    console.log(v);
+  })
+
+:content
+  From this common ground, let's see how blocks compare to passing anonymous functions for
+  replacing loops.
+
+  ## `break`
+
+  Most languages with loops allows you to exit early from them. Usually with a `break` keyword.
+
+  Think of the previous examples, but stopping (like `break`) after `v == 3`.
+
+  How do you do this with the `forEach` method in JavaScript? The simple answer is that you can't
+  so it simply. You either switch to an actual for loop or use exceptions or some other workaround.
+
+  `break` cannot be used to exit an anonymous function. But in Ruby, in a block...
+
+:code
+  [1, 2, 3, 4].each() do |v|
+    puts(v)
+    if v == 3
+      break
+    end
+  end
+
+:content
+  `break` just works.
+
+  `break` exits from the function to which the block was passed, so the block can stop early
+  just like in regular for loop.
+
+  We'll talk more about `break` in a bit; it can do more, but I want to go over the simpler
+  cases first.
+
+  ## `return`
+
+  How about returning from a function from within a loop? That's pretty common.
+
+  You, again, can't do this using anonymous functions in most languages. The `return` keyword
+  would only return from the anonymous function, and its caller would call it again for the
+  next iterations.
+
+  But it's easy in Ruby with its blocks:
+
+:code
+  def my_func() # Just defining a function to return out of
+    [1, 2, 3, 4].each() do |v|
+      puts(v)
+      if v == 3
+        return 42
+      end
+    end
+  end
+
+:content
+  When the code reaches the `return`, it's not the block which returns 42, it's actually
+  `my_func`. `return` leaves the block, the call to `each`, and returns from `my_func`
+  with the specified value. Just like `return` does in actual loops.
+
+  The behavior of `return` with anonymous functions is still useful. If you think of loops, this
+  is the equivalent of the `continue` / `next` keywords. So let's move over to these.
+
+  ## `continue` / `next`
+
+  In loops, we sometimes want to skip an iteration, just go to the next one. Most languages
+  will have a `continue` or `next` keyword that can be used in loops.
+
+  Instead of stopping, let's skip the iteration where `v == 3`.
+
+  As mentioned in the previous section, JavaScript and most other languages can achieve this
+  in anonymous functions using `return`, but they cannot use the standard `continue` or `next`:
+
+:code
+  #lang: javascript
+  [1, 2, 3, 4].forEach(function(v) {
+    if (v == 3) {
+      return;
+    }
+    console.log(v);
+  })
+
+:content
+  Ruby has `next` and it works in blocks exactly as one would expect in a loop.
+
+:code
+  [1, 2, 3, 4].each() do |v|
+    if v == 3
+      next
+    end
+    puts(v)
+  end
+
+:content
+  Pretty neat.
+
+  This is where the parallels with for loops end.
+
+  ## `next 42`
+
+  Blocks are used for more than just replacing a simple for loop. Let's switch to using
+  `map` for our examples. For those unfamiliar, `map` is a "for loop" which also saves a
+  return value for each iteration in an array and returns that array.
+
+  As an example, `squares` gets set to an array of the square (2nd power) of each number.
+
+:code
+  squares = [1, 2, 3, 4].map() do |v|
+    # Ruby detail: the `next` is optional for the last expression, it always has a `next`
+    next v ** 2
+  end
+
+:content
+  `next` can receive a value. It's what it will "return" to the method that called the block
+  (`map` in this case). It really is just a `return` that stays at the block's level.
+
+  In JavaScript, you would use `return` with a value.
+
+:code
+  squares = [1, 2, 3, 4].map(function(v) {
+    return v ** 2;
+  })
+
+:content
+  ## `break 42`
+
+  In Ruby, `break` can also receive a value. *Break*-ing news, right? :)
+
+:code
+  # We add a secret override code... it's an example ok! suggest a better one in the comments
+  squares = [1, 2, 666, 4].map() do |v|
+    if v == 666
+      break [-666]
+    end
+    v ** 2
+  end
+
+:content
+  In addition to breaking out of the function that received the block (the `map` in this example),
+  the function will return the value given to `break`. So in the above example, `squares` will
+  contain `[-666]`.
+
+  Again, no equivalent here in JavaScript and most other languages.
+
+  These were the main things that make blocks in Ruby more than just anonymous functions.
+  Still with me? Here is a little wrap up.
+
+  ## Building an intuition
+
+  With the right perspective, blocks' behaviors are quite intuitive.
+
+  When dealing with loops, you have 3 nested constructs interacting: a wrapping function, a loop
+  statement and the loop's body; and you have 3 keywords to choose where the flow of the code goes.
+
+  * `return` returns from the wrapping function
+  * `break` leaves the loop statement
+  * `next` / `continue` leaves loop's body
+
+  When dealing with blocks or anonymous functions, it's instead 3 nested "functions" that are
+  interacting: a wrapping function, a called function and an anonymous functions (or block).
+
+  Ruby's blocks, let you use the same 3 keywords to choose where the flow of the code goes.
+
+  * `return` returns from the wrapping function (ex: `my_func`)
+  * `break` returns from the called function (ex: `each`, `map`)
+  * `next` returns from the block
+
+  Quite consistent. But since we are talking about functions instead of statements (loop),
+  return values are also involved. Allowing both `break` and `next` to provide a return value fits
+  well in that model and is quite useful. The 3 keywords are `return`, but they have different targets.
+
+  ## More than just loops
+
+  I've been focusing on looping structures because those are common and simple to understand,
+  but blocks are used for lots of things.
+
+:code
+  File.open("my_file.txt", "w") do |f|
+    f.puts('x')
+    f.puts('y')
+    f.puts('z')
+    # It is automatically closed when leaving the block
+    # Including if you use return/break/next within
+  end
+
+  thr = Thread.new() do
+    # Do stuff in your thread
+  end
+
+  Timeout.timeout(5) do
+    # Code that will be interrupted if it takes more than 5 seconds
+  end
+
+  # (on a Hash, often called a Map or a Dictionary in different languages)
+  # The block is only called if "my_key" is not in the hash.
+  my_hash.fetch("my_key") do |key|
+    # generate default value, maybe set it in the hash
+  end
+
+  # Ok, another loop because it's cute
+  5.times() do |i|
+    # This block gets called 5 times, with `i` going from 0 to 4
+  end
+
+:content
+  ## Tool making
+
+  Programming is all about making tools from other tools. To me, blocks are a very neat
+  one that fit seamlessly in the Ruby language and handle many roles. They really feel
+  like a generalization of anonymous functions and I wish more mainstream languages would
+  have them.
+
+  ## Try Ruby out
+
+  You can try Ruby from your browser at https://try.ruby-lang.org/. There is a small
+  Ruby lesson built into the site, but it may feel too simple for more advanced programmers.
+  Anyhow, it will let you type some Ruby and see the result.
