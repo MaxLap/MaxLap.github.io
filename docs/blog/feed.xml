@@ -5,16 +5,106 @@
   <id>http://blog.url.com/blog</id>
   <link href="http://blog.url.com/blog"/>
   <link href="http://blog.url.com/blog/feed.xml" rel="self"/>
-  <updated>2022-02-09T19:00:00-05:00</updated>
+  <updated>2023-02-23T19:00:00-05:00</updated>
   <author>
     <name>Blog Author</name>
   </author>
+  <entry>
+    <title>Rant: I miss LastPass</title>
+    <link rel="alternate" href="http://blog.url.com/blog/2023/02/24/rant-i-miss-lastpass.html"/>
+    <id>http://blog.url.com/blog/2023/02/24/rant-i-miss-lastpass.html</id>
+    <published>2023-02-23T19:00:00-05:00</published>
+    <updated>2023-02-24T13:17:55-05:00</updated>
+    <author>
+      <name>Article Author</name>
+    </author>
+    <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;This post is a bit of a rant / review / basic wishlist for password manager.&lt;/p&gt;
+
+&lt;p&gt;Like many, I stopped using LastPass when their recent breach happened and noticed how slow they were to provide details. But now after using an alternative (Keeper) for a while, which took me a while to pick, I realize that I miss LastPass.&lt;/p&gt;
+
+&lt;p&gt;While the breach made LastPass feel unsafe to many, including me, some of their basic options made me feel safer and less annoyed in day to day usage.&lt;/p&gt;
+
+&lt;p&gt;Enough with the preamble, lets talk features!&lt;/p&gt;
+
+&lt;h3 id="emergency-access-contacts"&gt;Emergency Access contacts&lt;/h3&gt;
+
+&lt;p&gt;This is the possibility to setup contacts to be able to get access to my passwords should an emergency occur. The access should be granted after a delay of my choosing, so that I can prevent a wrongful emergency access.&lt;/p&gt;
+
+&lt;p&gt;I have lots of things spread in many place, if something happens to me, I want it to be possible for my partner to get access to them.&lt;/p&gt;
+
+&lt;p&gt;To me, this feature is a must have. If a password manager doesn&amp;#39;t have something that make sense for this, I&amp;#39;m not bothering installing it or learning more about it.&lt;/p&gt;
+
+&lt;p&gt;I don&amp;#39;t want to share master password because I care about privacy; I don&amp;#39;t want her password either.&lt;/p&gt;
+
+&lt;p&gt;When I browsed around, I was astounded by how many password managers don&amp;#39;t have something that make sense for this. Lets go over the main contenders.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;LastPass&lt;/strong&gt;: It has the full package. That&amp;#39;s an important reason I went with it in the beginning.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Dashlane&lt;/strong&gt;: You make a password protected backup of your passwords and make both accessible to the person, ideally in two different ways and ideally without giving immediate access to the file. They describe this all at high level, with recommendations. But it&amp;#39;s really just that, a backup that you share, something you can do with any Password Manager that allows you to export data. When you change your passwords, they won&amp;#39;t be updated and you need another backup. You also will have no clue if/when the person accesses the backup. And Dashlane dares to put &amp;quot;A way to share your Dashlane data with people you trust during an emergency&amp;quot; in their features, marketing BS...&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;1Password&lt;/strong&gt;: If you thought Dashlane was bad, 1Password just straight up tells you to give you master password to someone you trust. They market it as making an &amp;quot;emergency kit&amp;quot;, provide you a cute template to make sure you don&amp;#39;t forget the email and secret key. But it&amp;#39;s just giving your password to someone.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Zoho vault&lt;/strong&gt;: To be honest, Zoho didn&amp;#39;t pop in my radar when I was doing my replacement search. It just did now that I&amp;#39;m writing this post. In their system, you setup contacts to receive the full access in case of an emergency. An email is sent to all contacts in the system to alert them when an emergency is declared. This is pretty nice. For an enterprise setting, this sounds quite reasonable. The only thing missing is the possibility of setting a delay so that the emergency can be stopped before access is given.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Bitwarden&lt;/strong&gt;: It has the full package. You setup contacts, they can trigger the emergency access, you receive an email, the person gets access after a delay you&amp;#39;ve setup unless to deny it (you can also approve from the email). Good job!&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Keeper&lt;/strong&gt;: They have the full emergency access package just like Bitwarden. Good job! Searching about it though, I can&amp;#39;t really find documentation about this other than a blog post.&lt;/p&gt;
+
+&lt;p&gt;These appeared to be the main contenders in this space. So they&amp;#39;re are the only one I&amp;#39;ve used and can have more feedback on.&lt;/p&gt;
+
+&lt;h3 id="bitwarden"&gt;Bitwarden&lt;/h3&gt;
+
+&lt;p&gt;So, after LastPass, I first tried Bitwarden, but quickly got turned off from it.&lt;/p&gt;
+
+&lt;p&gt;To share things with other users, you create an organization and put the users in there. In the organization, you then create collections (folders) which contain the passwords. You can then give access to users based on the collection. It can make sense, but they way it&amp;#39;s setup, moving password to the organization is pretty easy, removing them from it (to make them private again) is a pain. You can&amp;#39;t. You must recreate it in your private account and delete from the organization.&lt;/p&gt;
+
+&lt;p&gt;The organization idea sounds good at the start, but it ends up feeling more like a hassle when interacting with them in the UI. Simple shared folders would do the trick without needing an organization layer where there is now a concept of administrator which makes the concept of privacy a bit weird. This feels focused on the enterprise context.&lt;/p&gt;
+
+&lt;p&gt;I tried to import my passwords from LastPass into my account that had the &amp;quot;Families&amp;quot; plan and every passwords got imported into the organization instead of my private account and would therefore have been shared if my partner had already made her account. I contacted the support about it and was told basically that I could try again with a link to the doc... Which I did and somehow the passwords got there again... I didn&amp;#39;t see a way to select where they go, but maybe I got confused by the way you need to always pick on which organization you are working on.&lt;/p&gt;
+
+&lt;p&gt;I didn&amp;#39;t even get to try the Android app before I was tired of this. I couldn&amp;#39;t think of myself trying to explain how to do basic things in this to my partner without myself getting frustrated. I wasn&amp;#39;t even sure how to get her to import her data without it becoming accessible to me?  I quickly moved on.&lt;/p&gt;
+
+&lt;h3 id="keeper"&gt;Keeper&lt;/h3&gt;
+
+&lt;p&gt;Keeper was the next and last one I saw recommended that matched the very high bar of having a meaningful emergency access. Many people spoke nicely about it online. It&amp;#39;s the one I still use, so it&amp;#39;s a positive sign about it at least.&lt;/p&gt;
+
+&lt;p&gt;It&amp;#39;s a lot more intuitive than Bitwarden was, that&amp;#39;s for sure. But that&amp;#39;s kind of easy when you have so few features and so few options.... I&amp;#39;d describe this as the Apple of password managers? It does things one way, if you hope to change it behavior, well, there are about 10 checkbox total as settings, and basically no options on a per-login aspect.&lt;/p&gt;
+
+&lt;p&gt;This is what I&amp;#39;m using right now.&lt;/p&gt;
+
+&lt;h3 id="feeling-less-safe-than-with-lastpass"&gt;Feeling less safe than with LastPass&lt;/h3&gt;
+
+&lt;p&gt;There is always this question of when/how often should you have to enter your master password. Too often gets annoying, not often enough can feel unsafe.&lt;/p&gt;
+
+&lt;p&gt;LastPass has these two options that I activated:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;make showing/copying any password require to re-enter the master password&lt;/li&gt;
+&lt;li&gt;allow configuring specific logins to require to re-enter the master password to use them&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The first feature doesn&amp;#39;t add much safety because it&amp;#39;s quite easy to open the login form, tell LastPass to fill it, and then get the password from the password field. It but it adds a little friction to just browsing the vault and taking every passwords.&lt;/p&gt;
+
+&lt;p&gt;The second option does make things actually secure. Applying it to financial, email and identity related sites is great.&lt;/p&gt;
+
+&lt;p&gt;With those two options, I didn&amp;#39;t feel the need to have a timeout on my LastPass session. LastPass allowed me quickly use all those logins that I don&amp;#39;t care much about without ever re-entering my master password, but still have the safety for the important passwords.&lt;/p&gt;
+
+&lt;p&gt;Now, with Keeper (and probably many other managers), my only choice is how long do I want before I get logged out... I can specify how many minutes, but it all comes down to how many times per day I want to have to write my password... It&amp;#39;s not related to what the password is being used for.&lt;/p&gt;
+
+&lt;p&gt;Oh, and Keeper makes entering the password just a bit extra painful! It first shows your email so you can edit it (that must almost never be needed), you must click next, wait a tiny bit, and then you get the password prompt. Why the extra click? Maybe because in some case there is a 2FA, and they just have a single UI flow? No idea, but poor user experience.&lt;/p&gt;
+
+&lt;p&gt;So yeah, in the end, I settled for having to entered my master password once a day... I&amp;#39;m usually at home, so the hassle of having to do it many times is greater than what I consider the risk to be... But wouldn&amp;#39;t it be great if I didn&amp;#39;t have to settle and a Password Manager just had those &amp;quot;basic&amp;quot; (in my mind) features.&lt;/p&gt;
+
+&lt;p&gt;So for now, I&amp;#39;m using Keeper. At one point I&amp;#39;ll probably look around hoping for alternatives to have a better story for emergency access so that trying them isn&amp;#39;t a waste of time and I find one that suits me better.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+  </entry>
   <entry>
     <title>What makes Ruby's blocks great</title>
     <link rel="alternate" href="http://blog.url.com/blog/2022/02/10/what-makes-ruby-blocks-great.html"/>
     <id>http://blog.url.com/blog/2022/02/10/what-makes-ruby-blocks-great.html</id>
     <published>2022-02-09T19:00:00-05:00</published>
-    <updated>2022-02-10T16:01:36-05:00</updated>
+    <updated>2023-02-24T12:16:20-05:00</updated>
     <author>
       <name>Article Author</name>
     </author>
@@ -200,7 +290,7 @@ Anyhow, it will let you type some Ruby and see the result.&lt;/p&gt;
     <link rel="alternate" href="http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>
     <id>http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html</id>
     <published>2021-02-14T19:00:00-05:00</published>
-    <updated>2021-08-20T14:52:53-04:00</updated>
+    <updated>2023-02-24T12:16:20-05:00</updated>
     <author>
       <name>Article Author</name>
     </author>

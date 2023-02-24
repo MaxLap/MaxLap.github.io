@@ -1,0 +1,80 @@
+---
+title: "Rant: I miss LastPass"
+date: 2023-02-24
+tags: [rant, misc]
+---
+
+:content
+  This post is a bit of a rant / review / basic wishlist for password manager.
+
+  Like many, I stopped using LastPass when their recent breach happened and noticed how slow they were to provide details. But now after using an alternative (Keeper) for a while, which took me a while to pick, I realize that I miss LastPass.
+
+  While the breach made LastPass feel unsafe to many, including me, some of their basic options made me feel safer and less annoyed in day to day usage.
+
+  Enough with the preamble, lets talk features!
+
+  ### Emergency Access contacts
+  This is the possibility to setup contacts to be able to get access to my passwords should an emergency occur. The access should be granted after a delay of my choosing, so that I can prevent a wrongful emergency access.
+
+  I have lots of things spread in many place, if something happens to me, I want it to be possible for my partner to get access to them.
+
+  To me, this feature is a must have. If a password manager doesn't have something that make sense for this, I'm not bothering installing it or learning more about it.
+
+  I don't want to share master password because I care about privacy; I don't want her password either.
+
+  When I browsed around, I was astounded by how many password managers don't have something that make sense for this. Lets go over the main contenders.
+
+  **LastPass**: It has the full package. That's an important reason I went with it in the beginning.
+
+  **Dashlane**: You make a password protected backup of your passwords and make both accessible to the person, ideally in two different ways and ideally without giving immediate access to the file. They describe this all at high level, with recommendations. But it's really just that, a backup that you share, something you can do with any Password Manager that allows you to export data. When you change your passwords, they won't be updated and you need another backup. You also will have no clue if/when the person accesses the backup. And Dashlane dares to put "A way to share your Dashlane data with people you trust during an emergency" in their features, marketing BS...
+
+  **1Password**: If you thought Dashlane was bad, 1Password just straight up tells you to give you master password to someone you trust. They market it as making an "emergency kit", provide you a cute template to make sure you don't forget the email and secret key. But it's just giving your password to someone.
+
+  **Zoho vault**: To be honest, Zoho didn't pop in my radar when I was doing my replacement search. It just did now that I'm writing this post. In their system, you setup contacts to receive the full access in case of an emergency. An email is sent to all contacts in the system to alert them when an emergency is declared. This is pretty nice. For an enterprise setting, this sounds quite reasonable. The only thing missing is the possibility of setting a delay so that the emergency can be stopped before access is given.
+
+  **Bitwarden**: It has the full package. You setup contacts, they can trigger the emergency access, you receive an email, the person gets access after a delay you've setup unless to deny it (you can also approve from the email). Good job!
+
+  **Keeper**: They have the full emergency access package just like Bitwarden. Good job! Searching about it though, I can't really find documentation about this other than a blog post.
+
+  These appeared to be the main contenders in this space. So they're are the only one I've used and can have more feedback on.
+
+
+  ### Bitwarden
+  So, after LastPass, I first tried Bitwarden, but quickly got turned off from it.
+
+  To share things with other users, you create an organization and put the users in there. In the organization, you then create collections (folders) which contain the passwords. You can then give access to users based on the collection. It can make sense, but they way it's setup, moving password to the organization is pretty easy, removing them from it (to make them private again) is a pain. You can't. You must recreate it in your private account and delete from the organization.
+
+  The organization idea sounds good at the start, but it ends up feeling more like a hassle when interacting with them in the UI. Simple shared folders would do the trick without needing an organization layer where there is now a concept of administrator which makes the concept of privacy a bit weird. This feels focused on the enterprise context.
+
+  I tried to import my passwords from LastPass into my account that had the "Families" plan and every passwords got imported into the organization instead of my private account and would therefore have been shared if my partner had already made her account. I contacted the support about it and was told basically that I could try again with a link to the doc... Which I did and somehow the passwords got there again... I didn't see a way to select where they go, but maybe I got confused by the way you need to always pick on which organization you are working on.
+
+  I didn't even get to try the Android app before I was tired of this. I couldn't think of myself trying to explain how to do basic things in this to my partner without myself getting frustrated. I wasn't even sure how to get her to import her data without it becoming accessible to me?  I quickly moved on.
+
+  ### Keeper
+  Keeper was the next and last one I saw recommended that matched the very high bar of having a meaningful emergency access. Many people spoke nicely about it online. It's the one I still use, so it's a positive sign about it at least.
+
+  It's a lot more intuitive than Bitwarden was, that's for sure. But that's kind of easy when you have so few features and so few options.... I'd describe this as the Apple of password managers? It does things one way, if you hope to change it behavior, well, there are about 10 checkbox total as settings, and basically no options on a per-login aspect.
+
+  This is what I'm using right now.
+
+  ### Feeling less safe than with LastPass
+
+  There is always this question of when/how often should you have to enter your master password. Too often gets annoying, not often enough can feel unsafe.
+
+  LastPass has these two options that I activated:
+  * make showing/copying any password require to re-enter the master password
+  * allow configuring specific logins to require to re-enter the master password to use them
+
+  The first feature doesn't add much safety because it's quite easy to open the login form, tell LastPass to fill it, and then get the password from the password field. It but it adds a little friction to just browsing the vault and taking every passwords.
+
+  The second option does make things actually secure. Applying it to financial, email and identity related sites is great.
+
+  With those two options, I didn't feel the need to have a timeout on my LastPass session. LastPass allowed me quickly use all those logins that I don't care much about without ever re-entering my master password, but still have the safety for the important passwords.
+
+  Now, with Keeper (and probably many other managers), my only choice is how long do I want before I get logged out... I can specify how many minutes, but it all comes down to how many times per day I want to have to write my password... It's not related to what the password is being used for.
+
+  Oh, and Keeper makes entering the password just a bit extra painful! It first shows your email so you can edit it (that must almost never be needed), you must click next, wait a tiny bit, and then you get the password prompt. Why the extra click? Maybe because in some case there is a 2FA, and they just have a single UI flow? No idea, but poor user experience.
+
+  So yeah, in the end, I settled for having to entered my master password once a day... I'm usually at home, so the hassle of having to do it many times is greater than what I consider the risk to be... But wouldn't it be great if I didn't have to settle and a Password Manager just had those "basic" (in my mind) features.
+
+  So for now, I'm using Keeper. At one point I'll probably look around hoping for alternatives to have a better story for emergency access so that trying them isn't a waste of time and I find one that suits me better.
