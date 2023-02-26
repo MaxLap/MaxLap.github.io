@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Blog Name</title>
-  <subtitle>Blog subtitle</subtitle>
-  <id>http://blog.url.com/blog</id>
-  <link href="http://blog.url.com/blog"/>
-  <link href="http://blog.url.com/blog/feed.xml" rel="self"/>
+  <title>MaxLap.dev</title>
+  <subtitle>Ruby, Rails, Rant &amp; Tools</subtitle>
+  <id>https://maxlap.dev/blog</id>
+  <link href="https://maxlap.dev/blog"/>
+  <link href="https://maxlap.dev/blog/feed.xml" rel="self"/>
   <updated>2023-02-23T19:00:00-05:00</updated>
   <author>
-    <name>Blog Author</name>
+    <name>Maxime Lapointe</name>
   </author>
   <entry>
     <title>Rant: I miss LastPass</title>
-    <link rel="alternate" href="http://blog.url.com/blog/2023/02/24/rant-i-miss-lastpass.html"/>
-    <id>http://blog.url.com/blog/2023/02/24/rant-i-miss-lastpass.html</id>
+    <link rel="alternate" href="https://maxlap.dev/blog/2023/02/24/rant-i-miss-lastpass.html"/>
+    <id>https://maxlap.dev/blog/2023/02/24/rant-i-miss-lastpass.html</id>
     <published>2023-02-23T19:00:00-05:00</published>
     <updated>2023-02-24T13:17:55-05:00</updated>
     <author>
-      <name>Article Author</name>
+      <name>Maxime Lapointe</name>
     </author>
     <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;This post is a bit of a rant / review / basic wishlist for password manager.&lt;/p&gt;
 
@@ -101,12 +101,12 @@
   </entry>
   <entry>
     <title>What makes Ruby's blocks great</title>
-    <link rel="alternate" href="http://blog.url.com/blog/2022/02/10/what-makes-ruby-blocks-great.html"/>
-    <id>http://blog.url.com/blog/2022/02/10/what-makes-ruby-blocks-great.html</id>
+    <link rel="alternate" href="https://maxlap.dev/blog/2022/02/10/what-makes-ruby-blocks-great.html"/>
+    <id>https://maxlap.dev/blog/2022/02/10/what-makes-ruby-blocks-great.html</id>
     <published>2022-02-09T19:00:00-05:00</published>
     <updated>2023-02-24T12:16:20-05:00</updated>
     <author>
-      <name>Article Author</name>
+      <name>Maxime Lapointe</name>
     </author>
     <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;In Ruby, we often talk about &amp;quot;blocks&amp;quot;. While not unique to Ruby, few mainstream languages
 have something I would consider equivalent and, to be frank, I think they&amp;#39;re missing out.&lt;/p&gt;
@@ -287,12 +287,12 @@ Anyhow, it will let you type some Ruby and see the result.&lt;/p&gt;
   </entry>
   <entry>
     <title>You should avoid `includes` in Rails</title>
-    <link rel="alternate" href="http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>
-    <id>http://blog.url.com/blog/2021/02/15/you-should-avoid-includes-in-rails.html</id>
+    <link rel="alternate" href="https://maxlap.dev/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>
+    <id>https://maxlap.dev/blog/2021/02/15/you-should-avoid-includes-in-rails.html</id>
     <published>2021-02-14T19:00:00-05:00</published>
     <updated>2023-02-24T12:16:20-05:00</updated>
     <author>
-      <name>Article Author</name>
+      <name>Maxime Lapointe</name>
     </author>
     <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;code&gt;includes&lt;/code&gt; is the recommended way to load associations of your records eagerly. In fact, the
 &lt;a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations"&gt;Rails guide for eager loading&lt;/a&gt;
