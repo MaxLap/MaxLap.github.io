@@ -38,4 +38,4 @@ as the same file with .rb as extension.
 This could be improved, but right now:
 
 * URL to the page: `#{current_page.url.sub(/\.html$/, '.rb')}`
-* Run the code from the page: `bin/console_on_post path_to_post` (You can use reload! from it)
+* Run the code from the page: `bin/console_on_post.rb path_to_post` (You can use reload! from it)
