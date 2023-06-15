@@ -68,7 +68,7 @@ replacing loops.&lt;/p&gt;
 &lt;p&gt;Think of the previous examples, but stopping (like &lt;code&gt;break&lt;/code&gt;) after &lt;code&gt;v == 3&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;How do you do this with the &lt;code&gt;forEach&lt;/code&gt; method in JavaScript? The simple answer is that you can&amp;#39;t
-so it simply. You either switch to an actual for loop or use exceptions or some other workaround.&lt;/p&gt;
+do it simply. You either switch to an actual for loop or use exceptions or some other workaround.&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;break&lt;/code&gt; cannot be used to exit an anonymous function. But in Ruby, in a block...&lt;/p&gt;
 &lt;/div&gt;
