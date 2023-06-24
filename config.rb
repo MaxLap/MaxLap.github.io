@@ -255,4 +255,15 @@ helpers do
   def content(text)
     Customizing::Filters::Content.render(text)
   end
+
+  $paperscript_canvas_id = 0
+  def paperscript_canvas(**options)
+    next_canvas_id = options.delete(:id) || "paperscript_canvas_#{$paperscript_canvas_id += 1}"
+    next_paperscript_canvas_id(next_canvas_id)
+    content_tag('canvas', nil, options.merge(id: next_canvas_id))
+  end
+
+  def next_paperscript_canvas_id(next_canvas_id)
+    Customizing::Filters::Paperscript.next_canvas_id = next_canvas_id
+  end
 end
