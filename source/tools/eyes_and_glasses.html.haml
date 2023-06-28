@@ -1,0 +1,215 @@
+---
+layout: blog
+---
+= javascript_include_tag "https://unpkg.com/paper@0.12.17/dist/paper-full.min.js"
+= javascript_include_tag "/javascripts/optics.js"
+
+:content
+  # Vision and glasses
+
+  Other than "glasses work by bending light and usually make us see clearer", the way they
+  interact with our vision is not common knowledge. The goal here is to help you understand the
+  effects of glasses on your vision and maybe help you understand how the choice of glasses impacts you.
+
+  I'm not an optometrist, but I learned a lot on the subject. There are of course simplifications in here.
+
+  Your eye is a lens that tries to focus (to bend) all of the light coming from a single point in front of it
+  to a single point on its retina (it's back surface).
+
+  What makes this hard is that that the closer an object, the stronger the lens must be to focus it at the
+  same spot. Yet we can see clearly from many distances, not just from a specific once. The eye
+  accomplishes this by having a lens than can change strength: the crystalline lens.
+
+  The strength of lenses is measured using diopters. Without going into details, what interests us is the
+  size in meters of a diopter... It varies based on the distance!
+
+  Move your mouse in this diagram. The top line is a distance in meter from the left. The second line
+  is consecutive 0.25 diopters. When you move the mouse, you will see the highlighted the distance when
+  going closer (left, aqua) or farther (right, orange) by 0.25 diopter.
+
+= paperscript_canvas(style: "height: 200px; width: 100%")
+:paperscript
+  var diopter_before_cursor = 0.25;
+  var diopter_after_cursor = 0.25;
+
+  view.scrollBy(new Point(-25, -10))
+  makeMeterRuler(paper, 10, 4)
+  makeDiopterRuler(paper, 50, 4, 0.25, 10)
+
+  var vision_area_layer = new Layer()
+  project.insertLayer(0, vision_area_layer)
+
+  var vision_highlight_left = makeVisionArea(paper, vision_area_layer, 10, 40, 'aqua')
+  var vision_highlight_right = makeVisionArea(paper, vision_area_layer, 10, 40, 'orange')
+
+  var cursor_distance_text = new PointText(new Point(20, 100))
+  cursor_distance_text.strokeWidth = 0
+  var min_distance_text = new PointText(new Point(20, 130))
+  min_distance_text.strokeWidth = 0
+  var max_distance_text = new PointText(new Point(20, 160))
+  max_distance_text.strokeWidth = 0
+
+  function updateDistances(x) {
+    if (x < 0) {
+      x = 0
+    }
+    var cursor_position_m = pixelToMeter(paper, x);
+
+    var left_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_left, x, 0.25, 0)
+    var right_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_right, x, 0, -0.25)
+
+    var min_distance = pixelToMeter(paper, left_xs[0])
+    var max_distance = pixelToMeter(paper, right_xs[1])
+
+    cursor_distance_text.content = "Cursor position: " + cursor_position_m.toFixed(3) + "m";
+    min_distance_text.content = "Min distance: " + min_distance.toFixed(3) + "m";
+    max_distance_text.content = "Max distance: " + max_distance.toFixed(3) + "m";
+  }
+
+  function onMouseMove(event) {
+    updateDistances(event.point.x);
+  }
+
+
+:content
+  Notice how the aqua side is smaller than the orange one? When you get close to half a meter, the
+  sizes gets tiny! And at the other extreme, they get huge! In fact, at 4m, adding 0.25 diopter takes you do infinity!
+
+  The crystalline lens of the eye is great, but is has limits. This means that the eye has both a minimum and
+  a maximum distance it can see. Try it, bring a piece of text close to your eye. At one point, it will get blurry.
+
+  How much the eye can change strength lower as you age. Wikipedia says "The age-related decline in accommodation [the
+  strength change] occurs almost universally to less than 2 dioptres by the time a person reaches 45 to 50 years"
+
+  So by the time you reach 45 to 50, your eye is likely to be able to adjust by less 2 diopters.
+
+  Lets visualize this. Here, the mouse location represent your minimum distance and the orange zone represent 2 diopter
+  farther, your optimistic but likely maximum distance.
+
+= paperscript_canvas(style: "height: 200px; width: 100%")
+:paperscript
+  var diopter_before_cursor = 0;
+  var diopter_after_cursor = -2;
+
+  view.scrollBy(new Point(-25, -10))
+  makeMeterRuler(paper, 10, 4)
+  makeDiopterRuler(paper, 50, 4, 0.25, 10)
+
+  var vision_area_layer = new Layer()
+  project.insertLayer(0, vision_area_layer)
+
+  var vision_highlight_right = makeVisionArea(paper, vision_area_layer, 10, 40, 'orange')
+
+  var cursor_distance_text = new PointText(new Point(20, 100))
+  cursor_distance_text.strokeWidth = 0
+  var min_distance_text = new PointText(new Point(20, 130))
+  min_distance_text.strokeWidth = 0
+  var max_distance_text = new PointText(new Point(20, 160))
+  max_distance_text.strokeWidth = 0
+
+  function updateDistances(x) {
+    if (x < 0) {
+      x = 0
+    }
+    var cursor_position_m = pixelToMeter(paper, x);
+
+    var right_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_right, x, diopter_before_cursor, diopter_after_cursor)
+
+    var min_distance = pixelToMeter(paper, right_xs[0])
+    var max_distance = pixelToMeter(paper, right_xs[1])
+
+    cursor_distance_text.content = "Cursor position: " + cursor_position_m.toFixed(3) + "m";
+    min_distance_text.content = "Min distance: " + min_distance.toFixed(3) + "m";
+    max_distance_text.content = "Max distance: " + max_distance.toFixed(3) + "m";
+  }
+
+  function onMouseMove(event) {
+    updateDistances(event.point.x);
+  }
+
+:content
+  If your mouse is close to the left edge, such as minimum distance of 0.25m / 25cm, then the maximum distance
+  would still be quite close at 0.5m / 50cm.
+
+  If you move your mouse to 0.5m, then finally, you get to see clearly at any distance... As long as
+  that distance is above 0.5m.
+
+  ### Vision glasses
+
+  Ok, so how do glasses fit into this? Well they are lenses and are rated in diopters! And when you have multiple lenses,
+  the effect is similar to a single lens with the diopters added. This means when you wear glasses, your whole
+  vision range, minimum and maximum, get shifted by that many diopters.
+
+  The two main categories of people wearing vision glasses into are:
+  * nearsighted (myopia): Without glasses, they see clearly objects that are close, but those that are far are blurry.
+  * farsighted (hyperopia): Without glasses, they see clearly objects that are far, but those that are close get blurry.^
+    As mentioned, an object that is really close to the eye will be blurry for anyone. The idea here is about comfort, if
+    you can't see clearly an object that is half a meter (18 inches) away from you, this can be quite annoying.
+
+  For nearsighted people, glasses will normally have the strength required to bring their vision's maximum distance to
+  close to infinity (from 10 meters, infinity is only 0.1 diopter away). For younger people, their vision's
+  minimum distance will remain low enough to not even notice that it moved.
+
+  For farsighted people, it's all about that minimum distance. It's too far! But unlike nearsighted people, there isn't
+  a clear limit to how much it can be corrected. With strong enough glasses, your minimum could become 10cm. Instead,
+  the goal is to move the vision close enough for most close work to be comfortable. This may vary based on what you do.
+
+  ### Progressive lenses / multi-focal
+
+  TODO: I lack expertise to continue here...
+
+  As your crystalline lens capacity to change strength weaken, a single prescription may not be enough. Instead,
+  we get classes with multiple zones that have different strength.
+
+  Usually the progressives lenses will have 3 strength. Let's visualize this. Let's say the eye has can still change
+  its strength by 1 diopter, here is a simple set of glasses with 0, 1 and 2 diopters.
+
+
+= paperscript_canvas(style: "height: 200px; width: 100%")
+:paperscript
+  var accomodation_diopter = -1
+  var near_diopter = 0, mid_diopter = -1, far_diopter = -2
+
+  view.scrollBy(new Point(-25, -10))
+  makeMeterRuler(paper, 10, 4)
+  makeDiopterRuler(paper, 50, 4, 0.25, 10)
+
+  var vision_area_layer = new Layer()
+  project.insertLayer(0, vision_area_layer)
+
+  var vision_highlight_near = makeVisionArea(paper, vision_area_layer, 0, 15, 'aqua')
+  var vision_highlight_mid = makeVisionArea(paper, vision_area_layer, 17.5, 15, 'orange')
+  var vision_highlight_far = makeVisionArea(paper, vision_area_layer, 35, 15, 'lightpink')
+
+  var cursor_distance_text = new PointText(new Point(20, 100))
+  cursor_distance_text.strokeWidth = 0
+  var min_distance_text = new PointText(new Point(20, 130))
+  min_distance_text.strokeWidth = 0
+  var max_distance_text = new PointText(new Point(20, 160))
+  max_distance_text.strokeWidth = 0
+
+  function updateDistances(x) {
+    if (x < 0) {
+      x = 0
+    }
+    var cursor_position_m = pixelToMeter(paper, x);
+
+    var near_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_near, x, near_diopter, near_diopter + accomodation_diopter)
+    var mid_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_mid, x, mid_diopter, mid_diopter + accomodation_diopter)
+    var far_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_far, x, far_diopter, far_diopter + accomodation_diopter)
+
+    // var min_distance = pixelToMeter(paper, right_xs[0])
+    // var max_distance = pixelToMeter(paper, right_xs[1])
+
+    cursor_distance_text.content = "Cursor position: " + cursor_position_m.toFixed(3) + "m";
+    //min_distance_text.content = "Min distance: " + min_distance.toFixed(3) + "m";
+    //max_distance_text.content = "Max distance: " + max_distance.toFixed(3) + "m";
+  }
+
+  function onMouseMove(event) {
+    updateDistances(event.point.x);
+  }
+
+:content
+  If you line it up for a maximum vision distance of 4m at most (clearly not ideal), then the the minimum ends up being
+  0.3m, it's okay for most tasks..
