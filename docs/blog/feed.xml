@@ -5,10 +5,189 @@
   <id>https://maxlap.dev/blog</id>
   <link href="https://maxlap.dev/blog"/>
   <link href="https://maxlap.dev/blog/feed.xml" rel="self"/>
-  <updated>2023-02-23T19:00:00-05:00</updated>
+  <updated>2023-07-14T20:00:00-04:00</updated>
   <author>
     <name>Maxime Lapointe</name>
   </author>
+  <entry>
+    <title>Vision and glasses</title>
+    <link rel="alternate" href="https://maxlap.dev/blog/2023/07/15/vision-and-glasses.html"/>
+    <id>https://maxlap.dev/blog/2023/07/15/vision-and-glasses.html</id>
+    <published>2023-07-14T20:00:00-04:00</published>
+    <updated>2023-07-15T16:52:09-04:00</updated>
+    <author>
+      <name>Maxime Lapointe</name>
+    </author>
+    <content type="html">&lt;script src="https://unpkg.com/paper@0.12.17/dist/paper-full.min.js"&gt;&lt;/script&gt;
+&lt;script src="/javascripts/optics.js"&gt;&lt;/script&gt;
+&lt;div class="markdown-body"&gt;&lt;h1 id="vision-and-glasses"&gt;Vision and glasses&lt;/h1&gt;
+
+&lt;p&gt;This is not in my usual style. This is a little visualization tool I wanted to have. It&amp;#39;s likely this will be
+improved upon over time. I just wanted to release it to be able to show it to friends and family.&lt;/p&gt;
+
+&lt;p&gt;Other than &amp;quot;glasses work by bending light and usually make us see clearer&amp;quot;, the way they
+interact with our vision is not common knowledge. The goal here is to help you understand the
+effects of glasses on your vision and maybe help you understand how prescriptions impact you.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;m not an optometrist, but I learned a lot on the subject. There are of course simplifications in here.&lt;/p&gt;
+
+&lt;p&gt;Your eye is a lens that tries to focus (to bend) all of the light coming from a single point in front of it
+to a single point on its retina (it&amp;#39;s back surface).&lt;/p&gt;
+
+&lt;p&gt;What makes this hard is that that the closer an object, the stronger the lens must be to focus it at the
+same spot. Yet we can see clearly from many distances, not just from a specific once. The eye
+accomplishes this by having a lens than can change strength: the crystalline lens.&lt;/p&gt;
+
+&lt;p&gt;The strength of lenses is measured using diopters. Without going into details, what interests us is the
+size in meters of a diopter... It varies based on the distance!&lt;/p&gt;
+
+&lt;p&gt;Move your mouse in this diagram. The top line is a distance in meter from the left. The second line
+is consecutive 0.25 diopters. When you move the mouse, you will see the highlighted the distance when
+going closer (left, aqua) or farther (right, orange) by 0.25 diopter.&lt;/p&gt;
+&lt;/div&gt;
+&lt;canvas style="height: 200px; width: 100%" id="paperscript_canvas_3"&gt;&lt;/canvas&gt;
+&lt;script type='text/paperscript' data-paper-canvas="paperscript_canvas_3"&gt;
+  project.currentStyle = {
+    strokeColor: 'black',
+    fillColor: 'black',
+    strokeWidth: 1,
+  };
+  var diopter_before_cursor = 0.25;
+  var diopter_after_cursor = 0.25;
+  
+  view.scrollBy(new Point(-25, -10))
+  makeMeterRuler(paper, 10, 4)
+  makeDiopterRuler(paper, 50, 4, 0.25, 10)
+  
+  var vision_area_layer = new Layer()
+  project.insertLayer(0, vision_area_layer)
+  
+  var vision_highlight_left = makeVisionArea(paper, vision_area_layer, 10, 40, 'aqua')
+  var vision_highlight_right = makeVisionArea(paper, vision_area_layer, 10, 40, 'orange')
+  
+  var cursor_distance_text = new PointText(new Point(20, 100))
+  cursor_distance_text.strokeWidth = 0
+  var min_distance_text = new PointText(new Point(20, 130))
+  min_distance_text.strokeWidth = 0
+  var max_distance_text = new PointText(new Point(20, 160))
+  max_distance_text.strokeWidth = 0
+  
+  function updateDistances(x) {
+    if (x &lt; 0) {
+      x = 0
+    }
+    var cursor_position_m = pixelToMeter(paper, x);
+  
+    var left_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_left, x, 0.25, 0)
+    var right_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_right, x, 0, -0.25)
+  
+    var min_distance = pixelToMeter(paper, left_xs[0])
+    var max_distance = pixelToMeter(paper, right_xs[1])
+  
+    cursor_distance_text.content = "Cursor position: " + cursor_position_m.toFixed(3) + "m";
+    min_distance_text.content = "Min distance: " + min_distance.toFixed(3) + "m";
+    max_distance_text.content = "Max distance: " + max_distance.toFixed(3) + "m";
+  }
+  
+  function onMouseMove(event) {
+    updateDistances(event.point.x);
+  }
+&lt;/script&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Notice how the aqua side is smaller than the orange one? When you get close to half a meter, the
+sizes gets tiny! And at the other extreme, they get huge! In fact, at 4m, adding 0.25 diopter takes you do infinity!&lt;/p&gt;
+
+&lt;p&gt;The crystalline lens of the eye is great, but is has limits. This means that the eye has both a minimum and
+a maximum distance it can see. Try it, bring a piece of text close to your eye. At one point, it will get blurry.&lt;/p&gt;
+
+&lt;p&gt;How much the eye can change strength lower as you age. Wikipedia says &amp;quot;The age-related decline in accommodation [the
+strength change] occurs almost universally to less than 2 dioptres by the time a person reaches 45 to 50 years&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;So by the time you reach 45 to 50, your eye is likely to be able to adjust by less 2 diopters.&lt;/p&gt;
+
+&lt;p&gt;Lets visualize this. Here, the mouse location represent your minimum distance and the orange zone represent 2 diopter
+farther, your optimistic but likely maximum distance.&lt;/p&gt;
+&lt;/div&gt;
+&lt;canvas style="height: 200px; width: 100%" id="paperscript_canvas_4"&gt;&lt;/canvas&gt;
+&lt;script type='text/paperscript' data-paper-canvas="paperscript_canvas_4"&gt;
+  project.currentStyle = {
+    strokeColor: 'black',
+    fillColor: 'black',
+    strokeWidth: 1,
+  };
+  var diopter_before_cursor = 0;
+  var diopter_after_cursor = -2;
+  
+  view.scrollBy(new Point(-25, -10))
+  makeMeterRuler(paper, 10, 4)
+  makeDiopterRuler(paper, 50, 4, 0.25, 10)
+  
+  var vision_area_layer = new Layer()
+  project.insertLayer(0, vision_area_layer)
+  
+  var vision_highlight_right = makeVisionArea(paper, vision_area_layer, 10, 40, 'orange')
+  
+  var cursor_distance_text = new PointText(new Point(20, 100))
+  cursor_distance_text.strokeWidth = 0
+  var min_distance_text = new PointText(new Point(20, 130))
+  min_distance_text.strokeWidth = 0
+  var max_distance_text = new PointText(new Point(20, 160))
+  max_distance_text.strokeWidth = 0
+  
+  function updateDistances(x) {
+    if (x &lt; 0) {
+      x = 0
+    }
+    var cursor_position_m = pixelToMeter(paper, x);
+  
+    var right_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_right, x, diopter_before_cursor, diopter_after_cursor)
+  
+    var min_distance = pixelToMeter(paper, right_xs[0])
+    var max_distance = pixelToMeter(paper, right_xs[1])
+  
+    cursor_distance_text.content = "Cursor position: " + cursor_position_m.toFixed(3) + "m";
+    min_distance_text.content = "Min distance: " + min_distance.toFixed(3) + "m";
+    max_distance_text.content = "Max distance: " + max_distance.toFixed(3) + "m";
+  }
+  
+  function onMouseMove(event) {
+    updateDistances(event.point.x);
+  }
+&lt;/script&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;If your mouse is close to the left edge, such as minimum distance of 0.25m / 25cm, then the maximum distance
+would still be quite close at 0.5m / 50cm.&lt;/p&gt;
+
+&lt;p&gt;If you move your mouse to 0.5m, then finally, you get to see clearly at any distance... As long as
+that distance is above 0.5m.&lt;/p&gt;
+
+&lt;h3 id="vision-glasses"&gt;Vision glasses&lt;/h3&gt;
+
+&lt;p&gt;Ok, so how do glasses fit into this? Well they are lenses and are rated in diopters! And when you have multiple lenses,
+the effect is similar to a single lens with the diopters added. This means when you wear glasses, your whole
+vision range, minimum and maximum, get shifted by that many diopters.&lt;/p&gt;
+
+&lt;p&gt;The two main categories of people wearing vision glasses into are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;nearsighted (myopia): Without glasses, they see clearly objects that are close, but those that are far are blurry.&lt;/li&gt;
+&lt;li&gt;farsighted (hyperopia): Without glasses, they see clearly objects that are far, but those that are close get blurry.&lt;br&gt;
+As mentioned, an object that is really close to the eye will be blurry for anyone. The idea here is about comfort, if
+you can&amp;#39;t see clearly an object that is half a meter (18 inches) away from you, this can be quite annoying.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For nearsighted people, glasses will normally have the strength required to bring their vision&amp;#39;s maximum distance to
+close to infinity (from 10 meters, infinity is only 0.1 diopter away). For younger people, their vision&amp;#39;s
+minimum distance will remain low enough to not even notice that it moved.&lt;/p&gt;
+
+&lt;p&gt;For farsighted people, it&amp;#39;s all about that minimum distance. It&amp;#39;s too far! But unlike nearsighted people, there isn&amp;#39;t
+a clear limit to how much it can be corrected. With strong enough glasses, your minimum could become 10cm. Instead,
+the goal is to move the vision close enough for most close work to be comfortable. This may vary based on what you do.&lt;/p&gt;
+
+&lt;h3 id="progressive-lenses-multi-focal"&gt;Progressive lenses / multi-focal&lt;/h3&gt;
+
+&lt;p&gt;TODO: I lack expertise to continue here...&lt;/p&gt;
+&lt;/div&gt;
+</content>
+  </entry>
   <entry>
     <title>Rant: I miss LastPass</title>
     <link rel="alternate" href="https://maxlap.dev/blog/2023/02/24/rant-i-miss-lastpass.html"/>
@@ -104,7 +283,7 @@
     <link rel="alternate" href="https://maxlap.dev/blog/2022/02/10/what-makes-ruby-blocks-great.html"/>
     <id>https://maxlap.dev/blog/2022/02/10/what-makes-ruby-blocks-great.html</id>
     <published>2022-02-09T19:00:00-05:00</published>
-    <updated>2023-02-24T12:16:20-05:00</updated>
+    <updated>2023-06-15T10:43:59-04:00</updated>
     <author>
       <name>Maxime Lapointe</name>
     </author>

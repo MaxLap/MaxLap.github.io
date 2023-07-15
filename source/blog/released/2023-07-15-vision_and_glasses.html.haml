@@ -1,15 +1,21 @@
 ---
-layout: blog
+title: Vision and glasses
+date: 2023-07-15
+tags: [misc]
 ---
+
 = javascript_include_tag "https://unpkg.com/paper@0.12.17/dist/paper-full.min.js"
 = javascript_include_tag "/javascripts/optics.js"
 
 :content
   # Vision and glasses
 
+  This is not in my usual style. This is a little visualization tool I wanted to have. It's likely this will be
+  improved upon over time. I just wanted to release it to be able to show it to friends and family.
+
   Other than "glasses work by bending light and usually make us see clearer", the way they
   interact with our vision is not common knowledge. The goal here is to help you understand the
-  effects of glasses on your vision and maybe help you understand how the choice of glasses impacts you.
+  effects of glasses on your vision and maybe help you understand how prescriptions impact you.
 
   I'm not an optometrist, but I learned a lot on the subject. There are of course simplifications in here.
 
@@ -158,58 +164,60 @@ layout: blog
 
   TODO: I lack expertise to continue here...
 
-  As your crystalline lens capacity to change strength weaken, a single prescription may not be enough. Instead,
-  we get classes with multiple zones that have different strength.
+- if app.config[:environment] == :development
+  :content
+    As your crystalline lens capacity to change strength weaken, a single prescription may not be enough. Instead,
+    we get classes with multiple zones that have different strength.
 
-  Usually the progressives lenses will have 3 strength. Let's visualize this. Let's say the eye has can still change
-  its strength by 1 diopter, here is a simple set of glasses with 0, 1 and 2 diopters.
+    Usually the progressives lenses will have 3 strength. Let's visualize this. Let's say the eye has can still change
+    its strength by 1 diopter, here is a simple set of glasses with 0, 1 and 2 diopters.
 
 
-= paperscript_canvas(style: "height: 200px; width: 100%")
-:paperscript
-  var accomodation_diopter = -1
-  var near_diopter = 0, mid_diopter = -1, far_diopter = -2
+  = paperscript_canvas(style: "height: 200px; width: 100%")
+  :paperscript
+    var accomodation_diopter = -1
+    var near_diopter = 0, mid_diopter = -1, far_diopter = -2
 
-  view.scrollBy(new Point(-25, -10))
-  makeMeterRuler(paper, 10, 4)
-  makeDiopterRuler(paper, 50, 4, 0.25, 10)
+    view.scrollBy(new Point(-25, -10))
+    makeMeterRuler(paper, 10, 4)
+    makeDiopterRuler(paper, 50, 4, 0.25, 10)
 
-  var vision_area_layer = new Layer()
-  project.insertLayer(0, vision_area_layer)
+    var vision_area_layer = new Layer()
+    project.insertLayer(0, vision_area_layer)
 
-  var vision_highlight_near = makeVisionArea(paper, vision_area_layer, 0, 15, 'aqua')
-  var vision_highlight_mid = makeVisionArea(paper, vision_area_layer, 17.5, 15, 'orange')
-  var vision_highlight_far = makeVisionArea(paper, vision_area_layer, 35, 15, 'lightpink')
+    var vision_highlight_near = makeVisionArea(paper, vision_area_layer, 0, 15, 'aqua')
+    var vision_highlight_mid = makeVisionArea(paper, vision_area_layer, 17.5, 15, 'orange')
+    var vision_highlight_far = makeVisionArea(paper, vision_area_layer, 35, 15, 'lightpink')
 
-  var cursor_distance_text = new PointText(new Point(20, 100))
-  cursor_distance_text.strokeWidth = 0
-  var min_distance_text = new PointText(new Point(20, 130))
-  min_distance_text.strokeWidth = 0
-  var max_distance_text = new PointText(new Point(20, 160))
-  max_distance_text.strokeWidth = 0
+    var cursor_distance_text = new PointText(new Point(20, 100))
+    cursor_distance_text.strokeWidth = 0
+    var min_distance_text = new PointText(new Point(20, 130))
+    min_distance_text.strokeWidth = 0
+    var max_distance_text = new PointText(new Point(20, 160))
+    max_distance_text.strokeWidth = 0
 
-  function updateDistances(x) {
-    if (x < 0) {
-      x = 0
+    function updateDistances(x) {
+      if (x < 0) {
+        x = 0
+      }
+      var cursor_position_m = pixelToMeter(paper, x);
+
+      var near_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_near, x, near_diopter, near_diopter + accomodation_diopter)
+      var mid_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_mid, x, mid_diopter, mid_diopter + accomodation_diopter)
+      var far_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_far, x, far_diopter, far_diopter + accomodation_diopter)
+
+      // var min_distance = pixelToMeter(paper, right_xs[0])
+      // var max_distance = pixelToMeter(paper, right_xs[1])
+
+      cursor_distance_text.content = "Cursor position: " + cursor_position_m.toFixed(3) + "m";
+      //min_distance_text.content = "Min distance: " + min_distance.toFixed(3) + "m";
+      //max_distance_text.content = "Max distance: " + max_distance.toFixed(3) + "m";
     }
-    var cursor_position_m = pixelToMeter(paper, x);
 
-    var near_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_near, x, near_diopter, near_diopter + accomodation_diopter)
-    var mid_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_mid, x, mid_diopter, mid_diopter + accomodation_diopter)
-    var far_xs = updateVisionAreaWithShiftPixelByDiopter(paper, vision_highlight_far, x, far_diopter, far_diopter + accomodation_diopter)
+    function onMouseMove(event) {
+      updateDistances(event.point.x);
+    }
 
-    // var min_distance = pixelToMeter(paper, right_xs[0])
-    // var max_distance = pixelToMeter(paper, right_xs[1])
-
-    cursor_distance_text.content = "Cursor position: " + cursor_position_m.toFixed(3) + "m";
-    //min_distance_text.content = "Min distance: " + min_distance.toFixed(3) + "m";
-    //max_distance_text.content = "Max distance: " + max_distance.toFixed(3) + "m";
-  }
-
-  function onMouseMove(event) {
-    updateDistances(event.point.x);
-  }
-
-:content
-  If you line it up for a maximum vision distance of 4m at most (clearly not ideal), then the the minimum ends up being
-  0.3m, it's okay for most tasks..
+  :content
+    If you line it up for a maximum vision distance of 4m at most (clearly not ideal), then the the minimum ends up being
+    0.3m, it's okay for most tasks..
