@@ -14,7 +14,7 @@
     <link rel="alternate" href="https://maxlap.dev/blog/2023/07/15/vision-and-glasses.html"/>
     <id>https://maxlap.dev/blog/2023/07/15/vision-and-glasses.html</id>
     <published>2023-07-14T20:00:00-04:00</published>
-    <updated>2023-07-15T16:52:09-04:00</updated>
+    <updated>2023-07-16T09:29:04-04:00</updated>
     <author>
       <name>Maxime Lapointe</name>
     </author>
@@ -92,6 +92,10 @@ going closer (left, aqua) or farther (right, orange) by 0.25 diopter.&lt;/p&gt;
   function onMouseMove(event) {
     updateDistances(event.point.x);
   }
+  
+  function onMouseDown(event) {
+    updateDistances(event.point.x);
+  }
 &lt;/script&gt;
 &lt;div class="markdown-body"&gt;&lt;p&gt;Notice how the aqua side is smaller than the orange one? When you get close to half a meter, the
 sizes gets tiny! And at the other extreme, they get huge! In fact, at 4m, adding 0.25 diopter takes you do infinity!&lt;/p&gt;
@@ -150,6 +154,10 @@ farther, your optimistic but likely maximum distance.&lt;/p&gt;
   }
   
   function onMouseMove(event) {
+    updateDistances(event.point.x);
+  }
+  
+  function onMouseDown(event) {
     updateDistances(event.point.x);
   }
 &lt;/script&gt;

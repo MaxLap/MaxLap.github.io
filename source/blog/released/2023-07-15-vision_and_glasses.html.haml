@@ -76,6 +76,10 @@ tags: [misc]
     updateDistances(event.point.x);
   }
 
+  function onMouseDown(event) {
+    updateDistances(event.point.x);
+  }
+
 
 :content
   Notice how the aqua side is smaller than the orange one? When you get close to half a meter, the
@@ -130,6 +134,10 @@ tags: [misc]
   }
 
   function onMouseMove(event) {
+    updateDistances(event.point.x);
+  }
+
+  function onMouseDown(event) {
     updateDistances(event.point.x);
   }
 
@@ -215,6 +223,10 @@ tags: [misc]
     }
 
     function onMouseMove(event) {
+      updateDistances(event.point.x);
+    }
+
+    function onMouseDown(event) {
       updateDistances(event.point.x);
     }
 
