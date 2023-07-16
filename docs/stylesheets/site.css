@@ -570,6 +570,8 @@ p, pre {
 
 .page-wrapper {
   margin: 0 auto;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
   width: 1000px;
   width: -webkit-min-content;
   width: -moz-min-content;
