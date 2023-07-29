@@ -104,10 +104,10 @@ a maximum distance it can see. Try it, bring a piece of text close to your eye. 
 &lt;p&gt;How much the eye can change strength lower as you age. Wikipedia says &amp;quot;The age-related decline in accommodation [the
 strength change] occurs almost universally to less than 2 dioptres by the time a person reaches 45 to 50 years&amp;quot;&lt;/p&gt;
 
-&lt;p&gt;So by the time you reach 45 to 50, your eye is likely to be able to adjust by less 2 diopters.&lt;/p&gt;
+&lt;p&gt;So by the time you reach 45 to 50, your eye is likely to be able to adjust by less than 2 diopters.&lt;/p&gt;
 
 &lt;p&gt;Lets visualize this. Here, the mouse location represent your minimum distance and the orange zone represent 2 diopter
-farther, your optimistic but likely maximum distance.&lt;/p&gt;
+farther: your optimistic but likely maximum distance.&lt;/p&gt;
 &lt;/div&gt;
 &lt;canvas style="height: 200px; width: 100%" id="paperscript_canvas_4"&gt;&lt;/canvas&gt;
 &lt;script type='text/paperscript' data-paper-canvas="paperscript_canvas_4"&gt;
