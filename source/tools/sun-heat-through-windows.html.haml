@@ -1,0 +1,328 @@
+---
+title: Sun heat through windows
+layout: 'blog'
+---
+-# might be interesting: https://stackoverflow.com/questions/61336948/calculating-the-cardinal-direction-of-a-smartphone-with-js
+
+= javascript_include_tag "/javascripts/utils.js"
+= javascript_include_tag "https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"
+= javascript_include_tag "/javascripts/sun_heat_through_windows.js"
+= javascript_include_tag "https://cdn.jsdelivr.net/npm/chart.js@4.3.3/dist/chart.umd.min.js"
+= javascript_include_tag "https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"
+
+:javascript
+  Chart.defaults.interaction.intersect = false
+  Chart.defaults.interaction.mode = 'index'
+  Chart.defaults.pointRadius = 1
+  Chart.defaults.plugins.legend.display = false
+  Chart.defaults.plugins.title.display = true
+  Chart.defaults.animation.duration = 300
+
+  window.chart_infos = {
+    latitude: 45.5,
+    orientation: 180,
+    date: new Date(),
+    shgc: 0.5,
+  }
+
+  window.ChartDefaultsYearly = {
+    data: {
+      labels: days_of_year_labels,
+    },
+    options: {
+      plugins: {
+        annotation: {
+          annotations: {
+            current_day: {
+              type: 'line',
+              borderColor: 'black',
+              borderWidth: 1,
+              click: function({chart, element}) {
+                console.log('Line annotation clicked');
+              },
+              label: {
+                backgroundColor: 'rgba(0,0,0,0)',
+                position: 'end',
+                color: 'black',
+                content: function() { return dateStringWithoutYear(chart_infos.date) },
+                display: true,
+              },
+              drawTime: 'beforeDatasetsDraw',
+              scaleID: 'x',
+              value: function() { return dayOfYear(chart_infos.date) - 1 },
+            }
+          }
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            callback: ticksCallbackFirstOfEachMonth,
+          }
+        }
+      }
+    }
+  }
+
+  window.ChartDefaultsDaily = {
+    data: {
+      labels: hours_of_day_labels,
+    },
+    options: {
+      plugins: {
+      },
+      scales: {
+        x: {
+          ticks: {
+            callback: ticksCallbackRoundHours,
+          }
+        }
+      }
+    }
+  }
+
+  window.ChartDefaultsIrradiance = {
+    options: {
+      scales: {
+        y: {
+          min: 0,
+          max: 1100,
+          ticks: {
+            count: 12,
+          }
+        },
+      }
+    }
+  }
+
+:content
+  # Sun heat through window calculator
+
+  How much heat from the sunlight gets through your windows? This calculator aims to give you an idea.
+
+  Just provide a few bits of information:
+
+  Your latitude:
+  <input type="number" name="latitude" oninput="updateInputs()" value="45.5" />
+  <button onclick="navigator.geolocation.getCurrentPosition(setLatitudeFromGeolocationPosition, function(){}, { maximumAge: 60000 });">
+  Use my location (if available)
+  </button>
+
+  Window facing direction (from inside):
+  <select name="window_main_orientation_angle" oninput="updateInputs()">
+    <option value=0>North</Option>
+    <option value=45>North-east</Option>
+    <option value=90>East</Option>
+    <option value=135>South-East</Option>
+    <option value=180 selected>South</Option>
+    <option value=225>South-West</Option>
+    <option value=270>West</Option>
+    <option value=315>North-West</Option>
+  </select>
+
+  (Optional) to be more precise, specify how "offset" your window is to the selected cardinal direction.
+  This is an angle, positive number means the window faces more to the right (clock-wise on a map)
+  <input type="number" name="window_orientation_offset_angle" value="0" oninput="updateInputs()"/>
+
+  Overall angle relative to north: <input type="number" name="window_final_orientation_angle" value="180" readonly disabled=disabled/>
+
+  Date to focus on: <input type="date" name="date" value="" oninput="updateInputs()"/> (The year doesn't matter)
+
+  The specific heat gain coefficient of your window (SHGC): <input type="number" name="shgc" value="0.5" oninput="updateInputs()"/>
+  Usually a number between 0.2 and 0.8. This directly multiplies with the sunlight strength, so even if you don't know,
+  you can still see what the shape looks like. The right one for your window would just be more of less "flat" (toward the bottom)
+
+  ### Results
+
+  On a clear day on that date, here is how much sun energy going getting inside based on the time:
+
+  <div>
+    <canvas id="w_per_m2_of_frame_daily"></canvas>
+  </div>
+
+:javascript
+  let ctx3 = document.getElementById('w_per_m2_of_frame_daily');
+
+  new Chart(ctx3, dupMergeOptions(ChartDefaultsDaily, ChartDefaultsIrradiance, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'W per m² in the frame',
+        data: refreshableArray(function() {
+          return hoursOfDayDataset(function(hour) {
+            return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(chart_infos.date, hour, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
+          })
+        }),
+      }]
+    },
+    options: {
+      animation: false,
+      plugins: {
+        title: {
+          text: 'Watts per m² of window throughout a clear day',
+        }
+      },
+    }
+  }));
+
+:content
+  The numbers are per square meter (m²). Divide by 10.75 to know per square feet (ft²).
+
+  Here, you want see how the peek changes
+
+
+  <div>
+    <canvas id="w_per_m2_of_frame_yearly"></canvas>
+  </div>
+
+:javascript
+  document.querySelector('input[name="date"]').valueAsDate = chart_infos.date
+
+  let ctx2 = document.getElementById('w_per_m2_of_frame_yearly');
+
+  new Chart(ctx2, dupMergeOptions(ChartDefaultsYearly, ChartDefaultsIrradiance, {
+    type: 'line',
+    title: 'Watt on clear day at noon through the year based on area of windows',
+    data: {
+      datasets: [{
+        label: 'W per m² in the frame',
+        data: refreshableArray(function() {
+          return daysOfYearDataset(function(date) {
+            return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(date, 12, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
+          })
+        }),
+      }]
+    },
+    options: {
+      animation: false,
+      plugins: {
+        title: {
+          text: 'Watts at noon* per m² of window on a clear day',
+        },
+      },
+    }
+  }));
+
+:content
+  Area of the window (or fill the HxW below):
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_area_m2" value="1" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">m²</span>
+  </span> =
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_height_ft2" value="10.76" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">ft²</span>
+  </span>
+
+  Height of the window:
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_height_cm" value="" oninput="updateInputs()" style="width: 100px"/>
+  <span class="input-suffix__suffix">cm</span>
+  </span> =
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_height_m" value="" oninput="updateInputs()" style="width: 100px"/>
+  <span class="input-suffix__suffix">m</span>
+  </span> =
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_height_in" value="" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">in</span>
+  </span> =
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_height_ft" value="" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">ft</span>
+  </span>
+
+  Width of the window:
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_width_cm" value="" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">cm</span>
+  </span> =
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_width_m" value="" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">m</span>
+  </span> =
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_width_in" value="" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">in</span>
+  </span> =
+  <span class="input-suffix__wrapper">
+    <input type="number" name="window_width_ft" value="" oninput="updateInputs()" style="width: 100px"/>
+    <span class="input-suffix__suffix">ft</span>
+  </span>
+
+
+  Outdoors, if you have a 1m² area on the ground that is lit by the sun on a clear day, this graph shows how much energy
+  (heat) it is receiving. (Note, the surface doesn't absorb 100% of that energy)
+
+  <div>
+    <canvas id="w_per_m2_of_ground_lit"></canvas>
+  </div>
+
+:javascript
+  let ctx1 = document.getElementById('w_per_m2_of_ground_lit');
+
+  new Chart(ctx1, dupMergeOptions(ChartDefaultsYearly, ChartDefaultsIrradiance, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'W per m² of outdoor ground lit',
+        data: refreshableArray(function() {
+          return daysOfYearDataset(function(date) {
+            return chart_infos.shgc * sunStrengthOverallMultiplierAt(date, 12, chart_infos.latitude) * solar_constant_w
+          })
+        }),
+      }]
+    },
+    options: {
+      animation: false,
+      plugins: {
+        title: {
+          text: 'Watts at noon* per m² of outdoor ground lit on a clear day',
+        }
+      },
+    }
+  }));
+
+:content
+  This is highest when the sun is at its highest in the sky, in the summer. This is mainly due to the projection effect.
+
+
+
+
+
+:javascript
+  function setLatitudeFromGeolocationPosition(pos) {
+    const crd = pos.coords;
+    document.querySelector('input[name="latitude"]').value = crd.latitude
+    updateResults()
+  }
+
+  function updateInputs() {
+    chart_infos.latitude = document.querySelector('input[name="latitude"]').value || 0;
+    let orientation_angle = parseInt(document.querySelector('select[name="window_main_orientation_angle"]').value) || 0;
+    orientation_angle += parseInt(document.querySelector('input[name="window_orientation_offset_angle"]').value) || 0;
+    orientation_angle = orientation_angle % 360
+    document.querySelector('input[name="window_final_orientation_angle"]').value = orientation_angle
+
+    chart_infos.orientation = orientation_angle
+
+    let date = document.querySelector('input[name="date"]').valueAsDate
+    if (date) {
+      chart_infos.date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+    } else {
+      chart_infos.date = new Date()
+    }
+
+    let shgc = parseFloat(document.querySelector('input[name="shgc"]').value)
+    if (shgc > 1) {
+      shgc = 1.0
+    } else if (shgc < 0) {
+      shgc = 0
+    } else if (!shgc) {
+      shgc = 0.5
+    }
+    chart_infos.shgc = shgc
+
+    updateRefreshableCharts()
+  }
+

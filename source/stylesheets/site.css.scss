@@ -3,6 +3,7 @@
 @import 'buttons';
 @import 'code-book';
 @import 'colors';
+@import 'inputs';
 
 @mixin default-margin-top($size) {
   p, .markdown-body, .code-book {
