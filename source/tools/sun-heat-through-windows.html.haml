@@ -17,12 +17,15 @@ layout: 'blog'
   Chart.defaults.plugins.legend.display = false
   Chart.defaults.plugins.title.display = true
   Chart.defaults.animation.duration = 300
+  Chart.defaults.scales.y = { min: 0 }
 
   window.chart_infos = {
     latitude: 45.5,
     orientation: 180,
     date: new Date(),
     shgc: 0.5,
+    area_m2: 1,
+    area_string: '1m²'
   }
 
   window.ChartDefaultsYearly = {
@@ -37,9 +40,6 @@ layout: 'blog'
               type: 'line',
               borderColor: 'black',
               borderWidth: 1,
-              click: function({chart, element}) {
-                console.log('Line annotation clicked');
-              },
               label: {
                 backgroundColor: 'rgba(0,0,0,0)',
                 position: 'end',
@@ -66,7 +66,7 @@ layout: 'blog'
 
   window.ChartDefaultsDaily = {
     data: {
-      labels: hours_of_day_labels,
+      labels: hours_of_day_by_15_mins_labels,
     },
     options: {
       plugins: {
@@ -85,16 +85,43 @@ layout: 'blog'
     options: {
       scales: {
         y: {
-          min: 0,
-          max: 1100,
+          max: function() { return 1100 * chart_infos.shgc },
+          title: {
+            display: true,
+            text: 'W/m²',
+            font: {
+              style: 'normal',
+            },
+          },
           ticks: {
             count: 12,
+            callback: ticksCallbackRoundValues,
           }
         },
       }
     }
   }
 
+  window.ChartDefaultsIrradianceWithSize = {
+    options: {
+      scales: {
+        y: {
+          max: function() { return 1100 * chart_infos.area_m2 * chart_infos.shgc },
+          title: {
+            display: true,
+            text: 'Watts',
+            font: {
+              style: 'normal',
+            },
+          },
+          ticks: {
+            count: 12,
+            callback: ticksCallbackRoundValues,
+          }
+        },
+      }
+    }
+  }
 :content
   # Sun heat through window calculator
 
@@ -129,10 +156,13 @@ layout: 'blog'
   Date to focus on: <input type="date" name="date" value="" oninput="updateInputs()"/> (The year doesn't matter)
 
   The specific heat gain coefficient of your window (SHGC): <input type="number" name="shgc" value="0.5" oninput="updateInputs()"/>
-  Usually a number between 0.2 and 0.8. This directly multiplies with the sunlight strength, so even if you don't know,
-  you can still see what the shape looks like. The right one for your window would just be more of less "flat" (toward the bottom)
+  Usually a number between 0.2 and 0.8. This directly multiplies with the sunlight strength, and in the charts, the shape
+  remains the same, it just changes the numbers on the left axis.
 
   ### Results
+
+  Note: The numbers may not be intuitive because there are multiple effects interacting. I might make a blog post to
+  explain them at one point.
 
   On a clear day on that date, here is how much sun energy going getting inside based on the time:
 
@@ -141,15 +171,13 @@ layout: 'blog'
   </div>
 
 :javascript
-  let ctx3 = document.getElementById('w_per_m2_of_frame_daily');
-
-  new Chart(ctx3, dupMergeOptions(ChartDefaultsDaily, ChartDefaultsIrradiance, {
+  new Chart(document.getElementById('w_per_m2_of_frame_daily'), dupMergeOptions(ChartDefaultsDaily,  {
     type: 'line',
     data: {
       datasets: [{
-        label: 'W per m² in the frame',
+        label: 'W per m² of window',
         data: refreshableArray(function() {
-          return hoursOfDayDataset(function(hour) {
+          return hoursOfDayBy15MinsDataset(function(hour) {
             return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(chart_infos.date, hour, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
           })
         }),
@@ -166,10 +194,38 @@ layout: 'blog'
   }));
 
 :content
-  The numbers are per square meter (m²). Divide by 10.75 to know per square feet (ft²).
+  The numbers are per square meter (m²). Divide by 10 for an approximation of per square feet (ft²).
 
-  Here, you want see how the peek changes
+  asd
+  <div>
+  <canvas id="asd"></canvas>
+  </div>
 
+:javascript
+  new Chart(document.getElementById('asd'), dupMergeOptions(ChartDefaultsYearly, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'W per m² of window',
+        data: refreshableArray(function() {
+          return daysOfYearDataset(function(date) {
+            return chart_infos.shgc * totalSunEnergyThroughWindowMultiplierAt(date, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
+          })
+        }),
+      }]
+    },
+    options: {
+      animation: false,
+      plugins: {
+        title: {
+          text: 'Watts at noon per m² of window on a clear day',
+        },
+      },
+    }
+  }));
+
+:content
+  Here, you can see how the value changes through the year at noon.
 
   <div>
     <canvas id="w_per_m2_of_frame_yearly"></canvas>
@@ -178,14 +234,11 @@ layout: 'blog'
 :javascript
   document.querySelector('input[name="date"]').valueAsDate = chart_infos.date
 
-  let ctx2 = document.getElementById('w_per_m2_of_frame_yearly');
-
-  new Chart(ctx2, dupMergeOptions(ChartDefaultsYearly, ChartDefaultsIrradiance, {
+  new Chart(document.getElementById('w_per_m2_of_frame_yearly'), dupMergeOptions(ChartDefaultsYearly, {
     type: 'line',
-    title: 'Watt on clear day at noon through the year based on area of windows',
     data: {
       datasets: [{
-        label: 'W per m² in the frame',
+        label: 'W per m² of window',
         data: refreshableArray(function() {
           return daysOfYearDataset(function(date) {
             return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(date, 12, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
@@ -197,7 +250,7 @@ layout: 'blog'
       animation: false,
       plugins: {
         title: {
-          text: 'Watts at noon* per m² of window on a clear day',
+          text: 'Watts at noon per m² of window on a clear day',
         },
       },
     }
@@ -205,70 +258,38 @@ layout: 'blog'
 
 :content
   Area of the window (or fill the HxW below):
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_area_m2" value="1" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">m²</span>
-  </span> =
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_height_ft2" value="10.76" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">ft²</span>
-  </span>
+  <input type="number" name="window_area" value="1" onchange="updateInputs()" style="width: 100px"/>
+  <select name="window_area_unit" oninput="updateInputs()">
+    <option value='cm' data-ratio=0.0001>cm²</Option>
+    <option value='m' data-ratio=1 selected>m²</Option>
+    <option value='in' data-ratio=0.00064516>in²</Option>
+    <option value='ft' data-ratio=0.092903>ft²</Option>
+  </select>
 
-  Height of the window:
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_height_cm" value="" oninput="updateInputs()" style="width: 100px"/>
-  <span class="input-suffix__suffix">cm</span>
-  </span> =
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_height_m" value="" oninput="updateInputs()" style="width: 100px"/>
-  <span class="input-suffix__suffix">m</span>
-  </span> =
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_height_in" value="" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">in</span>
-  </span> =
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_height_ft" value="" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">ft</span>
-  </span>
-
-  Width of the window:
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_width_cm" value="" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">cm</span>
-  </span> =
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_width_m" value="" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">m</span>
-  </span> =
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_width_in" value="" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">in</span>
-  </span> =
-  <span class="input-suffix__wrapper">
-    <input type="number" name="window_width_ft" value="" oninput="updateInputs()" style="width: 100px"/>
-    <span class="input-suffix__suffix">ft</span>
-  </span>
-
-
-  Outdoors, if you have a 1m² area on the ground that is lit by the sun on a clear day, this graph shows how much energy
-  (heat) it is receiving. (Note, the surface doesn't absorb 100% of that energy)
+  Height
+  <input type="number" name="window_height" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
+  x Width
+  <input type="number" name="window_width" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
+  <select name="window_dimensions_unit" oninput="updateAreaFromDimensions()">
+    <option value='cm'>cm</Option>
+    <option value='m'>m</Option>
+    <option value='in'>in</Option>
+    <option value='ft'>ft</Option>
+  </select>
 
   <div>
-    <canvas id="w_per_m2_of_ground_lit"></canvas>
+    <canvas id="w_in_area_daily"></canvas>
   </div>
 
 :javascript
-  let ctx1 = document.getElementById('w_per_m2_of_ground_lit');
-
-  new Chart(ctx1, dupMergeOptions(ChartDefaultsYearly, ChartDefaultsIrradiance, {
+  new Chart(document.getElementById('w_in_area_daily'), dupMergeOptions(ChartDefaultsDaily, ChartDefaultsIrradianceWithSize, {
     type: 'line',
     data: {
       datasets: [{
-        label: 'W per m² of outdoor ground lit',
+        label: 'W through the window',
         data: refreshableArray(function() {
-          return daysOfYearDataset(function(date) {
-            return chart_infos.shgc * sunStrengthOverallMultiplierAt(date, 12, chart_infos.latitude) * solar_constant_w
+          return hoursOfDayBy15MinsDataset(function(hour) {
+            return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(chart_infos.date, hour, chart_infos.latitude, chart_infos.orientation) * solar_constant_w * chart_infos.area_m2
           })
         }),
       }]
@@ -277,18 +298,15 @@ layout: 'blog'
       animation: false,
       plugins: {
         title: {
-          text: 'Watts at noon* per m² of outdoor ground lit on a clear day',
+          text: 'W through the window throughout a clear day',
         }
       },
     }
   }));
 
+
 :content
-  This is highest when the sun is at its highest in the sky, in the summer. This is mainly due to the projection effect.
-
-
-
-
+  as
 
 :javascript
   function setLatitudeFromGeolocationPosition(pos) {
@@ -323,6 +341,38 @@ layout: 'blog'
     }
     chart_infos.shgc = shgc
 
+    let window_area = parseFloat(document.querySelector('input[name="window_area"]').value)
+
+    chart_infos.area = window_area
+    chart_infos.area_unit = document.querySelector('select[name="window_area_unit"]').selectedOptions[0].text
+    chart_infos.area_m2 = window_area * parseFloat(document.querySelector('select[name="window_area_unit"]').selectedOptions[0].dataset['ratio'])
+
     updateRefreshableCharts()
   }
+
+  function updateAreaFromDimensions() {
+    let window_height = parseFloat(document.querySelector('input[name="window_height"]').value)
+    let window_width = parseFloat(document.querySelector('input[name="window_width"]').value)
+    if (!window_height || !window_width) {
+      return
+    }
+
+    let area = window_height * window_width
+    let dimensions_unit = document.querySelector('select[name="window_dimensions_unit"]').value
+
+    if (dimensions_unit == 'cm') {
+      dimensions_unit = 'm'
+      area *= 0.0001
+    } else if (dimensions_unit == 'in') {
+      dimensions_unit = 'ft'
+      area /= 144
+    }
+
+    document.querySelector('input[name="window_area"]').value = area
+    document.querySelector('select[name="window_area_unit"]').value = dimensions_unit
+    chart_infos.area_string = area + dimensions_unit + '²'
+
+    updateInputs()
+  }
+
 

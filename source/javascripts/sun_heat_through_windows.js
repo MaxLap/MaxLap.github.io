@@ -149,6 +149,16 @@ function overallSunStrengthThroughFrameMultiplier(altitude_angle, azimuth_angle,
     return sunStrengthOverallMultiplier(altitude_angle) * frameToShadowOverallMultiplier(altitude_angle, orientation_offset);
 }
 
+function totalSunEnergyThroughWindowMultiplierAt(date, latitude, frame_orientation_angle) {
+    let sum = 0
+    hoursOfDayBy15MinsDataset(function(solar_hour) {
+        sum += overallSunStrengthThroughFrameMultiplierAt(date, solar_hour, latitude, frame_orientation_angle)
+    })
+
+    // Dividing by 4 because the values are taken per 15 mins
+    return sum / 4
+}
+
 // Not meant to be fully general. Expects the line to cross in 2 points. Returns the two roots
 function lineCrossingCircleRoots(radius, line_slope, line_y_at_0) {
     // Line is y = ax + b
@@ -183,14 +193,33 @@ function ticksCallbackFirstOfEachMonth(value, index, ticks) {
     }
 }
 
-function hoursOfDayDataset(func) {
+function hoursOfDayBy15MinsDataset(func, wrap) {
     let data = []
-    for (let i=0; i <= 96; i++) {
+    for (let i=0; i <= 95; i++) {
         data.push(func(i * 0.25))
+    }
+
+    if (wrap) {
+        data.push(func(96))
     }
     return data
 }
 
+
+let hours_of_day_by_15_mins_labels = hoursOfDayBy15MinsDataset(hourStringFromHourFloat)
+
+function hoursOfDayDataset(func, wrap) {
+    let data = []
+    for (let i=0; i <= 23; i++) {
+        data.push(func(i))
+    }
+
+    if (wrap) {
+        data.push(func(24))
+    }
+
+    return data
+}
 
 let hours_of_day_labels = hoursOfDayDataset(hourStringFromHourFloat)
 
@@ -200,5 +229,15 @@ function ticksCallbackRoundHours(value, index, ticks) {
         return label
     } else {
         return undefined
+    }
+}
+
+function ticksCallbackRoundValues(value, index, ticks) {
+    if (value < 10) {
+        return Math.round(value * 100) / 100
+    } else if (value < 10) {
+        return Math.round(value * 10) / 10
+    } else {
+        return value
     }
 }
