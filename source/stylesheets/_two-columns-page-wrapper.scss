@@ -1,0 +1,11 @@
+.two-columns-page-wrapper {
+  display:block;
+  padding: 0 5px;
+}
+
+@media (min-width:1024px) {
+  .two-columns-page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}

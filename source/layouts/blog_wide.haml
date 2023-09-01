@@ -1,0 +1,25 @@
+- content_for :head do
+  = feed_tag :atom, "#{blog.options.prefix.to_s}/feed.xml", title: "Atom Feed"
+
+= wrap_layout :layout do
+  .page-wrapper
+    %header
+      %nav
+        .header__site-name.site-name
+          = link_to '/blog' do
+            MaxLap
+            %span.header__site-name-extension<>
+              \.dev
+
+        .header__navbar
+          = link_to 'Blog', '/blog', class: 'navbar-item'
+          = link_to 'About', '/about.html', class: 'navbar-item'
+
+  %div
+    = yield
+
+  .page-wrapper
+    %footer
+      = link_with_icon 'MaxLap', 'https://github.com/MaxLap', partial('reuseables/github_svg')
+      %br
+      = link_to 'blog@maxlap.dev', 'mailto:blog@maxlap.dev'

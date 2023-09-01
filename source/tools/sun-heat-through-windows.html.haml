@@ -1,6 +1,6 @@
 ---
 title: Sun heat through windows
-layout: 'blog'
+layout: 'blog_wide'
 ---
 -# might be interesting: https://stackoverflow.com/questions/61336948/calculating-the-cardinal-direction-of-a-smartphone-with-js
 
@@ -122,193 +122,171 @@ layout: 'blog'
       }
     }
   }
-:content
-  # Sun heat through window calculator
 
-  How much heat from the sunlight gets through your windows? This calculator aims to give you an idea.
+.two-columns-page-wrapper
+  %div{style: "padding-right: 5px"}
+    :content
+      # Sun heat through window calculator
 
-  Just provide a few bits of information:
+      How much heat from the sunlight gets through your windows? This calculator aims to give you an idea.
 
-  Your latitude:
-  <input type="number" name="latitude" oninput="updateInputs()" value="45.5" />
-  <button onclick="navigator.geolocation.getCurrentPosition(setLatitudeFromGeolocationPosition, function(){}, { maximumAge: 60000 });">
-  Use my location (if available)
-  </button>
+      Just provide a few bits of information:
 
-  Window facing direction (from inside):
-  <select name="window_main_orientation_angle" oninput="updateInputs()">
-    <option value=0>North</Option>
-    <option value=45>North-east</Option>
-    <option value=90>East</Option>
-    <option value=135>South-East</Option>
-    <option value=180 selected>South</Option>
-    <option value=225>South-West</Option>
-    <option value=270>West</Option>
-    <option value=315>North-West</Option>
-  </select>
+      Your latitude:
+      <input type="number" name="latitude" oninput="updateInputs()" value="45.5" />
+      <button onclick="navigator.geolocation.getCurrentPosition(setLatitudeFromGeolocationPosition, function(){}, { maximumAge: 60000 });">
+      Use my location (if available)
+      </button>
 
-  (Optional) to be more precise, specify how "offset" your window is to the selected cardinal direction.
-  This is an angle, positive number means the window faces more to the right (clock-wise on a map)
-  <input type="number" name="window_orientation_offset_angle" value="0" oninput="updateInputs()"/>
+      Window facing direction (from inside):
+      <select name="window_main_orientation_angle" oninput="updateInputs()">
+        <option value=0>North</Option>
+        <option value=45>North-east</Option>
+        <option value=90>East</Option>
+        <option value=135>South-East</Option>
+        <option value=180 selected>South</Option>
+        <option value=225>South-West</Option>
+        <option value=270>West</Option>
+        <option value=315>North-West</Option>
+      </select>
 
-  Overall angle relative to north: <input type="number" name="window_final_orientation_angle" value="180" readonly disabled=disabled/>
+      (Optional) to be more precise, specify how "offset" your window is to the selected cardinal direction.
+      This is an angle, positive number means the window faces more to the right (clock-wise on a map)
+      <input type="number" name="window_orientation_offset_angle" value="0" oninput="updateInputs()"/>
 
-  Date to focus on: <input type="date" name="date" value="" oninput="updateInputs()"/> (The year doesn't matter)
+      Overall angle relative to north: <input type="number" name="window_final_orientation_angle" value="180" readonly disabled=disabled/>
 
-  The specific heat gain coefficient of your window (SHGC): <input type="number" name="shgc" value="0.5" oninput="updateInputs()"/>
-  Usually a number between 0.2 and 0.8. This directly multiplies with the sunlight strength, and in the charts, the shape
-  remains the same, it just changes the numbers on the left axis.
+      Date to focus on: <input type="date" name="date" value="" oninput="updateInputs()"/> (The year doesn't matter)
 
-  ### Results
+      The specific heat gain coefficient of your window (SHGC): <input type="number" name="shgc" value="0.5" oninput="updateInputs()"/>
+      Usually a number between 0.2 and 0.8. This directly multiplies with the sunlight strength. The shape of the charts
+      remains the same. the SHGC only affects the numbers on the left axis.
 
-  Note: The numbers may not be intuitive because there are multiple effects interacting. I might make a blog post to
-  explain them at one point.
+      Area of the window (or fill the HxW below):
+      <input type="number" name="window_area" value="1" onchange="updateInputs()" style="width: 100px"/>
+      <select name="window_area_unit" oninput="updateInputs()">
+        <option value='cm' data-ratio=0.0001>cm²</Option>
+        <option value='m' data-ratio=1 selected>m²</Option>
+        <option value='in' data-ratio=0.00064516>in²</Option>
+        <option value='ft' data-ratio=0.092903>ft²</Option>
+      </select>
+      <br/>
+      Height
+      <input type="number" name="window_height" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
+      x Width
+      <input type="number" name="window_width" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
+      <select name="window_dimensions_unit" oninput="updateAreaFromDimensions()">
+        <option value='cm'>cm</Option>
+        <option value='m'>m</Option>
+        <option value='in'>in</Option>
+        <option value='ft'>ft</Option>
+      </select>
+      <br/>
+      If you have multiple windows in the same direction, you can add their area.
 
-  On a clear day on that date, here is how much sun energy going getting inside based on the time:
+      ### Results
 
-  <div>
-    <canvas id="w_per_m2_of_frame_daily"></canvas>
-  </div>
+      Note: The numbers and charts may not be intuitive because there are multiple effects interacting. I might make a blog post to
+      explain them at one point.
 
-:javascript
-  new Chart(document.getElementById('w_per_m2_of_frame_daily'), dupMergeOptions(ChartDefaultsDaily,  {
-    type: 'line',
-    data: {
-      datasets: [{
-        label: 'W per m² of window',
-        data: refreshableArray(function() {
-          return hoursOfDayBy15MinsDataset(function(hour) {
-            return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(chart_infos.date, hour, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
-          })
-        }),
-      }]
-    },
-    options: {
-      animation: false,
-      plugins: {
-        title: {
-          text: 'Watts per m² of window throughout a clear day',
-        }
-      },
-    }
-  }));
+      (On wide screens, the results show on the right.)
 
-:content
-  The numbers are per square meter (m²). Divide by 10 for an approximation of per square feet (ft²).
+  %div{style: "border-left: 1px solid lightgrey; padding-left: 5px"}
+    :content
+      On a clear day on that date, here is how much sun energy is getting inside through the window:
 
-  asd
-  <div>
-  <canvas id="asd"></canvas>
-  </div>
+      <div style="height: 35vh">
+        <canvas id="w_through_day"></canvas>
+      </div>
 
-:javascript
-  new Chart(document.getElementById('asd'), dupMergeOptions(ChartDefaultsYearly, {
-    type: 'line',
-    data: {
-      datasets: [{
-        label: 'W per m² of window',
-        data: refreshableArray(function() {
-          return daysOfYearDataset(function(date) {
-            return chart_infos.shgc * totalSunEnergyThroughWindowMultiplierAt(date, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
-          })
-        }),
-      }]
-    },
-    options: {
-      animation: false,
-      plugins: {
-        title: {
-          text: 'Watts at noon per m² of window on a clear day',
+    :javascript
+      new Chart(document.getElementById('w_through_day'), dupMergeOptions(ChartDefaultsDaily,  {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: 'Watts (W) through window at that moment',
+            data: refreshableArray(function() {
+              return hoursOfDayBy15MinsDataset(function(hour) {
+                return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(chart_infos.date, hour, chart_infos.latitude, chart_infos.orientation) * solar_constant_w * chart_infos.area_m2
+              })
+            }),
+          }]
         },
-      },
-    }
-  }));
+        options: {
+          animation: false,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              text: 'Energy through window throughout a clear day',
+            }
+          },
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: 'Watts',
+                font: {
+                  style: 'normal',
+                },
+              },
+            }
+          }
+        }
+      }));
 
-:content
-  Here, you can see how the value changes through the year at noon.
+    :content
+      And here is the total energy coming through for each day of the day for the window:
+      <div style="height: 35vh">
+        <canvas id="kWh_through_year"></canvas>
+      </div>
+      You can click this chart to change the date of the other chart.
 
-  <div>
-    <canvas id="w_per_m2_of_frame_yearly"></canvas>
-  </div>
+    :javascript
+      new Chart(document.getElementById('kWh_through_year'), dupMergeOptions(ChartDefaultsYearly, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: 'Total kWh through window on that day',
+            data: refreshableArray(function() {
+              return daysOfYearDataset(function(date) {
+                return chart_infos.shgc * totalSunEnergyThroughWindowMultiplierAt(date, chart_infos.latitude, chart_infos.orientation) * solar_constant_w * chart_infos.area_m2
+              })
+            }),
+          }]
+        },
+        options: {
+          animation: false,
+          maintainAspectRatio: false,
+          onClick: function(event, elements, chart) {
+            if (elements[0]) {
+              const i = elements[0].index;
+              document.querySelector('input[name="date"]').valueAsDate = new Date(chart_infos.date.getFullYear(), 0, i + 1)
+              updateInputs()
+            }
+          },
+          plugins: {
+            title: {
+              text: 'Daily total energy through the window assuming clear days, throughout the year',
+            },
+          },
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: 'kWh',
+                font: {
+                  style: 'normal',
+                },
+              },
+            }
+          }
+        }
+      }));
+
 
 :javascript
   document.querySelector('input[name="date"]').valueAsDate = chart_infos.date
 
-  new Chart(document.getElementById('w_per_m2_of_frame_yearly'), dupMergeOptions(ChartDefaultsYearly, {
-    type: 'line',
-    data: {
-      datasets: [{
-        label: 'W per m² of window',
-        data: refreshableArray(function() {
-          return daysOfYearDataset(function(date) {
-            return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(date, 12, chart_infos.latitude, chart_infos.orientation) * solar_constant_w
-          })
-        }),
-      }]
-    },
-    options: {
-      animation: false,
-      plugins: {
-        title: {
-          text: 'Watts at noon per m² of window on a clear day',
-        },
-      },
-    }
-  }));
-
-:content
-  Area of the window (or fill the HxW below):
-  <input type="number" name="window_area" value="1" onchange="updateInputs()" style="width: 100px"/>
-  <select name="window_area_unit" oninput="updateInputs()">
-    <option value='cm' data-ratio=0.0001>cm²</Option>
-    <option value='m' data-ratio=1 selected>m²</Option>
-    <option value='in' data-ratio=0.00064516>in²</Option>
-    <option value='ft' data-ratio=0.092903>ft²</Option>
-  </select>
-
-  Height
-  <input type="number" name="window_height" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
-  x Width
-  <input type="number" name="window_width" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
-  <select name="window_dimensions_unit" oninput="updateAreaFromDimensions()">
-    <option value='cm'>cm</Option>
-    <option value='m'>m</Option>
-    <option value='in'>in</Option>
-    <option value='ft'>ft</Option>
-  </select>
-
-  <div>
-    <canvas id="w_in_area_daily"></canvas>
-  </div>
-
-:javascript
-  new Chart(document.getElementById('w_in_area_daily'), dupMergeOptions(ChartDefaultsDaily, ChartDefaultsIrradianceWithSize, {
-    type: 'line',
-    data: {
-      datasets: [{
-        label: 'W through the window',
-        data: refreshableArray(function() {
-          return hoursOfDayBy15MinsDataset(function(hour) {
-            return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(chart_infos.date, hour, chart_infos.latitude, chart_infos.orientation) * solar_constant_w * chart_infos.area_m2
-          })
-        }),
-      }]
-    },
-    options: {
-      animation: false,
-      plugins: {
-        title: {
-          text: 'W through the window throughout a clear day',
-        }
-      },
-    }
-  }));
-
-
-:content
-  as
-
-:javascript
   function setLatitudeFromGeolocationPosition(pos) {
     const crd = pos.coords;
     document.querySelector('input[name="latitude"]').value = crd.latitude
