@@ -568,6 +568,25 @@ p, pre {
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px; } }
 
+.input-suffix__wrapper {
+  position: relative;
+  display: inline-block; }
+
+.input-suffix__suffix {
+  position: absolute;
+  right: 5px; }
+
+.two-columns-page-wrapper {
+  display: block;
+  padding: 0 5px; }
+
+@media (min-width: 1024px) {
+  .two-columns-page-wrapper {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; } }
+
 .page-wrapper {
   margin: 0 auto;
   padding-left: 0.5em;

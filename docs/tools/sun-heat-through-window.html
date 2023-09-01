@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content='text/html; charset=UTF-8' http-equiv='Content-Type'>
+<meta charset='utf-8'>
+<meta content='ie=edge' http-equiv='x-ua-compatible'>
+<meta content='width=device-width, initial-scale=1, shrink-to-fit=no' name='viewport'>
+<link rel="alternate" type="application/atom+xml" title="Atom Feed" href="/blog/feed.xml" />
+
+<title>
+
+Sun heat through a window
+| maxlap.dev
+</title>
+<script src="https://unpkg.com/@popperjs/core@2" defer="defer"></script>
+<script src="https://unpkg.com/tippy.js@6" defer="defer"></script>
+<script src="/javascripts/site.js" defer="defer"></script>
+<link href="/stylesheets/highlighting.css" rel="stylesheet" />
+<link href="/stylesheets/site.css" rel="stylesheet" />
+</head>
+<body>
+<div class='page-wrapper'>
+<header>
+<nav>
+<div class='header__site-name site-name'>
+<a href="/blog">MaxLap<span class='header__site-name-extension'>.dev</span></a></div>
+<div class='header__navbar'>
+<a href="/blog" class="navbar-item">Blog</a>
+<a href="/tools.html" class="navbar-item">Tools</a>
+<a href="/about.html" class="navbar-item">About</a>
+</div>
+</nav>
+</header>
+</div>
+<div>
+<script src="/javascripts/utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"></script>
+<script src="/javascripts/sun_heat_through_windows.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script>
+  Chart.defaults.interaction.intersect = false
+  Chart.defaults.interaction.mode = 'index'
+  Chart.defaults.pointRadius = 1
+  Chart.defaults.plugins.legend.display = false
+  Chart.defaults.plugins.title.display = true
+  Chart.defaults.animation.duration = 300
+  Chart.defaults.scales.y = { min: 0 }
+  
+  window.chart_infos = {
+    latitude: 45.5,
+    orientation: 180,
+    date: new Date(),
+    shgc: 0.5,
+    area_m2: 1,
+    area_string: '1m²'
+  }
+  
+  window.ChartDefaultsYearly = {
+    data: {
+      labels: days_of_year_labels,
+    },
+    options: {
+      plugins: {
+        annotation: {
+          annotations: {
+            current_day: {
+              type: 'line',
+              borderColor: 'black',
+              borderWidth: 1,
+              label: {
+                backgroundColor: 'rgba(0,0,0,0)',
+                position: 'end',
+                color: 'black',
+                content: function() { return dateStringWithoutYear(chart_infos.date) },
+                display: true,
+              },
+              drawTime: 'beforeDatasetsDraw',
+              scaleID: 'x',
+              value: function() { return dayOfYear(chart_infos.date) - 1 },
+            }
+          }
+        },
+      },
+      scales: {
+        x: {
+          ticks: {
+            callback: ticksCallbackFirstOfEachMonth,
+          }
+        }
+      }
+    }
+  }
+  
+  window.ChartDefaultsDaily = {
+    data: {
+      labels: hours_of_day_by_15_mins_labels,
+    },
+    options: {
+      plugins: {
+      },
+      scales: {
+        x: {
+          ticks: {
+            callback: ticksCallbackRoundHours,
+          }
+        }
+      }
+    }
+  }
+  
+  window.ChartDefaultsIrradiance = {
+    options: {
+      scales: {
+        y: {
+          max: function() { return 1100 * chart_infos.shgc },
+          title: {
+            display: true,
+            text: 'W/m²',
+            font: {
+              style: 'normal',
+            },
+          },
+          ticks: {
+            count: 12,
+            callback: ticksCallbackRoundValues,
+          }
+        },
+      }
+    }
+  }
+  
+  window.ChartDefaultsIrradianceWithSize = {
+    options: {
+      scales: {
+        y: {
+          max: function() { return 1100 * chart_infos.area_m2 * chart_infos.shgc },
+          title: {
+            display: true,
+            text: 'Watts',
+            font: {
+              style: 'normal',
+            },
+          },
+          ticks: {
+            count: 12,
+            callback: ticksCallbackRoundValues,
+          }
+        },
+      }
+    }
+  }
+</script>
+<div class='two-columns-page-wrapper'>
+<div style='padding-right: 5px'>
+<div class="markdown-body"><h1 id="sun-heat-through-window-calculator">Sun heat through window calculator</h1>
+
+<p>How much heat from the sunlight gets through your windows? This calculator aims to give you an idea.</p>
+
+<p>Just provide a few bits of information:</p>
+
+<p>Your latitude:
+<input type="number" name="latitude" oninput="updateInputs()" value="45.5" />
+<button onclick="navigator.geolocation.getCurrentPosition(setLatitudeFromGeolocationPosition, function(){}, { maximumAge: 60000 });">
+Use my location (if available)
+</button></p>
+
+<p>Window facing direction (from inside):
+<select name="window_main_orientation_angle" oninput="updateInputs()">
+  <option value=0>North</Option>
+  <option value=45>North-east</Option>
+  <option value=90>East</Option>
+  <option value=135>South-East</Option>
+  <option value=180 selected>South</Option>
+  <option value=225>South-West</Option>
+  <option value=270>West</Option>
+  <option value=315>North-West</Option>
+</select></p>
+
+<p>(Optional) to be more precise, specify how &quot;offset&quot; your window is to the selected cardinal direction.
+This is an angle, positive number means the window faces more to the right (clock-wise on a map)
+<input type="number" name="window_orientation_offset_angle" value="0" oninput="updateInputs()"/></p>
+
+<p>Overall angle relative to north: <input type="number" name="window_final_orientation_angle" value="180" readonly disabled=disabled/></p>
+
+<p>Date to focus on: <input type="date" name="date" value="" oninput="updateInputs()"/> (The year doesn&#39;t matter)</p>
+
+<p>The solar heat gain coefficient of your window (SHGC): <input type="number" name="shgc" value="0.5" oninput="updateInputs()"/>
+Usually a number between 0.2 and 0.8. This directly multiplies with the sunlight strength. The shape of the charts
+remains the same. the SHGC only affects the numbers on the left axis.</p>
+
+<p>Area of the window (or fill the HxW below):
+<input type="number" name="window_area" value="1" onchange="updateInputs()" style="width: 100px"/>
+<select name="window_area_unit" oninput="updateInputs()">
+  <option value='cm' data-ratio=0.0001>cm²</Option>
+  <option value='m' data-ratio=1 selected>m²</Option>
+  <option value='in' data-ratio=0.00064516>in²</Option>
+  <option value='ft' data-ratio=0.092903>ft²</Option>
+</select>
+<br/>
+Height
+<input type="number" name="window_height" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
+x Width
+<input type="number" name="window_width" value="" onchange="updateAreaFromDimensions()" style="width: 100px"/>
+<select name="window_dimensions_unit" oninput="updateAreaFromDimensions()">
+  <option value='cm'>cm</Option>
+  <option value='m'>m</Option>
+  <option value='in'>in</Option>
+  <option value='ft'>ft</Option>
+</select>
+<br/>
+If you have multiple windows in the same direction, you can add their area.</p>
+
+<h3 id="results">Results</h3>
+
+<p>Note: The numbers and charts may not be intuitive because there are multiple effects interacting. I might make a blog post to
+explain them at one point. These are approximations.</p>
+
+<p>(On wide screens, the results show on the right.)</p>
+</div>
+</div>
+<div style='border-left: 1px solid lightgrey; padding-left: 5px'>
+<div class="markdown-body"><p>On a clear day on that date, here is how much sun energy is getting inside through the window:</p>
+
+<div style="height: 35vh">
+  <canvas id="w_through_day"></canvas>
+</div>
+</div>
+<script>
+  new Chart(document.getElementById('w_through_day'), dupMergeOptions(ChartDefaultsDaily,  {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'Watts (W) through window at that moment',
+        data: refreshableArray(function() {
+          return hoursOfDayBy15MinsDataset(function(hour) {
+            return chart_infos.shgc * overallSunStrengthThroughFrameMultiplierAt(chart_infos.date, hour, chart_infos.latitude, chart_infos.orientation) * solar_constant_w * chart_infos.area_m2
+          })
+        }),
+      }]
+    },
+    options: {
+      animation: false,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          text: 'Energy through window throughout a clear day',
+        }
+      },
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Watts',
+            font: {
+              style: 'normal',
+            },
+          },
+        }
+      }
+    }
+  }));
+</script>
+<div class="markdown-body"><p>And here is the total energy coming through for each day of the day for the window:</p>
+
+<div style="height: 35vh">
+  <canvas id="kWh_through_year"></canvas>
+</div>
+
+<p>You can click this chart to change the date of the other chart.</p>
+</div>
+<script>
+  new Chart(document.getElementById('kWh_through_year'), dupMergeOptions(ChartDefaultsYearly, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'Total kWh through window on that day',
+        data: refreshableArray(function() {
+          return daysOfYearDataset(function(date) {
+            return chart_infos.shgc * totalSunEnergyThroughWindowMultiplierAt(date, chart_infos.latitude, chart_infos.orientation) * solar_constant_w * chart_infos.area_m2
+          })
+        }),
+      }]
+    },
+    options: {
+      animation: false,
+      maintainAspectRatio: false,
+      onClick: function(event, elements, chart) {
+        if (elements[0]) {
+          const i = elements[0].index;
+          document.querySelector('input[name="date"]').valueAsDate = new Date(chart_infos.date.getFullYear(), 0, i + 1)
+          updateInputs()
+        }
+      },
+      plugins: {
+        title: {
+          text: 'Daily total energy through the window assuming clear days, throughout the year',
+        },
+      },
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'kWh',
+            font: {
+              style: 'normal',
+            },
+          },
+        }
+      }
+    }
+  }));
+</script>
+</div>
+</div>
+<script>
+  document.querySelector('input[name="date"]').valueAsDate = chart_infos.date
+  
+  function setLatitudeFromGeolocationPosition(pos) {
+    const crd = pos.coords;
+    document.querySelector('input[name="latitude"]').value = crd.latitude
+    updateInputs()
+  }
+  
+  function updateInputs() {
+    chart_infos.latitude = document.querySelector('input[name="latitude"]').value || 0;
+    let orientation_angle = parseInt(document.querySelector('select[name="window_main_orientation_angle"]').value) || 0;
+    orientation_angle += parseInt(document.querySelector('input[name="window_orientation_offset_angle"]').value) || 0;
+    orientation_angle = orientation_angle % 360
+    document.querySelector('input[name="window_final_orientation_angle"]').value = orientation_angle
+  
+    chart_infos.orientation = orientation_angle
+  
+    let date = document.querySelector('input[name="date"]').valueAsDate
+    if (date) {
+      chart_infos.date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+    } else {
+      chart_infos.date = new Date()
+    }
+  
+    let shgc = parseFloat(document.querySelector('input[name="shgc"]').value)
+    if (shgc > 1) {
+      shgc = 1.0
+    } else if (shgc < 0) {
+      shgc = 0
+    } else if (!shgc) {
+      shgc = 0.5
+    }
+    chart_infos.shgc = shgc
+  
+    let window_area = parseFloat(document.querySelector('input[name="window_area"]').value)
+  
+    chart_infos.area = window_area
+    chart_infos.area_unit = document.querySelector('select[name="window_area_unit"]').selectedOptions[0].text
+    chart_infos.area_m2 = window_area * parseFloat(document.querySelector('select[name="window_area_unit"]').selectedOptions[0].dataset['ratio'])
+  
+    updateRefreshableCharts()
+  }
+  
+  function updateAreaFromDimensions() {
+    let window_height = parseFloat(document.querySelector('input[name="window_height"]').value)
+    let window_width = parseFloat(document.querySelector('input[name="window_width"]').value)
+    if (!window_height || !window_width) {
+      return
+    }
+  
+    let area = window_height * window_width
+    let dimensions_unit = document.querySelector('select[name="window_dimensions_unit"]').value
+  
+    if (dimensions_unit == 'cm') {
+      dimensions_unit = 'm'
+      area *= 0.0001
+    } else if (dimensions_unit == 'in') {
+      dimensions_unit = 'ft'
+      area /= 144
+    }
+  
+    document.querySelector('input[name="window_area"]').value = area
+    document.querySelector('select[name="window_area_unit"]').value = dimensions_unit
+    chart_infos.area_string = area + dimensions_unit + '²'
+  
+    updateInputs()
+  }
+</script>
+
+</div>
+<div class='page-wrapper'>
+<footer>
+<a href="https://github.com/MaxLap"><span class="icon-of-link"><svg viewBox='0 0 16 16'>
+<path d='M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z' fill='#828282'></path>
+</svg>
+</span>MaxLap</a>
+<br>
+<a href="mailto:blog@maxlap.dev">blog@maxlap.dev</a>
+</footer>
+</div>
+
+</body>
+</html>

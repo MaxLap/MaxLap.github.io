@@ -1,5 +1,5 @@
 ---
-title: Sun heat through windows
+title: Sun heat through a window
 layout: 'blog_wide'
 ---
 -# might be interesting: https://stackoverflow.com/questions/61336948/calculating-the-cardinal-direction-of-a-smartphone-with-js
@@ -158,7 +158,7 @@ layout: 'blog_wide'
 
       Date to focus on: <input type="date" name="date" value="" oninput="updateInputs()"/> (The year doesn't matter)
 
-      The specific heat gain coefficient of your window (SHGC): <input type="number" name="shgc" value="0.5" oninput="updateInputs()"/>
+      The solar heat gain coefficient of your window (SHGC): <input type="number" name="shgc" value="0.5" oninput="updateInputs()"/>
       Usually a number between 0.2 and 0.8. This directly multiplies with the sunlight strength. The shape of the charts
       remains the same. the SHGC only affects the numbers on the left axis.
 
@@ -187,7 +187,7 @@ layout: 'blog_wide'
       ### Results
 
       Note: The numbers and charts may not be intuitive because there are multiple effects interacting. I might make a blog post to
-      explain them at one point.
+      explain them at one point. These are approximations.
 
       (On wide screens, the results show on the right.)
 
@@ -290,7 +290,7 @@ layout: 'blog_wide'
   function setLatitudeFromGeolocationPosition(pos) {
     const crd = pos.coords;
     document.querySelector('input[name="latitude"]').value = crd.latitude
-    updateResults()
+    updateInputs()
   }
 
   function updateInputs() {
