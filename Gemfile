@@ -17,3 +17,4 @@ gem 'builder', '~> 3.0'
 gem 'pry'
 gem 'mini_racer' # Needed for faster css asset when serving locally. Autoprefixer seem pretty slow...
 gem 'nokogiri'
+gem 'haml', '< 6'
