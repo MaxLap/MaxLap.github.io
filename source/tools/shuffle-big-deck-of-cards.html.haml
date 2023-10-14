@@ -1,0 +1,187 @@
+---
+title: Big card deck shuffling
+layout: 'blog'
+---
+= %(<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>).html_safe
+= javascript_include_tag "/javascripts/utils.js"
+
+:css
+  .sliding-numbers {
+    width: 100%;
+    overflow: hidden;
+    margin-top: 1em;
+  }
+
+  .sliding-number {
+    font-size: 3.5em;
+    display: inline-block;
+    width: 15%;
+    line-height: 0.8;
+    text-align: center;
+  }
+
+:content
+  # [WIP] Shuffle big deck of cards
+
+  This tool helps you divide a big deck of cards into smaller piles to facilitate shuffling.
+
+  Explanation for how and why to use this tool are after it. This is a work in progress.
+
+  Number of cards (approximate, aim higher rather than lower):
+  <input type="number" name="total_nb_cards" oninput="" value="450" />
+
+  Time per displayed card (in milliseconds):
+  <input type="number" name="delay_ms" oninput="" value="650" />
+
+-#
+  <b>Either</b> number of cards in a subdeck:
+  <input type="number" name="max_nb_cards_subdeck" oninput="" value="70" />^
+  <b>Or</b> number of subdecks:
+  <input type="number" name="nb_subdeck" oninput="" value="" />
+
+
+%button{onclick: "start_loop()"}
+  Start!
+
+%button{onclick: "pause_loop()"}
+  Pause
+
+%button{onclick: "resume_loop()"}
+  Resume
+
+.sliding-numbers
+  .sliding-number{style: "margin-left: -15%"}
+    ?
+    %br
+    ?
+  .sliding-number
+    ?
+    %br
+    ?
+  .sliding-number
+    ?
+    %br
+    ?
+  .sliding-number
+    ?
+    %br
+    ?
+
+:content
+  ### How to use
+
+  This will divide a deck of card into 2 piles (sub-decks) randomly. If you need even smaller sub-decks, do this again
+  to each sub-decks.
+
+  When you press start, arrows and numbers will appear, from the right, ex: `2←` and `3→`. This tells you to put
+  that many cards from the deck into the left or right pile. Note:
+  * The arrows always alternate, so they are mostly a reminder.
+  * When an number is higher than 1, you can either place the cards in any either. So a chunk of 3 cards vs 3 times 1 card
+    and anything in between are just as good. The goal is to do it quickly enough to follow the rhythm.
+  * If you miss a number or put it in the wrong pile, it's no big deal. The goal is just to have a better randomness than
+    if a person does it in his head. So just keep going.
+
+  Now that you have smaller decks, you can shuffle them individually as you normally would.
+
+  When done with shuffling each decks, just stack them on top of each other without trying to shuffle them together.
+  Done!
+
+  ### Why
+
+  Some board games have a massive amount of playing cards. Terraforming Mars has about 450 when you have all extensions,
+  and while you play, there is a tendency to sort cards that fit together. Properly sorting the cards is important to
+  ensure some regularity in the way cards are dealt / drawn.
+
+  But properly shuffling that huge amount of cards can be difficult. Doing a riffle shuffle on such a big deck is quite
+  a challenge. Dividing it manually and then trying to merge the sub-decks manually is also not ideal. So this tool
+  provides a way to make it more intuitive and straightforward. Here is a basic explanation of the steps:
+
+  1) Use this tool to randomly divide the big deck into smaller decks.^
+  2) Shuffle the smaller decks as you usually would. (ex: do multiple riffle shuffles)^
+  3) Stack the decks on top of each other. No need for further shuffling.
+
+  The reason this work is that the division in smaller decks using this tool use actual randomness. So in which bucket
+  a card ends up is random and any other card in that same deck was picked randomly. This means that there is no need to
+  do extra shuffling to when mixing the decks. You can stack them on top of each other. Now all that matters is to do a
+  good job shuffling the smaller decks now.
+
+  Something nice about this way of doing it is that players can each be shuffling one of the smaller deck and when each
+  is done, the shuffling is done.
+
+  For shuffling the smaller decks, if you are not doing riffle shuffles, mash shuffles, or other kinds of shuffle where
+  cards get very interlaced, you are likely not properly shuffling those decks. How many should you use? Depends on how
+  many cards in a deck and how well you want it to be shuffled.
+
+  The question is what is sufficiently random/shuffled. This is subjective. A common suggestion online is 7 riffles
+  for a 52 card deck. If you have more cards in a sub-deck, that number should be higher. I won't go deeper in that
+  rabbit hole, at least for now... But it is really interesting.
+
+:javascript
+  function start_loop() {
+    if (window.loop_timeout) {
+      clearTimeout(window.loop_timeout);
+    }
+    window.base_delay_ms = $('input[name=delay_ms]').val()
+    var nb_decks = 2
+    var nb_cards_per_deck = 80
+
+    $('.sliding-numbers .sliding-number').html('?' + '<br/>' + '?')
+
+    var new_array = []
+
+    for (let i = 0; i < nb_decks; i++) {
+      //new_array = new_array.concat(Array(nb_cards_per_deck).fill(i + 1))
+    }
+
+    new_array = new_array.concat(Array(nb_cards_per_deck).fill('←'))
+    new_array = new_array.concat(Array(nb_cards_per_deck).fill('→'))
+
+    new_array.cryptoShuffle()
+
+    window.current_array = new_array
+    window.current_index = 0
+    window.loop_timeout = setTimeout(loop_step, 500)
+  }
+
+  function pause_loop() {
+    if (window.loop_timeout) {
+      clearTimeout(window.loop_timeout);
+    }
+  }
+
+  function resume_loop() {
+    if (window.loop_timeout) {
+      clearTimeout(window.loop_timeout);
+    }
+    window.loop_timeout = setTimeout(loop_step, 500)
+  }
+
+
+  function loop_step() {
+    var sliding_numbers_elem = $('.sliding-numbers')
+    var sliding_number_elems = $('.sliding-numbers .sliding-number')
+    var first_number_elem = $(sliding_number_elems[0])
+    var second_number_elem = $(sliding_number_elems[1])
+
+    var new_value = window.current_array[window.current_index]
+    if (new_value === undefined) {
+      return
+    }
+
+    var nb_times = 0
+    while(window.current_array[window.current_index] == new_value) {
+      nb_times += 1
+      window.current_index += 1
+    }
+
+    first_number_elem.css("margin-left", 0)
+
+    first_number_elem.html(nb_times + "<br/>" + new_value)
+
+    second_number_elem.animate({"margin-left": "-15%"}, 200)
+
+    sliding_numbers_elem.append(first_number_elem)
+
+    var delay_ms = base_delay_ms * (nb_times + 1) / 2
+    window.loop_timeout = setTimeout(loop_step, delay_ms)
+  }
