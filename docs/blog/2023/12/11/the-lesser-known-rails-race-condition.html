@@ -9,7 +9,7 @@
 
 <title>
 
-The lesser known Rails race condition [PREPRINT]
+The lesser known Rails race condition
 | maxlap.dev
 </title>
 <script src="https://unpkg.com/@popperjs/core@2" defer="defer"></script>
@@ -26,6 +26,7 @@ The lesser known Rails race condition [PREPRINT]
 <a href="/blog">MaxLap<span class='header__site-name-extension'>.dev</span></a></div>
 <div class='header__navbar'>
 <a href="/blog" class="navbar-item">Blog</a>
+<a href="/tools.html" class="navbar-item">Tools</a>
 <a href="/about.html" class="navbar-item">About</a>
 </div>
 </nav>
@@ -33,10 +34,7 @@ The lesser known Rails race condition [PREPRINT]
 <div>
 <main class='blog-post-content' role='main'>
 <div class='blog-post-header'>
-<div class='blog-post-title'>The lesser known Rails race condition [PREPRINT]<span class='blog-post-date blog-post-title__date'>2023-06-10</span></div>
-</div>
-<div class='warning-bubble'>
-This post isn't meant to be shared yet, it's only here to make it easier to gather feedback. Thank you
+<div class='blog-post-title'>The lesser known Rails race condition<span class='blog-post-date blog-post-title__date'>2023-12-11</span></div>
 </div>
 <div class="markdown-body"><p>Note: This post mentions and gives examples in Rails, but the content is relevant to anyone using databases systems,
 regardless of the use cases.</p>
@@ -69,7 +67,7 @@ following amounts in the account:</p>
 <p>Let&#39;s think about a single writer and a single reader. Reading some of the articles on Rails race conditions, you
 could believe everything will be fine.</p>
 
-<p>Consider the database already contains this:</p>
+<p>Consider the database already contains these two records:</p>
 </div>
 <div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="no">Post</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="ss">published: </span><span class="kp">true</span><span class="p">)</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="ss">published: </span><span class="kp">false</span><span class="p">)</span></code></pre></div></div>
 <div class="markdown-body"><p>Now if you have a reader doing a report:</p>
@@ -93,30 +91,33 @@ database doesn&#39;t end up with wrong data. You can &quot;just&quot; refresh th
 problem will be gone. It&#39;s one of those little glitch that no one can reproduce and no one bothers tracking down
 since it doesn&#39;t happen often anyways.</p>
 
+<p>If something like this is in some kind of nightly report, it&#39;s not so easy to &quot;just&quot; refresh the page.</p>
+
 <h2 id="but-wait-theres-more">But wait, there&#39;s more!</h2>
 
-<p>You might be tempted to think that this only happens when doing multiple queries on a single table. Depending on how
-you define the problem, you would be wrong.</p>
+<p>You might be tempted to think that this only happens when doing multiple queries on a single table, so you are safe
+as lon as you query only once per table. If you define the problem as any incoherency caused by the timing, you would
+be wrong.</p>
 
 <p>If the reader does:</p>
 </div>
-<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>&#x000A;<span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>&#x000A;<span class="n">report</span><span class="p">[</span><span class="ss">:has_admin_comment</span><span class="p">]</span> <span class="o">=</span> <span class="n">post</span><span class="p">.</span><span class="nf">has_admin_comment</span> <span class="c1"># an attribute</span>&#x000A;<span class="n">report</span><span class="p">[</span><span class="ss">:comments</span><span class="p">]</span> <span class="o">=</span> <span class="n">post</span><span class="p">.</span><span class="nf">comments</span> <span class="c1"># Imagine they are rendered in a page</span>&#x000A;<span class="nb">puts</span> <span class="n">report</span></code></pre></div></div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>&#x000A;<span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>&#x000A;<span class="c1"># Querying the posts table</span>&#x000A;<span class="n">report</span><span class="p">[</span><span class="ss">:has_admin_comment</span><span class="p">]</span> <span class="o">=</span> <span class="n">post</span><span class="p">.</span><span class="nf">has_admin_comment</span> <span class="c1"># an attribute</span>&#x000A;<span class="c1"># Querying the comments table</span>&#x000A;<span class="n">report</span><span class="p">[</span><span class="ss">:comments</span><span class="p">]</span> <span class="o">=</span> <span class="n">post</span><span class="p">.</span><span class="nf">comments</span> <span class="c1"># Imagine they are rendered in a page</span>&#x000A;<span class="nb">puts</span> <span class="n">report</span></code></pre></div></div>
 <div class="markdown-body"><p>And you have a writer adding some data at the same time:</p>
 </div>
-<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># A callback will see the post's has_admin_comment</span>&#x000A;<span class="no">Post</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="nb">id</span><span class="p">).</span><span class="nf">comments</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="ss">by_admin: </span><span class="kp">true</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span></code></pre></div></div>
+<div class="highlight lone-highlighted-code"><div class="highlight"><pre class="highlight ruby"><code><span class="c1"># A callback will see the post's has_admin_comment</span>&#x000A;<span class="c1"># Imagine a call</span>&#x000A;<span class="n">post</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="ss">by_admin: </span><span class="kp">true</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>&#x000A;<span class="n">post</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="ss">has_admin_comment: </span><span class="kp">true</span><span class="p">)</span></code></pre></div></div>
 <div class="markdown-body"><p>There is now the possibility that the report contains a comment by an admin while the <code>has_admin_comment</code> attribute
 says there are no such comments.</p>
 
-<p>So as soon as you do 2 queries, there is a chance you&#39;ll encounter this. Bummer, I frequently do more than one SQL
-query.</p>
+<p>So as soon as you do 2 queries, if any of the data of those two queries is related to the other query, there is a
+chance you&#39;ll encounter this. Bummer, I frequently do more than one SQL query in my pages.</p>
 
-<h2 id="solution">Solution</h2>
+<h2 id="a-solution">A solution</h2>
 
-<p>The root of the problem is that we are reading data at different points in time, but we are treating it as if it was
+<p>The root of the problem is that we are reading data at different points in time, but we want to treat it as if it was
 from a single point in time.</p>
 
-<p>The only solution I&#39;m aware of (other than doing only 1 query), is to tell the database that you want your
-queries to happen at a single point in time.</p>
+<p>The only solution I&#39;m aware of (other than doing only one query), is to tell the database: &quot;Ignore all changes from
+elsewhere when working on my queries&quot;. Where elsewhere means other processes / transations.</p>
 
 <p>In PostgreSQL, that can be done with a transaction with the <code>repeatable_read</code> isolation level. From <a href="https://www.postgresql.org/docs/current/transaction-iso.html">PostgreSQL&#39;s doc</a>:</p>
 
@@ -149,22 +150,23 @@ transaction?</p>
 grain of salt.</p>
 
 <p>Doing more restrictive transactions can have an impact on performance, can add latency, could introduce deadlocks,
-could increase the number of transactions that need to be retried.</p>
+could increase the number of transactions that need to be retried. But I&#39;m not sure this is actually a problem in
+practice.</p>
 
 <p>When starting a new application, I would consider wrapping every request in a transaction and calling it a day.
 It&#39;s too early to focus on scaling/performance in the beginning. The day you grow enough (if that happens) or
 encounter problems caused to this, then you can either disable this for some request or start doing it only for
-more critical parts / requests.</p>
+more critical requests.</p>
 
 <p>For existing applications, wrapping every request could cause new problems to appear:</p>
 
 <ul>
 <li>Existing race conditions you didn&#39;t know about might now produce an error. (I think this is good)</li>
-<li>Nested transactions could behave slightly differently.</li>
+<li>Nested transactions can behave slightly differently.</li>
 <li>Locks will be held longer, possibly resulting in longer latency and deadlocks.</li>
 </ul>
 
-<p>So is it worth it to wrap every request in that case? Your guess is as good as mine. Maybe do it, but progressively?</p>
+<p>So is it worth it to wrap every request for existing application? Your guess is as good as mine. Maybe do it,but progressively?</p>
 
 <p>One thing to consider about this is that while you can &quot;just&quot; refresh a page, it&#39;s not always so simple.
 If you are generating a pdf or generating new data from what you queries, then the glitch isn&#39;t quite so temporary
@@ -173,12 +175,27 @@ anymore, is it?</p>
 <p>So at the very least, you probably want to use the <code>repeatable_read</code> transaction whenever you are generating
 something longer lasting than a web page, no matter the consequences.</p>
 
+<h2 id="code-to-apply-everywhere">Code to apply %everywhere</h2>
+
+<p>In my case, for my new application, I&#39;m trying it. It&#39;s barely any code at all.</p>
+
+<p>Here is a callback on my <code>ApplicationController</code>:</p>
+
+<pre><code>around_action :wrap_in_transaction&#x000A;def wrap_in_transaction&#x000A;  ActiveRecord::Base.transaction(isolation: :repeatable_read) do&#x000A;    yield&#x000A;  end&#x000A;end&#x000A;</code></pre>
+
+<p>It&#39;s that simple! Except... It&#39;s likely your tests may fail, because they also start a transaction, with a different
+isolation level.</p>
+
+<p>So add this your your <code>test_helper.rb</code> / <code>spec_helper.rb</code>:</p>
+
+<pre><code># Tests already use a transaction, this tries to nest with a distinct isolation level, which breaks. So skip&#x000A;ApplicationController.skip_around_action :wrap_in_transaction&#x000A;</code></pre>
+
 <h2 id="closing-words">Closing words</h2>
 
 <p>Hope you learned something useful!</p>
 
 <p>If you want to play with examples that are similar to the post and demonstrate the effects of the <code>repeatable_read</code>
-transaction, here is a <a href="/blog/2023/06/10/the-lesser-known-rails-race-condition-preprint.rb">self-contained ruby script</a>.</p>
+transaction, here is a <a href="/blog/2023/12/11/the-lesser-known-rails-race-condition.rb">self-contained ruby script</a>.</p>
 </div>
 
 <hr class='comments-separator'>

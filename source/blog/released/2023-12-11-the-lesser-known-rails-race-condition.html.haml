@@ -1,0 +1,380 @@
+---
+title: The lesser known Rails race condition
+date: 2023-12-11
+tags: [rails, activerecord, postgres]
+---
+
+:content
+  Note: This post mentions and gives examples in Rails, but the content is relevant to anyone using databases systems,
+  regardless of the use cases.
+
+  There are many posts around discussing race conditions in Rails and how to handle/avoid them, but I haven't seen
+  one discussion this particular case.
+
+  Simply put, race conditions happen when more than one worker/process/thread interact with the same data and
+  the order those interactions happen in can give undesirable results.
+
+  ## Classical race condition
+
+  The classical example of a race condition is having 2 processes altering the same bank account at the same time.
+  Depending on the order that operations happen in, some of the alterations might be lost.
+
+  Starting with 100$, if one process does a +10 and another a -15 at the same time. You can end up with each of the
+  following amounts in the account:
+  * 110 (wrong)
+  * 85 (wrong)
+  * 95 (good)
+
+  I won't delve into this since there are already lots of articles about and how to avoid it in Rails.
+  [Here's one](https://www.honeybadger.io/blog/avoid-race-condition-in-rails/).
+
+  ## The lesser known race condition
+
+  Let's think about a single writer and a single reader. Reading some of the articles on Rails race conditions, you
+  could believe everything will be fine.
+
+  Consider the database already contains these two records:
+
+:code
+  Post.create(published: true)
+  Post.create(published: false)
+
+:content
+  Now if you have a reader doing a report:
+
+:code
+  report = {}
+  report[:total] = Post.count
+  report[:published] = Post.where(published: true).count
+  report[:unpublished] = Post.where(published: false).count
+  puts report
+
+:content
+  And you have a writer adding some data at the same time:
+
+:code
+  Post.create(published: false)
+
+:content
+  Here are the possible reports you might get:
+
+  * {total: 2, published: 1, unpublished: 1}
+  * {total: 2, published: 1, unpublished: 2}
+  * {total: 3, published: 1, unpublished: 2}
+
+  One of these is incoherent. You can't have 2 posts total but then have numbers that add up to 3 at the same time.
+
+  This example may feel contrived. It almost always feel like a technicality; the shown result is clearly wrong, but the
+  database doesn't end up with wrong data. You can "just" refresh the page the very few times this happens and the
+  problem will be gone. It's one of those little glitch that no one can reproduce and no one bothers tracking down
+  since it doesn't happen often anyways.
+
+  If something like this is in some kind of nightly report, it's not so easy to "just" refresh the page.
+
+  ## But wait, there's more!
+
+  You might be tempted to think that this only happens when doing multiple queries on a single table, so you are safe
+  as lon as you query only once per table. If you define the problem as any incoherency caused by the timing, you would
+  be wrong.
+
+  If the reader does:
+:code
+  post = Post.find(id)
+  result = {}
+  # Querying the posts table
+  report[:has_admin_comment] = post.has_admin_comment # an attribute
+  # Querying the comments table
+  report[:comments] = post.comments # Imagine they are rendered in a page
+  puts report
+
+:content
+  And you have a writer adding some data at the same time:
+
+:code
+  # A callback will see the post's has_admin_comment
+  # Imagine a call
+  post.comments.create(by_admin: true, ...)
+  post.update(has_admin_comment: true)
+
+:content
+  There is now the possibility that the report contains a comment by an admin while the `has_admin_comment` attribute
+  says there are no such comments.
+
+  So as soon as you do 2 queries, if any of the data of those two queries is related to the other query, there is a
+  chance you'll encounter this. Bummer, I frequently do more than one SQL query in my pages.
+
+  ## A solution
+
+  The root of the problem is that we are reading data at different points in time, but we want to treat it as if it was
+  from a single point in time.
+
+  The only solution I'm aware of (other than doing only one query), is to tell the database: "Ignore all changes from
+  elsewhere when working on my queries". Where elsewhere means other processes / transations.
+
+  In PostgreSQL, that can be done with a transaction with the `repeatable_read` isolation level. From [PostgreSQL's doc](
+  https://www.postgresql.org/docs/current/transaction-iso.html):
+
+  > The Repeatable Read isolation level only sees data committed before the transaction began; it never sees
+  either uncommitted data or changes committed during transaction execution by concurrent transactions.
+
+  So going back to our first example, if the reader did this instead:
+
+:code
+  Post.transaction(isolation: :repeatable_read) do
+    report = {}
+    report[:total] = Post.count
+    report[:published] = Post.where(published: true).count
+    report[:unpublished] = Post.where(published: false).count
+    puts report
+  end
+
+:content
+  Then only the 2 valid reports would be possible:
+
+  * {total: 2, published: 1, unpublished: 1}
+  * {total: 3, published: 1, unpublished: 2}
+
+  Note: In other database systems (such as MySQL or SQLite), it's possible that you need a different isolation level
+  than `repeatable_read`.
+
+  ## When to solve it?
+
+  I think the final question is when should you "solve" this problem? When should you run within a repeatable_read
+  transaction?
+
+  I don't know... It depends.
+
+  I have never actually tackled this problem in an application-wide manner... yet. So take these suggestions with a
+  grain of salt.
+
+  Doing more restrictive transactions can have an impact on performance, can add latency, could introduce deadlocks,
+  could increase the number of transactions that need to be retried. But I'm not sure this is actually a problem in
+  practice.
+
+  When starting a new application, I would consider wrapping every request in a transaction and calling it a day.
+  It's too early to focus on scaling/performance in the beginning. The day you grow enough (if that happens) or
+  encounter problems caused to this, then you can either disable this for some request or start doing it only for
+  more critical requests.
+
+  For existing applications, wrapping every request could cause new problems to appear:
+  * Existing race conditions you didn't know about might now produce an error. (I think this is good)
+  * Nested transactions can behave slightly differently.
+  * Locks will be held longer, possibly resulting in longer latency and deadlocks.
+
+  So is it worth it to wrap every request for existing application? Your guess is as good as mine. Maybe do it,but progressively?
+
+  One thing to consider about this is that while you can "just" refresh a page, it's not always so simple.
+  If you are generating a pdf or generating new data from what you queries, then the glitch isn't quite so temporary
+  anymore, is it?
+
+  So at the very least, you probably want to use the `repeatable_read` transaction whenever you are generating
+  something longer lasting than a web page, no matter the consequences.
+
+  ## Code to apply %everywhere
+
+  In my case, for my new application, I'm trying it. It's barely any code at all.
+
+  Here is a callback on my `ApplicationController`:
+  ```
+  around_action :wrap_in_transaction
+  def wrap_in_transaction
+    ActiveRecord::Base.transaction(isolation: :repeatable_read) do
+      yield
+    end
+  end
+  ```
+
+  It's that simple! Except... It's likely your tests may fail, because they also start a transaction, with a different
+  isolation level.
+
+  So add this your your `test_helper.rb` / `spec_helper.rb`:
+  ```
+  # Tests already use a transaction, this tries to nest with a distinct isolation level, which breaks. So skip
+  ApplicationController.skip_around_action :wrap_in_transaction
+  ```
+
+  ## Closing words
+
+  Hope you learned something useful!
+
+  If you want to play with examples that are similar to the post and demonstrate the effects of the `repeatable_read`
+  transaction, here is a [self-contained ruby script](#{current_page.url.sub(/\.html$/, '.rb')}).
+
+__RB__
+:ruby
+  #!/usr/bin/env ruby
+  # frozen_string_literal: true
+  #
+  # This is a little self contained script which automatically loads the needed gems and runs tests which
+  # show most behaviors as seen in the blog post.
+  #
+  # This uses Thread.new to execute code in a new transaction at a specific point in time to avoid the random
+  # nature associated with race conditions. This basically picks which path you want the test to take by specifying
+  # the exact order.
+  #
+  # Need to have PostgreSQL installed and to run this first:
+  #   CREATE DATABASE maxlap_dev_repeatable_read_demo;
+  require "bundler/inline"
+
+  gemfile(true) do
+    source "https://rubygems.org"
+
+    git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+
+    # Activate the gem you are reporting the issue against.
+    gem "activerecord", "~> 7.0.0"
+    gem "pg"
+  end
+
+  require "active_record"
+  require "minitest/autorun"
+  require "logger"
+
+  # This connection will do for database-independent bug reports.
+  ActiveRecord::Base.establish_connection(adapter: "postgresql",
+    database: "maxlap_dev_repeatable_read_demo",
+    pool: 5)
+  ActiveRecord::Base.logger = Logger.new($stdout)
+
+  ActiveRecord::Schema.define do
+    create_table :posts, force: true do |t|
+      t.text :name
+      t.integer :foo
+      t.boolean :published, null: false, default: false
+    end
+
+    create_table :comments, force: true do |t|
+      t.text :name
+      t.integer :foo
+    end
+  end
+
+  class Post < ActiveRecord::Base
+    has_many :comments
+  end
+
+  class Comment < ActiveRecord::Base
+  end
+
+  class ReadRepeatableExampleTest < Minitest::Test
+    def create_initial_data
+      Post.delete_all
+      Post.create!(published: true)
+      Post.create!
+    end
+
+
+    def test_it_works_as_expected_without_the_race
+      create_initial_data
+
+      report = []
+
+      report << Post.count
+      report << Post.where(published: true).count
+      report << Post.where(published: false).count
+
+      # This is what you want, this is the report you expect
+      assert_equal([2, 1, 1], report)
+    end
+
+    def test_race_without_the_transaction
+      create_initial_data
+
+      report = []
+
+      report << Post.count
+      report << Post.where(published: true).count
+
+      Thread.new { Post.create! }.join
+
+      report << Post.where(published: false).count
+
+      # This is NOT what you want, your report is incoherent becuase of the race condition
+      assert_equal([2, 1, 2], report)
+    end
+
+    def test_race_with_regular_transaction
+      create_initial_data
+
+      report = []
+      Post.transaction do
+        report << Post.count
+        report << Post.where(published: true).count
+
+        Thread.new { Post.create! }.join
+
+        report << Post.where(published: false).count
+      end
+
+      # This is NOT what you want, your report is incoherent becuase of the race condition
+      assert_equal([2, 1, 2], report)
+    end
+
+    def test_no_race_with_read_repeatable_transaction
+      create_initial_data
+
+      report = []
+      Post.transaction(isolation: :repeatable_read) do
+        report << Post.count
+        report << Post.where(published: true).count
+
+        Thread.new { Post.create! }.join
+
+        report << Post.where(published: false).count
+      end
+
+      # This is what you want, your report is correct because of the repeatable_read transaction
+      assert_equal([2, 1, 1], report)
+    end
+
+
+    def test_read_repeatable_transaction_affect_table_not_used_yet
+      create_initial_data
+
+      report = []
+      Post.transaction(isolation: :repeatable_read) do
+        # There needs to be a query for the transaction to actually begin. Doing it on an unrelated model
+        Comment.count
+
+        Thread.new { Post.create! }.join
+        report << Post.count
+        report << Post.where(published: true).count
+
+        report << Post.where(published: false).count
+      end
+
+      # This is what you want, your report is correct because of the repeatable_read transaction
+      assert_equal([2, 1, 1], report)
+    end
+
+    def test_no_place_for_race_with_group
+      create_initial_data
+
+      report = []
+
+      post_counts = Post.group(:published).count
+
+      report << post_counts[true] + post_counts[false]
+      report << post_counts[true]
+      report << post_counts[false]
+
+      # This is what you want, your report is correct because of the repeatable_read transaction
+      assert_equal([2, 1, 1], report)
+    end
+
+    def test_no_place_for_race_with_group
+      create_initial_data
+
+      report = []
+
+      post_counts = Post.group(:published).count
+
+      report << post_counts[true] + post_counts[false]
+      report << post_counts[true]
+      report << post_counts[false]
+
+      # This is what you want, your report is correct because of the repeatable_read transaction
+      assert_equal([2, 1, 1], report)
+    end
+  end
+__RB__

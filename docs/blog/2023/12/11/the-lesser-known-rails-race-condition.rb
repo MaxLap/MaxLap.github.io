@@ -8,8 +8,8 @@
 # nature associated with race conditions. This basically picks which path you want the test to take by specifying
 # the exact order.
 #
-# Need to have PostgreSQL installer and to run this first:
-#   CREATE DATABASE repeatable_read_demo;
+# Need to have PostgreSQL installed and to run this first:
+#   CREATE DATABASE maxlap_dev_repeatable_read_demo;
 require "bundler/inline"
 
 gemfile(true) do
@@ -28,7 +28,7 @@ require "logger"
 
 # This connection will do for database-independent bug reports.
 ActiveRecord::Base.establish_connection(adapter: "postgresql",
-  database: "repeatable_read_demo",
+  database: "maxlap_dev_repeatable_read_demo",
   pool: 5)
 ActiveRecord::Base.logger = Logger.new($stdout)
 

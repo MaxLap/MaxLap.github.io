@@ -5,16 +5,188 @@
   <id>https://maxlap.dev/blog</id>
   <link href="https://maxlap.dev/blog"/>
   <link href="https://maxlap.dev/blog/feed.xml" rel="self"/>
-  <updated>2023-07-14T20:00:00-04:00</updated>
+  <updated>2023-12-10T19:00:00-05:00</updated>
   <author>
     <name>Maxime Lapointe</name>
   </author>
+  <entry>
+    <title>The lesser known Rails race condition</title>
+    <link rel="alternate" href="https://maxlap.dev/blog/2023/12/11/the-lesser-known-rails-race-condition.html"/>
+    <id>https://maxlap.dev/blog/2023/12/11/the-lesser-known-rails-race-condition.html</id>
+    <published>2023-12-10T19:00:00-05:00</published>
+    <updated>2023-12-11T08:27:15-05:00</updated>
+    <author>
+      <name>Maxime Lapointe</name>
+    </author>
+    <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;Note: This post mentions and gives examples in Rails, but the content is relevant to anyone using databases systems,
+regardless of the use cases.&lt;/p&gt;
+
+&lt;p&gt;There are many posts around discussing race conditions in Rails and how to handle/avoid them, but I haven&amp;#39;t seen
+one discussion this particular case.&lt;/p&gt;
+
+&lt;p&gt;Simply put, race conditions happen when more than one worker/process/thread interact with the same data and
+the order those interactions happen in can give undesirable results.&lt;/p&gt;
+
+&lt;h2 id="classical-race-condition"&gt;Classical race condition&lt;/h2&gt;
+
+&lt;p&gt;The classical example of a race condition is having 2 processes altering the same bank account at the same time.
+Depending on the order that operations happen in, some of the alterations might be lost.&lt;/p&gt;
+
+&lt;p&gt;Starting with 100$, if one process does a +10 and another a -15 at the same time. You can end up with each of the
+following amounts in the account:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;110 (wrong)&lt;/li&gt;
+&lt;li&gt;85 (wrong)&lt;/li&gt;
+&lt;li&gt;95 (good)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I won&amp;#39;t delve into this since there are already lots of articles about and how to avoid it in Rails.
+&lt;a href="https://www.honeybadger.io/blog/avoid-race-condition-in-rails/"&gt;Here&amp;#39;s one&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id="the-lesser-known-race-condition"&gt;The lesser known race condition&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;#39;s think about a single writer and a single reader. Reading some of the articles on Rails race conditions, you
+could believe everything will be fine.&lt;/p&gt;
+
+&lt;p&gt;Consider the database already contains these two records:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;published: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;published: &lt;/span&gt;&lt;span class="kp"&gt;false&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Now if you have a reader doing a report:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;report&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:total&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:published&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;published: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:unpublished&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;published: &lt;/span&gt;&lt;span class="kp"&gt;false&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt;&amp;#x000A;&lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="n"&gt;report&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;And you have a writer adding some data at the same time:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;published: &lt;/span&gt;&lt;span class="kp"&gt;false&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Here are the possible reports you might get:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;{total: 2, published: 1, unpublished: 1}&lt;/li&gt;
+&lt;li&gt;{total: 2, published: 1, unpublished: 2}&lt;/li&gt;
+&lt;li&gt;{total: 3, published: 1, unpublished: 2}&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One of these is incoherent. You can&amp;#39;t have 2 posts total but then have numbers that add up to 3 at the same time.&lt;/p&gt;
+
+&lt;p&gt;This example may feel contrived. It almost always feel like a technicality; the shown result is clearly wrong, but the
+database doesn&amp;#39;t end up with wrong data. You can &amp;quot;just&amp;quot; refresh the page the very few times this happens and the
+problem will be gone. It&amp;#39;s one of those little glitch that no one can reproduce and no one bothers tracking down
+since it doesn&amp;#39;t happen often anyways.&lt;/p&gt;
+
+&lt;p&gt;If something like this is in some kind of nightly report, it&amp;#39;s not so easy to &amp;quot;just&amp;quot; refresh the page.&lt;/p&gt;
+
+&lt;h2 id="but-wait-theres-more"&gt;But wait, there&amp;#39;s more!&lt;/h2&gt;
+
+&lt;p&gt;You might be tempted to think that this only happens when doing multiple queries on a single table, so you are safe
+as lon as you query only once per table. If you define the problem as any incoherency caused by the timing, you would
+be wrong.&lt;/p&gt;
+
+&lt;p&gt;If the reader does:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="n"&gt;post&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;find&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;id&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;result&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# Querying the posts table&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:has_admin_comment&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;has_admin_comment&lt;/span&gt; &lt;span class="c1"&gt;# an attribute&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# Querying the comments table&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:comments&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt; &lt;span class="c1"&gt;# Imagine they are rendered in a page&lt;/span&gt;&amp;#x000A;&lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="n"&gt;report&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;And you have a writer adding some data at the same time:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="c1"&gt;# A callback will see the post's has_admin_comment&lt;/span&gt;&amp;#x000A;&lt;span class="c1"&gt;# Imagine a call&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;comments&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;create&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;by_admin: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&amp;#x000A;&lt;span class="n"&gt;post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;update&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;has_admin_comment: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;There is now the possibility that the report contains a comment by an admin while the &lt;code&gt;has_admin_comment&lt;/code&gt; attribute
+says there are no such comments.&lt;/p&gt;
+
+&lt;p&gt;So as soon as you do 2 queries, if any of the data of those two queries is related to the other query, there is a
+chance you&amp;#39;ll encounter this. Bummer, I frequently do more than one SQL query in my pages.&lt;/p&gt;
+
+&lt;h2 id="a-solution"&gt;A solution&lt;/h2&gt;
+
+&lt;p&gt;The root of the problem is that we are reading data at different points in time, but we want to treat it as if it was
+from a single point in time.&lt;/p&gt;
+
+&lt;p&gt;The only solution I&amp;#39;m aware of (other than doing only one query), is to tell the database: &amp;quot;Ignore all changes from
+elsewhere when working on my queries&amp;quot;. Where elsewhere means other processes / transations.&lt;/p&gt;
+
+&lt;p&gt;In PostgreSQL, that can be done with a transaction with the &lt;code&gt;repeatable_read&lt;/code&gt; isolation level. From &lt;a href="https://www.postgresql.org/docs/current/transaction-iso.html"&gt;PostgreSQL&amp;#39;s doc&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The Repeatable Read isolation level only sees data committed before the transaction began; it never sees
+either uncommitted data or changes committed during transaction execution by concurrent transactions.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So going back to our first example, if the reader did this instead:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="highlight lone-highlighted-code"&gt;&lt;div class="highlight"&gt;&lt;pre class="highlight ruby"&gt;&lt;code&gt;&lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;transaction&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;isolation: :repeatable_read&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;report&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:total&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:published&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;published: &lt;/span&gt;&lt;span class="kp"&gt;true&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt;&amp;#x000A;  &lt;span class="n"&gt;report&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:unpublished&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Post&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nf"&gt;where&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;published: &lt;/span&gt;&lt;span class="kp"&gt;false&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nf"&gt;count&lt;/span&gt;&amp;#x000A;  &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="n"&gt;report&lt;/span&gt;&amp;#x000A;&lt;span class="k"&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class="markdown-body"&gt;&lt;p&gt;Then only the 2 valid reports would be possible:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;{total: 2, published: 1, unpublished: 1}&lt;/li&gt;
+&lt;li&gt;{total: 3, published: 1, unpublished: 2}&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Note: In other database systems (such as MySQL or SQLite), it&amp;#39;s possible that you need a different isolation level
+than &lt;code&gt;repeatable_read&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id="when-to-solve-it"&gt;When to solve it?&lt;/h2&gt;
+
+&lt;p&gt;I think the final question is when should you &amp;quot;solve&amp;quot; this problem? When should you run within a repeatable_read
+transaction?&lt;/p&gt;
+
+&lt;p&gt;I don&amp;#39;t know... It depends.&lt;/p&gt;
+
+&lt;p&gt;I have never actually tackled this problem in an application-wide manner... yet. So take these suggestions with a
+grain of salt.&lt;/p&gt;
+
+&lt;p&gt;Doing more restrictive transactions can have an impact on performance, can add latency, could introduce deadlocks,
+could increase the number of transactions that need to be retried. But I&amp;#39;m not sure this is actually a problem in
+practice.&lt;/p&gt;
+
+&lt;p&gt;When starting a new application, I would consider wrapping every request in a transaction and calling it a day.
+It&amp;#39;s too early to focus on scaling/performance in the beginning. The day you grow enough (if that happens) or
+encounter problems caused to this, then you can either disable this for some request or start doing it only for
+more critical requests.&lt;/p&gt;
+
+&lt;p&gt;For existing applications, wrapping every request could cause new problems to appear:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Existing race conditions you didn&amp;#39;t know about might now produce an error. (I think this is good)&lt;/li&gt;
+&lt;li&gt;Nested transactions can behave slightly differently.&lt;/li&gt;
+&lt;li&gt;Locks will be held longer, possibly resulting in longer latency and deadlocks.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;So is it worth it to wrap every request for existing application? Your guess is as good as mine. Maybe do it,but progressively?&lt;/p&gt;
+
+&lt;p&gt;One thing to consider about this is that while you can &amp;quot;just&amp;quot; refresh a page, it&amp;#39;s not always so simple.
+If you are generating a pdf or generating new data from what you queries, then the glitch isn&amp;#39;t quite so temporary
+anymore, is it?&lt;/p&gt;
+
+&lt;p&gt;So at the very least, you probably want to use the &lt;code&gt;repeatable_read&lt;/code&gt; transaction whenever you are generating
+something longer lasting than a web page, no matter the consequences.&lt;/p&gt;
+
+&lt;h2 id="code-to-apply-everywhere"&gt;Code to apply %everywhere&lt;/h2&gt;
+
+&lt;p&gt;In my case, for my new application, I&amp;#39;m trying it. It&amp;#39;s barely any code at all.&lt;/p&gt;
+
+&lt;p&gt;Here is a callback on my &lt;code&gt;ApplicationController&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;around_action :wrap_in_transaction&amp;#x000A;def wrap_in_transaction&amp;#x000A;  ActiveRecord::Base.transaction(isolation: :repeatable_read) do&amp;#x000A;    yield&amp;#x000A;  end&amp;#x000A;end&amp;#x000A;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It&amp;#39;s that simple! Except... It&amp;#39;s likely your tests may fail, because they also start a transaction, with a different
+isolation level.&lt;/p&gt;
+
+&lt;p&gt;So add this your your &lt;code&gt;test_helper.rb&lt;/code&gt; / &lt;code&gt;spec_helper.rb&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# Tests already use a transaction, this tries to nest with a distinct isolation level, which breaks. So skip&amp;#x000A;ApplicationController.skip_around_action :wrap_in_transaction&amp;#x000A;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id="closing-words"&gt;Closing words&lt;/h2&gt;
+
+&lt;p&gt;Hope you learned something useful!&lt;/p&gt;
+
+&lt;p&gt;If you want to play with examples that are similar to the post and demonstrate the effects of the &lt;code&gt;repeatable_read&lt;/code&gt;
+transaction, here is a &lt;a href="/blog/2023/12/11/the-lesser-known-rails-race-condition.rb"&gt;self-contained ruby script&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</content>
+  </entry>
   <entry>
     <title>Vision and glasses</title>
     <link rel="alternate" href="https://maxlap.dev/blog/2023/07/15/vision-and-glasses.html"/>
     <id>https://maxlap.dev/blog/2023/07/15/vision-and-glasses.html</id>
     <published>2023-07-14T20:00:00-04:00</published>
-    <updated>2023-07-16T09:29:04-04:00</updated>
+    <updated>2023-10-12T13:13:23-04:00</updated>
     <author>
       <name>Maxime Lapointe</name>
     </author>
@@ -43,8 +215,8 @@ size in meters of a diopter... It varies based on the distance!&lt;/p&gt;
 is consecutive 0.25 diopters. When you move the mouse, you will see the highlighted the distance when
 going closer (left, aqua) or farther (right, orange) by 0.25 diopter.&lt;/p&gt;
 &lt;/div&gt;
-&lt;canvas style="height: 200px; width: 100%" id="paperscript_canvas_3"&gt;&lt;/canvas&gt;
-&lt;script type='text/paperscript' data-paper-canvas="paperscript_canvas_3"&gt;
+&lt;canvas style="height: 200px; width: 100%" id="paperscript_canvas_1"&gt;&lt;/canvas&gt;
+&lt;script type='text/paperscript' data-paper-canvas="paperscript_canvas_1"&gt;
   project.currentStyle = {
     strokeColor: 'black',
     fillColor: 'black',
@@ -109,8 +281,8 @@ strength change] occurs almost universally to less than 2 dioptres by the time a
 &lt;p&gt;Lets visualize this. Here, the mouse location represent your minimum distance and the orange zone represent 2 diopter
 farther: your optimistic but likely maximum distance.&lt;/p&gt;
 &lt;/div&gt;
-&lt;canvas style="height: 200px; width: 100%" id="paperscript_canvas_4"&gt;&lt;/canvas&gt;
-&lt;script type='text/paperscript' data-paper-canvas="paperscript_canvas_4"&gt;
+&lt;canvas style="height: 200px; width: 100%" id="paperscript_canvas_2"&gt;&lt;/canvas&gt;
+&lt;script type='text/paperscript' data-paper-canvas="paperscript_canvas_2"&gt;
   project.currentStyle = {
     strokeColor: 'black',
     fillColor: 'black',
@@ -199,7 +371,7 @@ the goal is to move the vision close enough for most close work to be comfortabl
     <link rel="alternate" href="https://maxlap.dev/blog/2023/02/24/rant-i-miss-lastpass.html"/>
     <id>https://maxlap.dev/blog/2023/02/24/rant-i-miss-lastpass.html</id>
     <published>2023-02-23T19:00:00-05:00</published>
-    <updated>2023-02-24T13:17:55-05:00</updated>
+    <updated>2023-10-12T13:13:23-04:00</updated>
     <author>
       <name>Maxime Lapointe</name>
     </author>
@@ -289,7 +461,7 @@ the goal is to move the vision close enough for most close work to be comfortabl
     <link rel="alternate" href="https://maxlap.dev/blog/2022/02/10/what-makes-ruby-blocks-great.html"/>
     <id>https://maxlap.dev/blog/2022/02/10/what-makes-ruby-blocks-great.html</id>
     <published>2022-02-09T19:00:00-05:00</published>
-    <updated>2023-06-15T10:43:59-04:00</updated>
+    <updated>2023-10-12T13:13:23-04:00</updated>
     <author>
       <name>Maxime Lapointe</name>
     </author>
@@ -475,7 +647,7 @@ Anyhow, it will let you type some Ruby and see the result.&lt;/p&gt;
     <link rel="alternate" href="https://maxlap.dev/blog/2021/02/15/you-should-avoid-includes-in-rails.html"/>
     <id>https://maxlap.dev/blog/2021/02/15/you-should-avoid-includes-in-rails.html</id>
     <published>2021-02-14T19:00:00-05:00</published>
-    <updated>2023-02-24T12:16:20-05:00</updated>
+    <updated>2023-10-12T13:13:23-04:00</updated>
     <author>
       <name>Maxime Lapointe</name>
     </author>
