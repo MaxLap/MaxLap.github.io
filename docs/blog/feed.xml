@@ -651,8 +651,8 @@ Anyhow, it will let you type some Ruby and see the result.&lt;/p&gt;
     <author>
       <name>Maxime Lapointe</name>
     </author>
-    <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;code&gt;includes&lt;/code&gt; is the recommended way to load associations of your records eagerly. In fact, the
-&lt;a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations"&gt;Rails guide for eager loading&lt;/a&gt;
+    <content type="html">&lt;div class="markdown-body"&gt;&lt;p&gt;&lt;code&gt;includes&lt;/code&gt; is the recommended way to load associations of your records eagerly in Rails. In fact, the
+&lt;a href="https://guides.rubyonrails.org/active_record_querying.html#eager-loading-associations"&gt;Ruby on Rails guide for eager loading&lt;/a&gt;
 only mentions &lt;code&gt;includes&lt;/code&gt;. However, there are other ways, and I want to argue that you should
 avoid &lt;code&gt;includes&lt;/code&gt;.&lt;/p&gt;
 
